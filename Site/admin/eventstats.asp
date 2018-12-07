@@ -161,9 +161,9 @@ End Sub%>
 			
 			$(function() {
 			
-			<%	If Not IsMobile And Not IsiPad Then%>
+			<%	If Not IsMobile And Not IsiPad Then %>
 					$( document ).tooltip({track: true});
-				End If %>	
+			<%	End If %>	
 				
 			
 				$( "#from" ).datepicker({

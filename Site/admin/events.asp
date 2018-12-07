@@ -209,7 +209,7 @@ End Sub%>
 			
 			<%	If Not IsMobile And Not IsiPad Then%>
 					$( document ).tooltip({track: true});
-				End If %>	
+			<%	End If %>	
 			
 				var table = $('#ListView').DataTable( {
 					paging: false,

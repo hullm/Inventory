@@ -1979,7 +1979,7 @@ End Function%>
 	</body>
 	</html>
 
-<%	sEnd If
+<%	End If
 
 End Sub%>
 
