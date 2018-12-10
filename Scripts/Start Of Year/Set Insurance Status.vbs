@@ -23,11 +23,11 @@ While txtInsuranceFile.AtEndOfLine = False
 	'Read in the next line of the text file
 	strSerial = txtInsuranceFile.ReadLine
 	
-   'Update the student ID in the database
-   strSQL = "UPDATE Devices SET "
-   strSQL = strSQL & "HasInsurance=True "
-   strSQL = strSQL & "WHERE SerialNumber='" & Replace(strSerial,"'","''") & "'"
-   objConnection.Execute(strSQL)
+	'Update the student ID in the database
+	strSQL = "UPDATE Devices SET "
+	strSQL = strSQL & "HasInsurance=True "
+	strSQL = strSQL & "WHERE SerialNumber='" & Replace(strSerial,"'","''") & "'"
+	objConnection.Execute(strSQL)
 
 WEnd
 
