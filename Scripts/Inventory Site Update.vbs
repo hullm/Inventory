@@ -50,8 +50,8 @@ CONST STUDENTID = 6
 CONST DATECREATED = 7
 CONST SEX = 8
 CONST BIRTHDAY = 9
-CONST USERNAME = 10
 Const PASSWORD = 11
+CONST USERNAME = 10
 
 'Set the groups that will have access to the student's home folder
 Set objPerms = CreateObject("Scripting.Dictionary")
@@ -75,27 +75,28 @@ End If
 
 'Early daily run
 If strHour = 5 And strMinute = 30 Then
-   RunPendingTasks
-   ScanImportFileForChanges True
-   UpdatePasswordExpirationDate False
-   ValidateADAccounts strStudentOU
-   FixDestinyExport
-   UpdateStudentCountHistory
-   VerifyADandDBMatch
+	RunPendingTasks
+	ScanImportFileForChanges True
+	UpdatePasswordExpirationDate False
+	ValidateADAccounts strStudentOU
+	FixDestinyExport
+	UpdateStudentCountHistory
+	VerifyADandDBMatch
+	UpdateParentData
 
 'Normal daily run
 ElseIf strHour = 8 And strMinute = 0 Then
-   RunPendingTasks
-   UpdatePasswordExpirationDate True
+	RunPendingTasks
+	UpdatePasswordExpirationDate True
 
 'Hourly run
 ElseIf strMinute = 0 Then
-   RunPendingTasks
-   UpdatePasswordExpirationDate False
+	RunPendingTasks
+	UpdatePasswordExpirationDate False
 
 'Every 5 minutes
 ElseIf strMinute Mod 5 = 0 Then
-   RunPendingTasks
+	RunPendingTasks
 End If
 
 'Uncomment if you need to run out of cycle
@@ -107,13 +108,14 @@ Set objArguments = Nothing
 
 Sub RunAll
 	RunPendingTasks
-  	'ScanImportFileForChanges True
-  	'UpdatePasswordExpirationDate False
-  	'ValidateADAccounts strStudentOU
-  	'FixDestinyExport
-  	'UpdateStudentCountHistory
-  	'VerifyADandDBMatch
-  'MsgBox "Done"
+	'ScanImportFileForChanges True
+	'UpdatePasswordExpirationDate False
+	'ValidateADAccounts strStudentOU
+	'FixDestinyExport
+	'UpdateStudentCountHistory
+	'VerifyADandDBMatch
+	'UpdateParentData
+	'MsgBox "Done"
 End Sub
 
 Sub ScanImportFileForChanges(bolResetPasswords)
@@ -160,20 +162,20 @@ Sub ScanImportFileForChanges(bolResetPasswords)
 		
 		'If they aren't in the database then add them
 		If Not ExistsInDatabase(arrUserData(STUDENTID),arrUserData(CLASSOF)) Then
-		   
-         'Find the first available UserName
-         arrUserData(USERNAME) = CreateUsername(arrUserData(FIRSTNAME),arrUserData(LASTNAME),arrUserData(CLASSOF))
-         
+		
+			'Find the first available UserName
+			arrUserData(USERNAME) = CreateUsername(arrUserData(FIRSTNAME),arrUserData(LASTNAME),arrUserData(CLASSOF))
+		
 			'Create the account in Active Directory
 			CreateStudentADAccount arrUserData
 
 			'Create a home folder for them
-      	'CreateHomeFolder arrUserData(USERNAME)
-      	
-      	'Add the user to the inventory database
+			'CreateHomeFolder arrUserData(USERNAME)
+		
+			'Add the user to the inventory database
 			AddUserToDatabase arrUserData
-      	
-      	'Update the log
+		
+			'Update the log
 			UpdateLog "NewStudentDetected","",arrUserData(USERNAME),"",arrUserData(LASTNAME) & ", " & arrUserData(FIRSTNAME),""
 
 			'Send email about the new student found.
@@ -315,19 +317,19 @@ Sub RunPendingTasks
 					strSite = objUserLookUp(1)
 					
 					strSQL = "SELECT Role FROM Roles WHERE RoleID=" & objUserLookUp(0)
-   				Set objRoleLookup = objDBConnection.Execute(strSQL)
-   				strRole = objRoleLookup(0)
-   				
-   				MoveUser strUserName, strRole, strSite
-   				
-   			Case "CreateAccount"
-   				CreateAdultADAccount arrUserData, strNewValue
-   				
-   			Case "EnableUser"
-   				EnableInActiveDirectory strUserName
-   			
-   			Case "DisableUser"
-   				DisableInActiveDirectory strUserName, ""
+					Set objRoleLookup = objDBConnection.Execute(strSQL)
+					strRole = objRoleLookup(0)
+					
+					MoveUser strUserName, strRole, strSite
+					
+				Case "CreateAccount"
+					CreateAdultADAccount arrUserData, strNewValue
+					
+				Case "EnableUser"
+					EnableInActiveDirectory strUserName
+				
+				Case "DisableUser"
+					DisableInActiveDirectory strUserName, ""
 					
 			End Select
 			
@@ -383,8 +385,8 @@ Function GetUserDataFromImportedData(strImportedData)
 	Dim arrRow, strLastName, strFirstName, intClassOf, intStudentID, strSex, datBirthday, datDateCreated
 	Dim strHomeRoom, strHomeRoomEmail, arrLastName, strSite
 	
-   'On Error Resume Next
-   
+	'On Error Resume Next
+
 	arrRow = Split(strImportedData,",")
 		
 	'Get the variables from the row
@@ -401,21 +403,21 @@ Function GetUserDataFromImportedData(strImportedData)
 		strHomeRoomEmail = Replace(Trim(arrRow(7))," / ",";")
 		strHomeRoom = Replace(Trim(arrRow(8)),"""","")
 	Else
-		'On Error Resume Next
-      strHomeRoomEmail = Trim(arrRow(7))
-		strHomeRoom = Replace(Trim(arrRow(8)) & ", " & Trim(arrRow(9)),"""","")
-      
-      'If Err Then
-      '   msgbox arrRow(8)
-      '   err.Clear
-      '   wscript.exit
-      'End If
+		On Error Resume Next
+		strHomeRoomEmail = Trim(arrRow(7))
+			strHomeRoom = Replace(Trim(arrRow(8)) & ", " & Trim(arrRow(9)),"""","")
+		
+		'If Err Then
+		'	msgbox arrRow(8)
+		'	err.Clear
+		'	wscript.exit
+		'End If
 	End If
-   
-   'If Err Then
-   '   MsgBox strFirstName & " " & strLastName
-   '   Wscript.Quote
-   'End If
+	
+	'If Err Then
+	'	MsgBox strFirstName & " " & strLastName
+	'	Wscript.Quit
+	'End If
 
 	'Fix the last name
 	If InStr(strLastName," ") <> 0 Then
@@ -517,6 +519,7 @@ Sub CreateStudentADAccount(arrUserData)
 	'objUser.Put "HomeDirectory", strStudentShare & arrUserData(USERNAME)
 	'objUser.Put "HomeDrive", strHomeDrive
 	objUser.Put "Description", "Class of " & arrUserData(CLASSOF) & " - Pending Account"
+	'MsgBox arrUserData(USERNAME)
 	objUser.SetInfo
 	objUser.Setpassword("P@ssw0rd")
 	objUser.Put "UserAccountControl", 66050 'Account Disabled
@@ -530,11 +533,11 @@ Sub CreateStudentADAccount(arrUserData)
 		Set objPaperCut = Nothing
 	End If
 	
-   'Close objects
+	'Close objects
 	Set objOU = Nothing
 	Set objGroup = Nothing
 	Set objUser = Nothing
-   
+
 End Sub
 
 Sub CreateAdultADAccount(arrUserData,strPassword)
@@ -614,16 +617,16 @@ Sub CreateAdultADAccount(arrUserData,strPassword)
 	'Update the log
 	UpdateLog "NewADAccountCreated","",arrUserData(USERNAME),"","",""
 	
-   'Close objects
+	'Close objects
 	Set objOU = Nothing
 	Set objGroups = Nothing
 	Set objUser = Nothing
-   
+
 End Sub
 
 Sub ModifyADAccount(arrUserData,strPassword,bolResetPassword)
 
-   On Error Resume Next
+	On Error Resume Next
 
 	'This will update the users settings in AD
 
@@ -651,8 +654,8 @@ Sub ModifyADAccount(arrUserData,strPassword,bolResetPassword)
 
 	'Fix some of the other properties of the account
 	objUser.Put "ScriptPath", strScript
-   objUser.PutEx 1,"HomeDirectory",vbNullString
-   objUser.PutEx 1,"HomeDrive",vbNullString
+	objUser.PutEx 1,"HomeDirectory",vbNullString
+	objUser.PutEx 1,"HomeDrive",vbNullString
 	'objUser.Put "HomeDirectory", strStudentShare & arrUserData(USERNAME)
 	'objUser.Put "HomeDrive", strHomeDrive
 
@@ -664,11 +667,11 @@ Sub ModifyADAccount(arrUserData,strPassword,bolResetPassword)
 			End If
 		End If
 	End If
-   
-   If Err Then
-      'MsgBox objUser.sAMAccountName & " " & strPassword & "."
-      Err.Clear
-   End If
+	
+	If Err Then
+		'MsgBox objUser.sAMAccountName & " " & strPassword & "."
+		Err.Clear
+	End If
 
 	'Save changes
 	objUser.SetInfo
@@ -780,14 +783,14 @@ Sub UpdateUserDescription(strUserName,strDescription)
 	Const ADS_PROPERTY_CLEAR = 1
 	
 	Dim objRootDSE, objUserLookUp, objUser, arrUserData, strSQL, objOldDescription, strOldDescription, bolError
-   
-   bolError = False
-   
-   'Make sure the user account exists before trying to update it.
-   If ExistsInActiveDirectory(strUserName) Then
-   	
-   	If Len(strDescription) <=250 Then
-   	
+	
+	bolError = False
+	
+	'Make sure the user account exists before trying to update it.
+	If ExistsInActiveDirectory(strUserName) Then
+		
+		If Len(strDescription) <=250 Then
+		
 			'Create a RootDSE object for the domain
 			Set objRootDSE = GetObject("LDAP://RootDSE")
 	
@@ -809,16 +812,16 @@ Sub UpdateUserDescription(strUserName,strDescription)
 			objUser.SetInfo
 		
 		Else
-   		bolError = True 'Description too long
-   	End If
-   Else  
-   	bolError = True 'User not in Active Directory
+			bolError = True 'Description too long
+		End If
+	Else  
+		bolError = True 'User not in Active Directory
 	End If
 	
 	If bolError Then
 	
 		'Something wen't wrong, we can't find the account in AD, so let people know.
-   	arrUserData = GetUserDataFromDatabase(strUserName)
+		arrUserData = GetUserDataFromDatabase(strUserName)
 		SendEmail "Matt", "hullm@lkgeorge.org", "UserNotUpdatedInAD", arrUserData
 		SendEmail "Dane", "davisd@lkgeorge.org", "UserNotUpdatedInAD", arrUserData
 		SendEmail "Janine", "wayj@lkgeorge.org", "UserNotUpdatedInAD", arrUserData
@@ -826,8 +829,8 @@ Sub UpdateUserDescription(strUserName,strDescription)
 		'Get the old description so we can set it back.
 		strSQL = "SELECT OldValue FROM Log WHERE Type='UserUpdatedDescription' AND UserName='" & strUserName & "' ORDER BY ID DESC"
 		Set objOldDescription = objDBConnection.Execute(strSQL)
-   	
-   	'Change the description back to the old one in the database if we were able to find it.
+
+		'Change the description back to the old one in the database if we were able to find it.
 		If Not objOldDescription.EOF Then
 			strOldDescription = objOldDescription(0)
 			UpdateLog "UserUpdatedDescription","",strUserName,strDescription,strOldDescription,""
@@ -835,11 +838,11 @@ Sub UpdateUserDescription(strUserName,strDescription)
 			objDBConnection.Execute(strSQL)
 		End If
 	End If
-   
-   'Close objects
-   Set objRootDSE = Nothing
-   Set objUserLookup = Nothing
-   Set objUser = Nothing
+	
+	'Close objects
+	Set objRootDSE = Nothing
+	Set objUserLookup = Nothing
+	Set objUser = Nothing
 
 End Sub
 
@@ -854,7 +857,7 @@ Sub UpdateUserPhone(strUserName,strPhone)
 	bolError = False
 	
 	'Make sure the user account exists before trying to update it.
-   If ExistsInActiveDirectory(strUserName) Then
+	If ExistsInActiveDirectory(strUserName) Then
 	
 		'Make sure the provided input isn't crazy long.
 		If Len(strPhone) <= 25 Then
@@ -883,15 +886,15 @@ Sub UpdateUserPhone(strUserName,strPhone)
 
 		Else
 			bolError = True 'Phone number too long
-   	End If
-   Else
-   	bolError = True 'User not in Active Directory
-   End If
-   
-   If bolError Then
-   	
-   	'Something went wrong, let people know
-   	arrUserData = GetUserDataFromDatabase(strUserName)
+		End If
+	Else
+		bolError = True 'User not in Active Directory
+	End If
+	
+	If bolError Then
+		
+		'Something went wrong, let people know
+		arrUserData = GetUserDataFromDatabase(strUserName)
 		SendEmail "Matt", "hullm@lkgeorge.org", "UserNotUpdatedInAD", arrUserData
 		SendEmail "Dane", "davisd@lkgeorge.org", "UserNotUpdatedInAD", arrUserData
 		SendEmail "Janine", "wayj@lkgeorge.org", "UserNotUpdatedInAD", arrUserData
@@ -899,21 +902,21 @@ Sub UpdateUserPhone(strUserName,strPhone)
 		'Get the old phone number so we can set it back.
 		strSQL = "SELECT OldValue FROM Log WHERE Type='UserUpdatedPhone' AND UserName='" & strUserName & "' ORDER BY ID DESC"
 		Set objOldPhoneNumber = objDBConnection.Execute(strSQL)
-   	
-   	'Change the phone number back to the old one in the database if we were able to find it.
+		
+		'Change the phone number back to the old one in the database if we were able to find it.
 		If Not objOldPhoneNumber.EOF Then
 			strOldPhoneNumber = objOldPhoneNumber(0)
 			UpdateLog "UserUpdatedPhone","",strUserName,strPhone,strOldPhoneNumber,""
 			strSQL = "UPDATE People SET PhoneNumber='" & strOldPhoneNumber & "' WHERE UserName='" & strUserName & "'"
 			objDBConnection.Execute(strSQL)
 		End If
-   
-   End If
-   
-   'Close objects
-   Set objRootDSE = Nothing
-   Set objUserLookup = Nothing
-   Set objUser = Nothing
+	
+	End If
+	
+	'Close objects
+	Set objRootDSE = Nothing
+	Set objUserLookup = Nothing
+	Set objUser = Nothing
 
 End Sub
 
@@ -928,7 +931,7 @@ Sub UpdateUserRoom(strUserName,strRoom)
 	bolError = False
 	
 	'Make sure the user account exists before trying to update it.
-   If ExistsInActiveDirectory(strUserName) Then
+	If ExistsInActiveDirectory(strUserName) Then
 	
 		'Make sure the provided input isn't crazy long.
 		If Len(strRoom) <= 50 Then
@@ -955,15 +958,15 @@ Sub UpdateUserRoom(strUserName,strRoom)
 
 		Else
 			bolError = True 'Room too long
-   	End If
-   Else
-   	bolError = True 'User not in Active Directory
-   End If
-   
-   If bolError Then
-   	
-   	'Something went wrong, let people know
-   	arrUserData = GetUserDataFromDatabase(strUserName)
+		End If
+	Else
+		bolError = True 'User not in Active Directory
+	End If
+	
+	If bolError Then
+		
+		'Something went wrong, let people know
+		arrUserData = GetUserDataFromDatabase(strUserName)
 		SendEmail "Matt", "hullm@lkgeorge.org", "UserNotUpdatedInAD", arrUserData
 		SendEmail "Dane", "davisd@lkgeorge.org", "UserNotUpdatedInAD", arrUserData
 		SendEmail "Janine", "wayj@lkgeorge.org", "UserNotUpdatedInAD", arrUserData
@@ -971,21 +974,21 @@ Sub UpdateUserRoom(strUserName,strRoom)
 		'Get the old room so we can set it back.
 		strSQL = "SELECT OldValue FROM Log WHERE Type='UserUpdatedRoom' AND UserName='" & strUserName & "' ORDER BY ID DESC"
 		Set objOldRoomNumber = objDBConnection.Execute(strSQL)
-   	
-   	'Change the phone number back to the old one in the database if we were able to find it.
+		
+		'Change the phone number back to the old one in the database if we were able to find it.
 		If Not objOldRoomNumber.EOF Then
 			strOldRoomNumber = objOldRoomNumber(0)
 			UpdateLog "UserUpdatedRoom","",strUserName,strRoom,strOldRoomNumber,""
 			strSQL = "UPDATE People SET RoomNumber='" & strOldRoomNumber & "' WHERE UserName='" & strUserName & "'"
 			objDBConnection.Execute(strSQL)
-		End If
-   
-   End If
-   
-   'Close objects
-   Set objRootDSE = Nothing
-   Set objUserLookup = Nothing
-   Set objUser = Nothing
+			End If
+	
+	End If
+	
+	'Close objects
+	Set objRootDSE = Nothing
+	Set objUserLookup = Nothing
+	Set objUser = Nothing
 
 End Sub
 
@@ -998,7 +1001,7 @@ Sub UpdateUserPassword(strUserName,strPassword)
 	bolError = False
 	
 	'Make sure the user account exists before trying to update it.
-   If ExistsInActiveDirectory(strUserName) Then
+	If ExistsInActiveDirectory(strUserName) Then
 	
 		If PasswordValid(strPassword) Then
 			
@@ -1044,11 +1047,11 @@ Sub UpdateUserPassword(strUserName,strPassword)
 		End If
 	
 	End If
-   
-   'Close objects
-   Set objRootDSE = Nothing
-   Set objUserLookup = Nothing
-   Set objUser = Nothing
+	
+	'Close objects
+	Set objRootDSE = Nothing
+	Set objUserLookup = Nothing
+	Set objUser = Nothing
 
 End Sub
 
@@ -1061,7 +1064,7 @@ Sub UpdateUserFirstName(strUserName,strFirstName)
 	bolError = False
 	
 	'Make sure the user account exists before trying to update it
-   If ExistsInActiveDirectory(strUserName) Then
+	If ExistsInActiveDirectory(strUserName) Then
 	
 		'Make sure they didn't subit a blank value
 		If strFirstName <> "" Then
@@ -1123,12 +1126,12 @@ Sub UpdateUserFirstName(strUserName,strFirstName)
 		End If
 	
 	End If
-   
-   'Close objects
-   Set objRootDSE = Nothing
-   Set objUserLookup = Nothing
-   Set objUser = Nothing
-   Set objOU = Nothing
+	
+	'Close objects
+	Set objRootDSE = Nothing
+	Set objUserLookup = Nothing
+	Set objUser = Nothing
+	Set objOU = Nothing
 
 End Sub
 
@@ -1141,9 +1144,9 @@ Sub UpdateUserLastName(strUserName,strLastName)
 	bolError = False
 	
 	'Make sure the user account exists before trying to update it
-   If ExistsInActiveDirectory(strUserName) Then
-   
-   	'Make sure they didn't subit a blank value
+	If ExistsInActiveDirectory(strUserName) Then
+	
+		'Make sure they didn't subit a blank value
 		If strLastName <> "" Then
 	
 			'Make sure the provided input isn't crazy long.
@@ -1173,13 +1176,13 @@ Sub UpdateUserLastName(strUserName,strLastName)
 				bolError = True 'Last name is too long
 			End If
 		Else
-   		bolError = True 'Last name is blank
-   	End If
-   Else
-   	bolError = True 'User not in Active Directory 
-   End If
-   
-   'Fix things if there was an error
+			bolError = True 'Last name is blank
+		End If
+	Else
+		bolError = True 'User not in Active Directory 
+	End If
+	
+	'Fix things if there was an error
 	If bolError Then
 	
 		'Something went wrong, let people know
@@ -1201,12 +1204,12 @@ Sub UpdateUserLastName(strUserName,strLastName)
 		End If
 	
 	End If
-   
-   'Close objects
-   Set objRootDSE = Nothing
-   Set objUserLookup = Nothing
-   Set objUser = Nothing
-   Set objOU = Nothing
+	
+	'Close objects
+	Set objRootDSE = Nothing
+	Set objUserLookup = Nothing
+	Set objUser = Nothing
+	Set objOU = Nothing
 
 End Sub
 
@@ -1219,7 +1222,7 @@ Sub MoveUser(strUserName,strRole,strSite)
 	Dim objOU, objRootDSE, objUserLookup, objUser, objGroupList, objGroup, arrUserData, strSQL, objGroups, strGroup
 	
 	'Make sure the user account exists before trying to update it
-   If ExistsInActiveDirectory(strUserName) Then
+	If ExistsInActiveDirectory(strUserName) Then
 	
 		'Make sure the site and role aren't blank
 		If strRole <> "" And strSite <> "" Then
@@ -1298,7 +1301,7 @@ Sub UpdateUserUserName(strUserName,strNewUserName)
 	If Not ExistsInActiveDirectory(strNewUserName) Then
 	
 		'Make sure the user account exists before trying to update it
-  		If ExistsInActiveDirectory(strUserName) Then
+		If ExistsInActiveDirectory(strUserName) Then
 		
 			'Make sure they didn't subit a blank value
 			If strNewUserName <> "" Then
@@ -1367,11 +1370,11 @@ Sub UpdateUserUserName(strUserName,strNewUserName)
 		SendEmail "Janine", "wayj@lkgeorge.org", "UserNotUpdatedInAD", arrUserData
 	
 	End If
-	   
-   'Close objects
-   Set objRootDSE = Nothing
-   Set objUserLookup = Nothing
-   Set objUser = Nothing
+	
+	'Close objects
+	Set objRootDSE = Nothing
+	Set objUserLookup = Nothing
+	Set objUser = Nothing
 
 End Sub
 
@@ -1380,9 +1383,9 @@ Sub TogglePasswordStatus(strUserName, bolPasswordExpire)
 	Dim objRootDSE, objUserLookup, objUser
 	
 	'Make sure the user account exists before trying to update it
-  	If ExistsInActiveDirectory(strUserName) Then
-  	
-  		'Create a RootDSE object for the domain
+	If ExistsInActiveDirectory(strUserName) Then
+		
+		'Create a RootDSE object for the domain
 		Set objRootDSE = GetObject("LDAP://RootDSE")
 
 		'Get the user object from Active Directory	
@@ -1400,8 +1403,8 @@ Sub TogglePasswordStatus(strUserName, bolPasswordExpire)
 			objUser.Put "userAccountControl", 66048 'Normal account, password doesn't expire
 		End If
 		objUser.SetInfo
-  	
-  	End If
+	
+	End If
 
 End Sub
 
@@ -1416,7 +1419,7 @@ Sub EnableInActiveDirectory(strUserName)
 	arrUserData = GetUserDataFromDatabase(strUserName)
 	
 	'Create a RootDSE object for the domain
-	 Set objRootDSE = GetObject("LDAP://RootDSE")
+	Set objRootDSE = GetObject("LDAP://RootDSE")
 
 	'Get the user object from Active Directory	
 	objADCommand.CommandText = "<LDAP://" & objRootDSE.Get("DefaultNamingContext") & _
@@ -1424,16 +1427,16 @@ Sub EnableInActiveDirectory(strUserName)
 	Set objUserLookup = objADCommand.Execute
 	
 	'Build the user object
-   Set objUser = GetObject("LDAP://" & objUserLookup(0))
-   
-   'Enable the user
-   objUser.Put "UserAccountControl", 66048 'Account Enabled
-   
-   'Update the description if the user is a student
-   If arrUserData(CLASSOF) > 1000 Then
-   	objUser.Put "Description", "Class of 20" & Left(objUser.SAMAccountName,2)
-   	
-   	'Add the student to the PaperCut group if it's set
+	Set objUser = GetObject("LDAP://" & objUserLookup(0))
+	
+	'Enable the user
+	objUser.Put "UserAccountControl", 66048 'Account Enabled
+	
+	'Update the description if the user is a student
+	If arrUserData(CLASSOF) > 1000 Then
+		objUser.Put "Description", "Class of 20" & Left(objUser.SAMAccountName,2)
+		
+		'Add the student to the PaperCut group if it's set
 		If strPaperCut <> "" Then
 			Set objPaperCut = GetObject("LDAP://" & strPaperCut)
 			objPaperCut.Add(objUser.ADSPath)
@@ -1442,16 +1445,16 @@ Sub EnableInActiveDirectory(strUserName)
 		
 		'Add the student to the students group
 		Set objGroup = GetObject("LDAP://" & strGroupRoot)
-   	If objGroup.IsMember("LDAP://" & objUser.distinguishedName) = False Then
-         objGroup.Add(objUser.ADSPath)
-      End If
-      Set objGroup = Nothing
-      'If Err Then
-      '   MsgBox objUser.sAMAccountName
-      'End If
+		If objGroup.IsMember("LDAP://" & objUser.distinguishedName) = False Then
+			objGroup.Add(objUser.ADSPath)
+		End If
+		Set objGroup = Nothing
+		'If Err Then
+		'	MsgBox objUser.sAMAccountName
+		'End If
 
-   Else
-   
+	Else
+
 		'Add the user to the correct groups
 		strSQL = "SELECT DN FROM GroupMappings WHERE RoleID=" & arrUserData(CLASSOF) & " AND Site='" & arrUserData(SITE) & "'"
 		Set objGroups = objDBConnection.Execute(strSQL)
@@ -1463,16 +1466,16 @@ Sub EnableInActiveDirectory(strUserName)
 				objGroups.MoveNext
 			Loop
 		End If
-   
-   End If
-   
-   'Save the changes
-   objUser.SetInfo
-   
-   'Close objects
-   Set objRootDSE = Nothing
-   Set objUserLookup = Nothing
-   Set objUser = Nothing
+	
+	End If
+	
+	'Save the changes
+	objUser.SetInfo
+	
+	'Close objects
+	Set objRootDSE = Nothing
+	Set objUserLookup = Nothing
+	Set objUser = Nothing
 	
 End Sub 
 
@@ -1521,7 +1524,7 @@ Sub DisableInActiveDirectory(strUserName, strReason)
 		
 		'Remove the student from the students group
 		'Set objGroup = GetObject("LDAP://" & strGroupRoot)
-   	'objGroup.Remove(objUser.ADSPath)
+		'objGroup.Remove(objUser.ADSPath)
 	
 	Else
 	
@@ -1541,12 +1544,12 @@ Sub DisableInActiveDirectory(strUserName, strReason)
 	
 	'Turn off the password from expiring in the database so we don't get an AD/DB conflit
 	strSQL = "UPDATE People SET PWordNeverExpires=True WHERE UserName='" &  strUserName & "'"
-   objDBConnection.Execute(strSQL)
-   
-   'Close objects
-   Set objRootDSE = Nothing
-   Set objUserLookup = Nothing
-   Set objUser = Nothing
+	objDBConnection.Execute(strSQL)
+	
+	'Close objects
+	Set objRootDSE = Nothing
+	Set objUserLookup = Nothing
+	Set objUser = Nothing
 	
 End Sub 
 
@@ -1558,9 +1561,9 @@ Function IsActiveInActiveDirectory(strUserName)
 	Dim objRootDSE, objUserLookup
 
 	'Create a RootDSE object for the domain
-   Set objRootDSE = GetObject("LDAP://RootDSE")
-   
-   'Get the user object from Active Diretory
+	Set objRootDSE = GetObject("LDAP://RootDSE")
+	
+	'Get the user object from Active Diretory
 	objADCommand.CommandText = "<LDAP://" & objRootDSE.Get("DefaultNamingContext") & _
 	">;(&(objectClass=user)(samAccountName=" & strUserName & "));UserAccountControl"
 	Set objUserLookup = objADCommand.Execute
@@ -1592,7 +1595,7 @@ Function ExistsInActiveDirectory(strUserName)
 	Dim objRootDSE, objUserLookup
 
 	'Create a RootDSE object for the domain
-	 Set objRootDSE = GetObject("LDAP://RootDSE")
+	Set objRootDSE = GetObject("LDAP://RootDSE")
 	
 	'Get the user object from Active Directory	
 	objADCommand.CommandText = "<LDAP://" & objRootDSE.Get("DefaultNamingContext") & _
@@ -1618,24 +1621,24 @@ Function ExistsInDatabase(intStudentID,intClassOf)
 
 	Dim strSQL, objStudent
 
-   'Check and see if they are in the students table
-   strSQL = "SELECT ID,ClassOf" & vbCRLF
-   strSQL = strSQL & "FROM People" & vbCRLF
-   strSQL = strSQL & "WHERE ClassOf>2000 AND StudentID=" & intStudentID
-   Set objStudent = objDBConnection.Execute(strSQL)
-   
-   'If they aren't in the people table then they aren't in the database.
-   If objStudent.EOF Then
-      ExistsInDatabase = False
-   Else
+	'Check and see if they are in the students table
+	strSQL = "SELECT ID,ClassOf" & vbCRLF
+	strSQL = strSQL & "FROM People" & vbCRLF
+	strSQL = strSQL & "WHERE ClassOf>2000 AND StudentID=" & intStudentID
+	Set objStudent = objDBConnection.Execute(strSQL)
+	
+	'If they aren't in the people table then they aren't in the database.
+	If objStudent.EOF Then
+		ExistsInDatabase = False
+	Else
 
-      'If the course has changed in the export file then change the user account in AD and the database.
-      If CInt(intClassOf) <> CInt(objStudent(1)) Then 
-         RollBackStudent objStudent(0),intClassOf
-      End If
-      
-      ExistsInDatabase = True
-   End If
+		'If the course has changed in the export file then change the user account in AD and the database.
+		If CInt(intClassOf) <> CInt(objStudent(1)) Then 
+			RollBackStudent objStudent(0),intClassOf
+		End If
+		
+		ExistsInDatabase = True
+	End If
 
 End Function
 
@@ -1726,7 +1729,6 @@ Sub ValidateADAccounts(strOU)
 						'Get the information needed to send the email messages
 						arrUserData = GetUserDataFromDatabase(objUser.SamAccountName)
 
-						
 						Select Case strStatus
 							
 							Case "Enabled"
@@ -1744,6 +1746,7 @@ Sub ValidateADAccounts(strOU)
 									SendEmail "Matt", "hullm@lkgeorge.org", "DisabledSchoolToolAdmin", arrUserData
 									SendEmail "Rene","palmerr@lkgeorge.org", "DisabledSchoolToolAdmin", arrUserData
 									SendEmail "Janine","wayj@lkgeorge.org", "DisabledSchoolToolAdmin", arrUserData
+									SendEmail "Sherry","galkiewiczs@lkgeorge.org", "DisabledSchoolToolAdmin", arrUserData
 									SendEMailToTeachers "DisabledSchoolTool", arrUserData
 								End If
 						End Select 
@@ -1781,7 +1784,7 @@ Sub VerifyADandDBMatch
 	
 	'Create a connection to the database
 	Set objDBConnection = ConnectToDatabase
-    
+	
 	'Get the list of users in the database with phone numbers
 	strSQL = "SELECT UserName,FirstName,LastName,Description,RoomNumber,PhoneNumber,Active,Site,ClassOf,PWordNeverExpires FROM People WHERE Role='Teacher'"
 	Set objDBUsers = objDBConnection.Execute(strSQL)
@@ -1965,73 +1968,73 @@ Sub RollBackStudent(intStudentID,intCourse)
 	'in Active Directory, rename their home folder, and update the database.  It will move a student
 	'either back, or forward a grade depending on the change.
 
-   Dim strSQL, objFixStudent, strNewUserName, strNewHome, strNewEMail, strNewUserPrincipalName, strOU
-   Dim strNewSAMAccountName, strNewDescription, objUserLookup, objUser, strOldUserName, objRootDSE
-   Dim objOU, objFSO, arrUserData
+	Dim strSQL, objFixStudent, strNewUserName, strNewHome, strNewEMail, strNewUserPrincipalName, strOU
+	Dim strNewSAMAccountName, strNewDescription, objUserLookup, objUser, strOldUserName, objRootDSE
+	Dim objOU, objFSO, arrUserData
 
-   'Get the student from the database
-   strSQL = "SELECT UserName" & vbCRLF
-   strSQL = strSQL & "FROM People" & vbCRLF
-   strSQL = strSQL & "WHERE ID=" & intStudentID
-   Set objFixStudent = objDBConnection.Execute(strSQL)
-   
-   'Set the new variables
-   strNewUserName = Right(intCourse,2) & Right(objFixStudent(0),Len(objFixStudent(0)) - 2) 
-   strNewHome = strStudentShare & strNewUserName
-   strNewEMail = strNewUserName & "@" & strDomain
-   strNewUserPrincipalName = strNewEMail
-   strNewSAMAccountName = strNewUserName
-   strNewDescription = "Class of " & intCourse
-   strOldUserName = objFixStudent(0)
+	'Get the student from the database
+	strSQL = "SELECT UserName" & vbCRLF
+	strSQL = strSQL & "FROM People" & vbCRLF
+	strSQL = strSQL & "WHERE ID=" & intStudentID
+	Set objFixStudent = objDBConnection.Execute(strSQL)
+	
+	'Set the new variables
+	strNewUserName = Right(intCourse,2) & Right(objFixStudent(0),Len(objFixStudent(0)) - 2) 
+	strNewHome = strStudentShare & strNewUserName
+	strNewEMail = strNewUserName & "@" & strDomain
+	strNewUserPrincipalName = strNewEMail
+	strNewSAMAccountName = strNewUserName
+	strNewDescription = "Class of " & intCourse
+	strOldUserName = objFixStudent(0)
 
 	'Create a RootDSE object for the domain
-   Set objRootDSE = GetObject("LDAP://RootDSE")
-   
-   'Get the user object from Active Diretory
-   objADCommand.CommandText = "<LDAP://" & objRootDSE.Get("DefaultNamingContext") & _
-   ">;(&(objectClass=user)(samAccountName=" & strOldUserName & "));distinguishedName"
-   Set objUserLookup = objADCommand.Execute
-  
-   'Build the user object
-   Set objUser = GetObject("LDAP://" & objUserLookup(0))
-   
-   'Set the users properties
-   'objUser.Put "homeDirectory", strNewHome
-   objUser.Put "mail", strNewEMail
-   objUser.Put "sAMAccountName", strNewUserName
-   objUser.Put "userPrincipalName", strNewUserPrincipalName
-   objUser.Put "description", strNewDescription
-   objUser.SetInfo
-   
-   'Move the user to the correct OU
-   strOU = "LDAP://OU=" & intCourse & "," & strStudentOU
-   Set objOU = GetObject(strOU)
-   objOU.MoveHere "LDAP://" & objUserLookup(0),vbNullString
-   
-   'Rename the home folder
-   'Set objFSO = CreateObject("Scripting.FileSystemObject")
-   'objFSO.MoveFolder strStudentShare & strOldUserName, strStudentShare & strNewUserName
-   
-   'Update the inventory database.
-   strSQL = "UPDATE People SET Username='" & strNewUserName & "',ClassOf='" & intCourse & "' WHERE Username='" & strOldUserName & "'"
-   objDBConnection.Execute(strSQL)
-   strSQL = "UPDATE Log SET Username='" & strNewUserName & "' WHERE Username='" & strOldUserName & "'"
-   objDBConnection.Execute(strSQL)
-   
-   UpdateLog "StudentGradeChange","",strNewUserName,strOldUserName,strNewUserName,""
-   
-   'Send the email
-   arrUserData = GetUserDataFromDatabase(strNewUserName)
-   SendEmail "Natalie", "fullenn@lkgeorge.org", "GradeChangeAdmin", arrUserData
-   SendEmail "Matt", "hullm@lkgeorge.org", "GradeChangeAdmin", arrUserData
-   SendEmail "Dane", "davisd@lkgeorge.org", "GradeChangeAdmin", arrUserData
-   SendEmail "Janine", "wayj@lkgeorge.org", "GradeChangeAdmin", arrUserData
-   
-   'Close objects
-   Set objFixStudent = Nothing
-   Set objUserLookup = Nothing
-   Set objUser = Nothing
-   Set objOU = Nothing
+	Set objRootDSE = GetObject("LDAP://RootDSE")
+	
+	'Get the user object from Active Diretory
+	objADCommand.CommandText = "<LDAP://" & objRootDSE.Get("DefaultNamingContext") & _
+	">;(&(objectClass=user)(samAccountName=" & strOldUserName & "));distinguishedName"
+	Set objUserLookup = objADCommand.Execute
+	
+	'Build the user object
+	Set objUser = GetObject("LDAP://" & objUserLookup(0))
+	
+	'Set the users properties
+	'objUser.Put "homeDirectory", strNewHome
+	objUser.Put "mail", strNewEMail
+	objUser.Put "sAMAccountName", strNewUserName
+	objUser.Put "userPrincipalName", strNewUserPrincipalName
+	objUser.Put "description", strNewDescription
+	objUser.SetInfo
+	
+	'Move the user to the correct OU
+	strOU = "LDAP://OU=" & intCourse & "," & strStudentOU
+	Set objOU = GetObject(strOU)
+	objOU.MoveHere "LDAP://" & objUserLookup(0),vbNullString
+	
+	'Rename the home folder
+	'Set objFSO = CreateObject("Scripting.FileSystemObject")
+	'objFSO.MoveFolder strStudentShare & strOldUserName, strStudentShare & strNewUserName
+	
+	'Update the inventory database.
+	strSQL = "UPDATE People SET Username='" & strNewUserName & "',ClassOf='" & intCourse & "' WHERE Username='" & strOldUserName & "'"
+	objDBConnection.Execute(strSQL)
+	strSQL = "UPDATE Log SET Username='" & strNewUserName & "' WHERE Username='" & strOldUserName & "'"
+	objDBConnection.Execute(strSQL)
+	
+	UpdateLog "StudentGradeChange","",strNewUserName,strOldUserName,strNewUserName,""
+	
+	'Send the email
+	arrUserData = GetUserDataFromDatabase(strNewUserName)
+	SendEmail "Natalie", "fullenn@lkgeorge.org", "GradeChangeAdmin", arrUserData
+	SendEmail "Matt", "hullm@lkgeorge.org", "GradeChangeAdmin", arrUserData
+	SendEmail "Dane", "davisd@lkgeorge.org", "GradeChangeAdmin", arrUserData
+	SendEmail "Janine", "wayj@lkgeorge.org", "GradeChangeAdmin", arrUserData
+	
+	'Close objects
+	Set objFixStudent = Nothing
+	Set objUserLookup = Nothing
+	Set objUser = Nothing
+	Set objOU = Nothing
 
 End Sub
 
@@ -2049,7 +2052,7 @@ Sub FixDestinyExport
 	'Open the source and destination files
 	Set txtSourceCSV = objFSO.OpenTextFile(strDestinyData)
 	Set txtDestCSV = objFSO.CreateTextFile(strDestinyExport)
-	 
+	
 	'Loop through each line 
 	While txtSourceCSV.AtEndOfLine = False
 
@@ -2101,18 +2104,18 @@ Function GetUserName(intStudentID)
 
 	Dim strSQL, objStudent
 
-   'Check and see if they are in the people table
-   strSQL = "SELECT UserName" & vbCRLF
-   strSQL = strSQL & "FROM People" & vbCRLF
-   strSQL = strSQL & "WHERE Role='Student' AND StudentID=" & intStudentID
-   Set objStudent = objDBConnection.Execute(strSQL)  
-   
-   'Return the status
-   If objStudent.EOF Then
-      GetUserName = ""
-   Else
-      GetUserName = objStudent(0)
-   End If
+	'Check and see if they are in the people table
+	strSQL = "SELECT UserName" & vbCRLF
+	strSQL = strSQL & "FROM People" & vbCRLF
+	strSQL = strSQL & "WHERE Role='Student' AND StudentID=" & intStudentID
+	Set objStudent = objDBConnection.Execute(strSQL)  
+	
+	'Return the status
+	If objStudent.EOF Then
+		GetUserName = ""
+	Else
+		GetUserName = objStudent(0)
+	End If
 
 End Function
 
@@ -2123,115 +2126,115 @@ Sub SendEmail(strFirstName, strEMail, strType, arrUserData)
 	Dim strSMTPPickupFolder, objMessage, objConf, strMessage, strSubject, bolHTMLMEssage
 	Dim bolSendAsAdmin
 
-   Const cdoSendUsingPickup = 1
+	Const cdoSendUsingPickup = 1
 
-   strSMTPPickupFolder = "C:\Inetpub\mailroot\Pickup"
-   
-   'Get the message body
-   strMessage =  GetEMailMessage(strFirstName, strType, arrUserData)
-   
-   'Set the subject
-   Select Case strType
-   	Case "NewStudentFound"	
-   		strSubject = "New Student Found"
-   		bolHTMLMEssage = False
-   		bolSendAsAdmin = False
-   	Case "NewStudentReady", "NewStudentReadyAdmin"
-   		strSubject = "New Student Account Created"
-   		bolHTMLMEssage = False
-   		bolSendAsAdmin = False
-   	Case "EnabledSchoolTool", "EnabledSchoolToolAdmin"
-   		strSubject = "Student Account Enabled - Student Returned"
-   		bolHTMLMEssage = False
-   		bolSendAsAdmin = False
-   	Case "DisabledSchoolTool", "DisabledSchoolToolAdmin"
-   		strSubject = "Student Account Disabled - Student Left District"
-   		bolHTMLMEssage = False
-   		bolSendAsAdmin = False
-   	Case "EnabledAUP", "EnabledAUPAdmin"
-   		strSubject = "Student Account Enabled - AUP Turned In"
-   		bolHTMLMEssage = False
-   		bolSendAsAdmin = False
-   	Case "DisabledAUP", "DisabledAUPAdmin"
-   		strSubject = "Student Account Disabled - Missing AUP"
-   		bolHTMLMEssage = False
-   		bolSendAsAdmin = False
-   	Case "GradeChange", "GradeChangeAdmin"
-   		strSubject = "Student Grade Changed"
-   		bolHTMLMEssage = False
-   		bolSendAsAdmin = False
-   	Case "PasswordExpired"
-   		strSubject = "Your Password Has Expired"
-   		bolHTMLMEssage = True
-   		bolSendAsAdmin = True
-   	Case "PasswordExpiring"
-   		strSubject = "Password Will Expire in " & arrUserData(PASSWORD) & " Days"
-   		bolHTMLMEssage = True
-   		bolSendAsAdmin = True
-   	Case "PasswordExpiresToday"
-   		strSubject = "Password Expires Today"
-   		bolHTMLMEssage = True
-   		bolSendAsAdmin = True
-   	Case "PasswordExpiringAdmin"
-   		strSubject = "Passwords About to Expire"
-   		bolHTMLMEssage = True
-   		bolSendAsAdmin = True
-   	Case "EndOfYearPasswordReset"
-   		strSubject = "End Of Year Password Change"
-   		bolHTMLMEssage = True
-   		bolSendAsAdmin = True
-   	Case "UserNotUpdatedInAD"
-   		strSubject = "User Update Failed in Active Directory"
-   		bolHTMLMEssage = False
-   		bolSendAsAdmin = True
-   	Case "UserNotInSync"	
-   		strSubject = "Inventory Site and Active Directory Out Of Sync"
-   		bolHTMLMEssage = False
-   		bolSendAsAdmin = True
-   	Case "NewAccountCreated"
-   		strSubject = "New User Account Created in Active Directory"
-   		bolHTMLMEssage = False
-   		bolSendAsAdmin = True
-   End Select
+	strSMTPPickupFolder = "C:\Inetpub\mailroot\Pickup"
+	
+	'Get the message body
+	strMessage =  GetEMailMessage(strFirstName, strType, arrUserData)
+	
+	'Set the subject
+	Select Case strType
+		Case "NewStudentFound"	
+			strSubject = "New Student Found"
+			bolHTMLMEssage = False
+			bolSendAsAdmin = False
+		Case "NewStudentReady", "NewStudentReadyAdmin"
+			strSubject = "New Student Account Created"
+			bolHTMLMEssage = False
+			bolSendAsAdmin = False
+		Case "EnabledSchoolTool", "EnabledSchoolToolAdmin"
+			strSubject = "Student Account Enabled - Student Returned"
+			bolHTMLMEssage = False
+			bolSendAsAdmin = False
+		Case "DisabledSchoolTool", "DisabledSchoolToolAdmin"
+			strSubject = "Student Account Disabled - Student Left District"
+			bolHTMLMEssage = False
+			bolSendAsAdmin = False
+		Case "EnabledAUP", "EnabledAUPAdmin"
+			strSubject = "Student Account Enabled - AUP Turned In"
+			bolHTMLMEssage = False
+			bolSendAsAdmin = False
+		Case "DisabledAUP", "DisabledAUPAdmin"
+			strSubject = "Student Account Disabled - Missing AUP"
+			bolHTMLMEssage = False
+			bolSendAsAdmin = False
+		Case "GradeChange", "GradeChangeAdmin"
+			strSubject = "Student Grade Changed"
+			bolHTMLMEssage = False
+			bolSendAsAdmin = False
+		Case "PasswordExpired"
+			strSubject = "Your Password Has Expired"
+			bolHTMLMEssage = True
+			bolSendAsAdmin = True
+		Case "PasswordExpiring"
+			strSubject = "Password Will Expire in " & arrUserData(PASSWORD) & " Days"
+			bolHTMLMEssage = True
+			bolSendAsAdmin = True
+		Case "PasswordExpiresToday"
+			strSubject = "Password Expires Today"
+			bolHTMLMEssage = True
+			bolSendAsAdmin = True
+		Case "PasswordExpiringAdmin"
+			strSubject = "Passwords About to Expire"
+			bolHTMLMEssage = True
+			bolSendAsAdmin = True
+		Case "EndOfYearPasswordReset"
+			strSubject = "End Of Year Password Change"
+			bolHTMLMEssage = True
+			bolSendAsAdmin = True
+		Case "UserNotUpdatedInAD"
+			strSubject = "User Update Failed in Active Directory"
+			bolHTMLMEssage = False
+			bolSendAsAdmin = True
+		Case "UserNotInSync"	
+			strSubject = "Inventory Site and Active Directory Out Of Sync"
+			bolHTMLMEssage = False
+			bolSendAsAdmin = True
+		Case "NewAccountCreated"
+			strSubject = "New User Account Created in Active Directory"
+			bolHTMLMEssage = False
+			bolSendAsAdmin = True
+	End Select
 
-   'Create the objects required to send the mail.
-   Set objMessage = CreateObject("CDO.Message")
-   Set objConf = objMessage.Configuration
-   With objConf.Fields
-      .item("http://schemas.microsoft.com/cdo/configuration/sendusing") = cdoSendUsingPickup
-      .item("http://schemas.microsoft.com/cdo/configuration/smtpserverpickupdirectory") = strSMTPPickupFolder
-      .Update
-   End With
-   
-   'Set who the message is from.
-   If bolSendAsAdmin Then
-   	objMessage.From = strFromEMailAdmin
-   Else
-   	objMessage.From = strFromEMail
-   	objMessage.BCC = strFromEMail
-   End If
-   
-   'Send the message
-   If strEMailOverride = "" Then
-   	objMessage.To = strEMail
-   Else
-   	objMessage.To = strEMailOverride
-   	objMessage.BCC = ""
-   End If
-   objMessage.Subject = strSubject
-   If bolHTMLMEssage Then
-		objMessage.HTMLBody = strMessage
+	'Create the objects required to send the mail.
+	Set objMessage = CreateObject("CDO.Message")
+	Set objConf = objMessage.Configuration
+	With objConf.Fields
+		.item("http://schemas.microsoft.com/cdo/configuration/sendusing") = cdoSendUsingPickup
+		.item("http://schemas.microsoft.com/cdo/configuration/smtpserverpickupdirectory") = strSMTPPickupFolder
+		.Update
+	End With
+	
+	'Set who the message is from.
+	If bolSendAsAdmin Then
+		objMessage.From = strFromEMailAdmin
 	Else
-		objMessage.TextBody = strMessage
+		objMessage.From = strFromEMail
+		objMessage.BCC = strFromEMail
 	End If
-	If bolEnableEmail Then
-   	objMessage.Send
-   End If
-   
-   'Close objects
-   Set objMessage = Nothing
-   Set objConf = Nothing
-   
+	
+	'Send the message
+	If strEMailOverride = "" Then
+		objMessage.To = strEMail
+	Else
+		objMessage.To = strEMailOverride
+		objMessage.BCC = ""
+	End If
+	objMessage.Subject = strSubject
+	If bolHTMLMEssage Then
+			objMessage.HTMLBody = strMessage
+		Else
+			objMessage.TextBody = strMessage
+		End If
+		If bolEnableEmail Then
+		objMessage.Send
+	End If
+	
+	'Close objects
+	Set objMessage = Nothing
+	Set objConf = Nothing
+	
 End Sub
 
 Function GetEMailMessage(strFirstName,strType,arrUserData)
@@ -2259,7 +2262,7 @@ Function GetEMailMessage(strFirstName,strType,arrUserData)
 	strMessage = Replace(strMessage,"#STUDENTURL#", strURL & "user.asp?UserName=" & arrUserData(USERNAME))
 	strMessage = Replace(strMessage,"#STUDENTURLADMIN#", strURL & "admin/user.asp?UserName=" & arrUserData(USERNAME))
 	strMessage = Replace(strMessage,"#ADDURL#",strURL & "admin/add.asp")
-	 
+	
 	Select Case strType
 		
 		Case "PasswordExpiringAdmin"
@@ -2348,25 +2351,25 @@ Sub UpdatePasswordExpirationDate(bolSendEmail)
 
 	'This will update the PWordLastSet value in the People table using info from Active Directory
 
-   Dim strSQL, objUsers, datPwdLastSet, datExpires, intDaysUntilAccountExpires, strUserList
-   Dim arrUserData, arrUserList
+	Dim strSQL, objUsers, datPwdLastSet, datExpires, intDaysUntilAccountExpires, strUserList
+	Dim arrUserData, arrUserList
 
-   'Grab the list of active users from the database
-   strSQL = "SELECT UserName,PWordLastSet,ClassOf FROM People"
-   Set objUsers = objDBConnection.Execute(strSQL)
+	'Grab the list of active users from the database
+	strSQL = "SELECT UserName,PWordLastSet,ClassOf FROM People"
+	Set objUsers = objDBConnection.Execute(strSQL)
 
-   If Not objUsers.EOF Then
-      Do Until objUsers.EOF
-      
-      	'Get the date the password was last set and calculate how many days remain until they need
-      	'to change it.
-      	datPwdLastSet = GetLastPasswordSet(objUsers(0))
+	If Not objUsers.EOF Then
+		Do Until objUsers.EOF
+		
+			'Get the date the password was last set and calculate how many days remain until they need
+			'to change it.
+			datPwdLastSet = GetLastPasswordSet(objUsers(0))
 			datExpires = DateAdd("d",intPasswordLife,datPwdLastSet)
 			intDaysUntilAccountExpires = DateDiff("d",Date,datExpires)
-      	
-      	'Send the user an email if their account is about to expire, and build this list of users for the 
-      	'email that will be sent to the admins.
-      	If bolSendEmail Then
+		
+			'Send the user an email if their account is about to expire, and build this list of users for the 
+			'email that will be sent to the admins.
+			If bolSendEmail Then
 				arrUserData = GetUserDataFromDatabase(objUsers(0))
 				If arrUserData(CLASSOF) < 2000 Then 'Only send email to adults.
 					If PasswordExpires(arrUserData(USERNAME)) Then 'Only send if their password is set to expire.
@@ -2385,133 +2388,132 @@ Sub UpdatePasswordExpirationDate(bolSendEmail)
 						End If
 					End If
 				End If
-      	
-      		'Send the nag email if it's the end of the year.  This will prompt users to change their password even
-      		'if they've recently changed their password.  This is so their password won't expire over the summer.
-      		If objUsers(2) < 2000 Then
+		
+				'Send the nag email if it's the end of the year.  This will prompt users to change their password even
+				'if they've recently changed their password.  This is so their password won't expire over the summer.
+				If objUsers(2) < 2000 Then
 					If Date() >= CDate(datStartPasswordNag) And Date() <= CDate(datEndPasswordNag) Then
-   					If DateDiff("d",datStartPasswordNag,datPwdLastSet) < 0 Then
+					If DateDiff("d",datStartPasswordNag,datPwdLastSet) < 0 Then
 							arrUserData = GetUserDataFromDatabase(objUsers(0))
 							SendEmail arrUserData(FIRSTNAME), arrUserData(USERNAME) & "@" & strDomain, "EndOfYearPasswordReset", arrUserData
 						End If
 					End If
 				End If
-				   
-      	End If
-      	
-      	'Send the date the password was last set to the database
-         strSQL = "UPDATE People SET PWordLastSet=#" & datPwdLastSet & "# WHERE UserName='" & Replace(objUsers(0),"'","''") & "'"
-         objDBConnection.Execute(strSQL)			
-         
-         objUsers.MoveNext
-      Loop
-      
-      'Send the message to the admins
-      If bolSendEmail Then
-      	If strUserList <> "" Then
-				strUserList = Left(strUserList,Len(strUserList) - 1)
-				arrUserList = Split(strUserList,";")
-				arrUserList = SortArray(arrUserList)
-				arrUserData = Array("","","","","","","","","","","",arrUserList)
-				SendEmail "Matt", "hullm@lkgeorge.org", "PasswordExpiringAdmin", arrUserData
-				SendEmail "Dane", "davisd@lkgeorge.org", "PasswordExpiringAdmin", arrUserData
-				SendEmail "Janine", "wayj@lkgeorge.org", "PasswordExpiringAdmin", arrUserData
 			End If
-      End If
-      
-   End If
+			
+			'Send the date the password was last set to the database
+			strSQL = "UPDATE People SET PWordLastSet=#" & datPwdLastSet & "# WHERE UserName='" & Replace(objUsers(0),"'","''") & "'"
+			objDBConnection.Execute(strSQL)			
+		
+			objUsers.MoveNext
+		Loop
+		
+		'Send the message to the admins
+		If bolSendEmail Then
+			If strUserList <> "" Then
+					strUserList = Left(strUserList,Len(strUserList) - 1)
+					arrUserList = Split(strUserList,";")
+					arrUserList = SortArray(arrUserList)
+					arrUserData = Array("","","","","","","","","","","",arrUserList)
+					SendEmail "Matt", "hullm@lkgeorge.org", "PasswordExpiringAdmin", arrUserData
+					SendEmail "Dane", "davisd@lkgeorge.org", "PasswordExpiringAdmin", arrUserData
+					SendEmail "Janine", "wayj@lkgeorge.org", "PasswordExpiringAdmin", arrUserData
+				End If
+		End If
+		
+	End If
 
 End Sub
 
 Sub UpdateStudentCountHistory
 
-   'This will update the student count history to the latest numbers if needed.
+	'This will update the student count history to the latest numbers if needed.
 
-   Dim strSQL, objStudentCount, intTotalCount, objCurrentCount
-   
-   'Get the number of students per grade from the database
-   strSQL = "SELECT ClassOf, Count(ID) AS CountOfID" & vbCRLF
-   strSQL = strSQL & "FROM People" & vbCRLF
-   strSQL = strSQL & "GROUP BY ClassOf, Active" & vbCRLF
-   strSQL = strSQL & "HAVING ClassOf>2000 AND Active=True"
-   Set objStudentCount = objDBConnection.Execute(strSQL)
-   
-   'Initialize the counter that will be used to count the total number of students
-   intTotalCount = 0
-   
-   'Loop through each grade level and write the count to the database
-   If Not objStudentCount.EOF Then
-      Do Until objStudentCount.EOF
-         intTotalCount = intTotalCount + objStudentCount(1)
-         
-         'Get the last value from the database
-         strSQL = "SELECT StudentCount " & vbCRLF
-         strSQL = strSQL & "FROM CountHistory" & vbCRLF
-         strSQL = strSQL & "WHERE Role='" & objStudentCount(0) & "'"
-         strSQL = strSQL & "ORDER BY ID DESC"
-         Set objCurrentCount = objDBConnection.Execute(strSQL)
-         
-         'If this the first time this is run record the starting data
-         If objCurrentCount.EOF Then
-            strSQL = "INSERT INTO CountHistory (Role,StudentCount,RecordedDate)" & vbCRLF
-            strSQL = strSQL & "VALUES ("
-            strSQL = strSQL & "'" & objStudentCount(0) & "',"
-            strSQL = strSQL & objStudentCount(1) & ","
-            strSQL = strSQL & "#" & Date & "#)"
-            objDBConnection.Execute(strSQL)
-         Else
-            
-            'If any value has changed add it to the database
-            If objCurrentCount(0) <> objStudentCount(1) Then
-               strSQL = "INSERT INTO CountHistory (Role,StudentCount,RecordedDate)" & vbCRLF
-               strSQL = strSQL & "VALUES ("
-               strSQL = strSQL & "'" & objStudentCount(0) & "',"
-               strSQL = strSQL & objStudentCount(1) & ","
-               strSQL = strSQL & "#" & Date & "#)"
-               objDBConnection.Execute(strSQL)
-            End If
-         End If
-         
-         objStudentCount.MoveNext
-      Loop
-   End If
-   
-   strSQL = "SELECT StudentCount FROM CountHistory WHERE Role='TotalCount' ORDER BY ID DESC"
-   Set objCurrentCount = objDBConnection.Execute(strSQL)
-   
-   'If this the first time this is run record the starting data
-   If objCurrentCount.EOF Then
-      strSQL = "INSERT INTO CountHistory (Role,StudentCount,RecordedDate)" & vbCRLF
-      strSQL = strSQL & "VALUES ("
-      strSQL = strSQL & "'TotalCount',"
-      strSQL = strSQL & intTotalCount & ","
-      strSQL = strSQL & "#" & Date & "#)"
-      objDBConnection.Execute(strSQL)
-   Else
-   
-      'If any value has changed add it to the database
-      If objCurrentCount(0) <> intTotalCount Then
-         strSQL = "INSERT INTO CountHistory (Role,StudentCount,RecordedDate)" & vbCRLF
-         strSQL = strSQL & "VALUES ("
-         strSQL = strSQL & "'TotalCount',"
-         strSQL = strSQL & intTotalCount & ","
-         strSQL = strSQL & "#" & Date & "#)"
-         objDBConnection.Execute(strSQL)
-      End If
-   End If 
+	Dim strSQL, objStudentCount, intTotalCount, objCurrentCount
+	
+	'Get the number of students per grade from the database
+	strSQL = "SELECT ClassOf, Count(ID) AS CountOfID" & vbCRLF
+	strSQL = strSQL & "FROM People" & vbCRLF
+	strSQL = strSQL & "GROUP BY ClassOf, Active" & vbCRLF
+	strSQL = strSQL & "HAVING ClassOf>2000 AND Active=True"
+	Set objStudentCount = objDBConnection.Execute(strSQL)
+	
+	'Initialize the counter that will be used to count the total number of students
+	intTotalCount = 0
+	
+	'Loop through each grade level and write the count to the database
+	If Not objStudentCount.EOF Then
+		Do Until objStudentCount.EOF
+			intTotalCount = intTotalCount + objStudentCount(1)
+			
+			'Get the last value from the database
+			strSQL = "SELECT StudentCount " & vbCRLF
+			strSQL = strSQL & "FROM CountHistory" & vbCRLF
+			strSQL = strSQL & "WHERE Role='" & objStudentCount(0) & "'"
+			strSQL = strSQL & "ORDER BY ID DESC"
+			Set objCurrentCount = objDBConnection.Execute(strSQL)
+			
+			'If this the first time this is run record the starting data
+			If objCurrentCount.EOF Then
+				strSQL = "INSERT INTO CountHistory (Role,StudentCount,RecordedDate)" & vbCRLF
+				strSQL = strSQL & "VALUES ("
+				strSQL = strSQL & "'" & objStudentCount(0) & "',"
+				strSQL = strSQL & objStudentCount(1) & ","
+				strSQL = strSQL & "#" & Date & "#)"
+				objDBConnection.Execute(strSQL)
+			Else
+				
+				'If any value has changed add it to the database
+				If objCurrentCount(0) <> objStudentCount(1) Then
+				strSQL = "INSERT INTO CountHistory (Role,StudentCount,RecordedDate)" & vbCRLF
+				strSQL = strSQL & "VALUES ("
+				strSQL = strSQL & "'" & objStudentCount(0) & "',"
+				strSQL = strSQL & objStudentCount(1) & ","
+				strSQL = strSQL & "#" & Date & "#)"
+				objDBConnection.Execute(strSQL)
+				End If
+			End If
+		
+			objStudentCount.MoveNext
+		Loop
+	End If
+	
+	strSQL = "SELECT StudentCount FROM CountHistory WHERE Role='TotalCount' ORDER BY ID DESC"
+	Set objCurrentCount = objDBConnection.Execute(strSQL)
+	
+	'If this the first time this is run record the starting data
+	If objCurrentCount.EOF Then
+		strSQL = "INSERT INTO CountHistory (Role,StudentCount,RecordedDate)" & vbCRLF
+		strSQL = strSQL & "VALUES ("
+		strSQL = strSQL & "'TotalCount',"
+		strSQL = strSQL & intTotalCount & ","
+		strSQL = strSQL & "#" & Date & "#)"
+		objDBConnection.Execute(strSQL)
+	Else
+	
+		'If any value has changed add it to the database
+		If objCurrentCount(0) <> intTotalCount Then
+			strSQL = "INSERT INTO CountHistory (Role,StudentCount,RecordedDate)" & vbCRLF
+			strSQL = strSQL & "VALUES ("
+			strSQL = strSQL & "'TotalCount',"
+			strSQL = strSQL & intTotalCount & ","
+			strSQL = strSQL & "#" & Date & "#)"
+			objDBConnection.Execute(strSQL)
+		End If
+	End If 
 
 End Sub
 
 Sub UpdateCheckInHistory
 
-   'This will update the check in history count to the latest numbers if needed.
+	'This will update the check in history count to the latest numbers if needed.
 
-   Dim strSQL, objStudentCount, objInsideCheckIns, intTotalCount, objOutsideCheckIns, strHSStudents, intInsideCount, intOutsideCount
-   
-   strHSStudents = GetGraduationYear(5)
-   
-   'Get the total count of students per grade
-   strSQL = "SELECT ClassOf, Count(ID) AS CountOfID" & vbCRLF
+	Dim strSQL, objStudentCount, objInsideCheckIns, intTotalCount, objOutsideCheckIns, strHSStudents, intInsideCount, intOutsideCount
+	
+	strHSStudents = GetGraduationYear(5)
+	
+	'Get the total count of students per grade
+	strSQL = "SELECT ClassOf, Count(ID) AS CountOfID" & vbCRLF
 	strSQL = strSQL & "FROM People" & vbCRLF
 	strSQL = strSQL & "WHERE Active=True AND (HomeRoom Is Not Null And HomeRoom  <>'') And ClassOf <= "  & strHSStudents & vbCRLF
 	strSQL = strSQL & "GROUP BY ClassOf" & vbCRLF
@@ -2533,77 +2535,76 @@ Sub UpdateCheckInHistory
 	strSQL = strSQL & "GROUP BY ClassOf" & vbCRLF
 	strSQL = strSQL & "ORDER BY ClassOf DESC"
 	Set objOutsideCheckIns = objDBConnection.Execute(strSQL)
-   
-   'Initialize the counter that will be used to count the total number of students
-   intTotalCount = 0
-   intInsideCount = 0
-   intOutsideCount = 0
-   
-   'Loop through each grade level and write the count to the database
-   If Not objStudentCount.EOF Then
-   
-   	'Delete any existing entries on the same day
-   	strSQL = "DELETE FROM CheckInHistory WHERE RecordedDate=#" & Date & "#"
-   	objDBConnection.Execute(strSQL)
-   	
-      Do Until objStudentCount.EOF
-         intTotalCount = intTotalCount + objStudentCount(1)
-         
-         'Loop through each classes internal checkin count and add it to the inventory
-         If Not objInsideCheckIns.EOF Then
-         	Do Until objInsideCheckIns.EOF
-         		
-
-         		'Make sure you find the right class
-         		If objInsideCheckIns(0) = objStudentCount(0) Then
-         			
-         			'Add the data to the database
-         			strSQL = "INSERT INTO CheckInHistory (Role,CheckInCount,TotalStudentCount,RecordedDate,InternalCheckIn) Values (" & vbCRLF
-         			strSQL = strSQL & "'" & objInsideCheckIns(0) & "',"
-         			strSQL = strSQL & objInsideCheckIns(1) & ","
-         			strSQL = strSQL & objStudentCount(1) & ","
-         			strSQL = strSQL & "#" & Date & "#,"
-         			strSQL = strSQL & "True)"
-         			objDBConnection.Execute(strSQL)
-         			
-         			intInsideCount = intInsideCount + objInsideCheckIns(1)
-         			
-         		End If
-         		
-         		objInsideCheckIns.MoveNext
-         	Loop
-         	objInsideCheckIns.MoveFirst
-         End If
-         
-         'Loop through each classes external checkin count and add it to the inventory
-         If Not objOutsideCheckIns.EOF Then
-         	Do Until objOutsideCheckIns.EOF
-         		
-         		'Make sure you find the right class
-         		If objOutsideCheckIns(0) = objStudentCount(0) Then
-         			
-         			'Add the data to the database
-         			strSQL = "INSERT INTO CheckInHistory (Role,CheckInCount,TotalStudentCount,RecordedDate,InternalCheckIn) Values (" & vbCRLF
-         			strSQL = strSQL & "'" & objOutsideCheckIns(0) & "',"
-         			strSQL = strSQL & objOutsideCheckIns(1) & ","
-         			strSQL = strSQL & objStudentCount(1) & ","
-         			strSQL = strSQL & "#" & Date & "#,"
-         			strSQL = strSQL & "False)"
-         			objDBConnection.Execute(strSQL)
-         			
-         			intOutsideCount = intOutsideCount + objOutsideCheckIns(1)
-         			
-         		End If
-         		
-         		objOutsideCheckIns.MoveNext
-         	Loop
-         	objOutsideCheckIns.MoveFirst
-         End If
-         
-         objStudentCount.MoveNext
-      Loop
-      
-      'Add the internal total count to the database
+	
+	'Initialize the counter that will be used to count the total number of students
+	intTotalCount = 0
+	intInsideCount = 0
+	intOutsideCount = 0
+	
+	'Loop through each grade level and write the count to the database
+	If Not objStudentCount.EOF Then
+	
+		'Delete any existing entries on the same day
+		strSQL = "DELETE FROM CheckInHistory WHERE RecordedDate=#" & Date & "#"
+		objDBConnection.Execute(strSQL)
+		
+		Do Until objStudentCount.EOF
+			intTotalCount = intTotalCount + objStudentCount(1)
+			
+			'Loop through each classes internal checkin count and add it to the inventory
+			If Not objInsideCheckIns.EOF Then
+				Do Until objInsideCheckIns.EOF
+					
+					'Make sure you find the right class
+					If objInsideCheckIns(0) = objStudentCount(0) Then
+						
+						'Add the data to the database
+						strSQL = "INSERT INTO CheckInHistory (Role,CheckInCount,TotalStudentCount,RecordedDate,InternalCheckIn) Values (" & vbCRLF
+						strSQL = strSQL & "'" & objInsideCheckIns(0) & "',"
+						strSQL = strSQL & objInsideCheckIns(1) & ","
+						strSQL = strSQL & objStudentCount(1) & ","
+						strSQL = strSQL & "#" & Date & "#,"
+						strSQL = strSQL & "True)"
+						objDBConnection.Execute(strSQL)
+						
+						intInsideCount = intInsideCount + objInsideCheckIns(1)
+						
+					End If
+					
+					objInsideCheckIns.MoveNext
+				Loop
+				objInsideCheckIns.MoveFirst
+			End If
+			
+			'Loop through each classes external checkin count and add it to the inventory
+			If Not objOutsideCheckIns.EOF Then
+				Do Until objOutsideCheckIns.EOF
+					
+					'Make sure you find the right class
+					If objOutsideCheckIns(0) = objStudentCount(0) Then
+						
+						'Add the data to the database
+						strSQL = "INSERT INTO CheckInHistory (Role,CheckInCount,TotalStudentCount,RecordedDate,InternalCheckIn) Values (" & vbCRLF
+						strSQL = strSQL & "'" & objOutsideCheckIns(0) & "',"
+						strSQL = strSQL & objOutsideCheckIns(1) & ","
+						strSQL = strSQL & objStudentCount(1) & ","
+						strSQL = strSQL & "#" & Date & "#,"
+						strSQL = strSQL & "False)"
+						objDBConnection.Execute(strSQL)
+						
+						intOutsideCount = intOutsideCount + objOutsideCheckIns(1)
+						
+					End If
+					
+					objOutsideCheckIns.MoveNext
+				Loop
+				objOutsideCheckIns.MoveFirst
+			End If
+			
+			objStudentCount.MoveNext
+		Loop
+		
+		'Add the internal total count to the database
 		strSQL = "INSERT INTO CheckInHistory (Role,CheckInCount,TotalStudentCount,RecordedDate,InternalCheckIn) Values (" & vbCRLF
 		strSQL = strSQL & "'Total',"
 		strSQL = strSQL & intInsideCount & ","
@@ -2620,24 +2621,231 @@ Sub UpdateCheckInHistory
 		strSQL = strSQL & "#" & Date & "#,"
 		strSQL = strSQL & "False)"
 		objDBConnection.Execute(strSQL)
-      
-   End If
+	
+	End If
 
 End Sub
 
+Sub UpdateParentData()
+
+	Dim objFSO, strCurrentFolder, strCSV, txtSourceCSV, strSQL, objParentData, arrParentData, bolContactFound, bolChangeFound
+	Dim intUpdateCount, intAddedCount
+
+	intUpdateCount = 0
+	intAddedCount = 0
+
+	'Get the CSV path
+	Set objFSO = CreateObject("Scripting.FileSystemObject")
+	strCurrentFolder = objFSO.GetAbsolutePathName(".")
+	strCurrentFolder = strCurrentFolder & "\CSV\"
+	strCSV = strCurrentFolder & "ParentData.csv"
+	
+	'Open the source CSV
+	Set txtSourceCSV = objFSO.OpenTextFile(strCSV)
+	txtSourceCSV.ReadLine
+	
+	'Get the current parent data from the database
+	strSQL = "SELECT StudentID, ParentID, FirstName,LastName,Relationship,EMail,StreetNumber,UnitNumber,StreetName,Address2,City,State,ZIP FROM Parents"
+	Set objParentData = objDBConnection.Execute(strSQL)
+	
+	'Make sure there is some data in the parent table
+	If Not objParentData.EOF Then
+
+		'Loop through each line of the CSV
+		While txtSourceCSV.AtEndOfLine = False
+		
+			'Get the data from the row and add it to an array
+			arrParentData = Split(txtSourceCSV.ReadLine,",")
+			
+			'Loop through the database data looking for the contact
+			bolContactFound = False
+			Do Until objParentData.EOF
+				
+				'Check the ID's of the contact to make sure the parent and student match
+				If Int(objParentData(0)) = Int(arrParentData(0)) Then 'Student ID
+					If Int(objParentData(1)) = Int(arrParentData(1)) Then 'Parent ID
+						bolContactFound = True
+						bolChangeFound = False
+						
+						'Look for changes in the contact
+						If IsNull(objParentData(2)) Then
+							If CStr(arrParentData(2)) <> "" Then
+								bolChangeFound = True
+							End If
+						Else
+							If CStr(objParentData(2)) <> CStr(arrParentData(2)) Then 'First name
+								bolChangeFound = True
+							End If
+						End If
+						
+						If IsNull(objParentData(3)) Then
+							If CStr(arrParentData(3)) <> "" Then
+								bolChangeFound = True
+							End If
+						Else
+							If CStr(objParentData(3)) <> CStr(arrParentData(3)) Then 'Last name
+								bolChangeFound = True
+							End If
+						End If
+						
+						If IsNull(objParentData(4)) Then
+							If CStr(arrParentData(4)) <> "" Then
+								bolChangeFound = True
+							End If
+						Else
+							If CStr(objParentData(4)) <> CStr(arrParentData(4)) Then 'Relationship
+								bolChangeFound = True
+							End If
+						End If
+						
+						If IsNull(objParentData(5)) Then
+							If CStr(arrParentData(5)) <> "" Then
+								bolChangeFound = True
+							End If
+						Else
+							If CStr(objParentData(5)) <> CStr(arrParentData(5)) Then 'EMail
+								bolChangeFound = True
+							End If
+						End If
+						
+						If IsNull(objParentData(6)) Then
+							If CStr(arrParentData(6)) <> "" Then
+								bolChangeFound = True
+							End If
+						Else
+							If CStr(objParentData(6)) <> CStr(arrParentData(6)) Then 'Street Number
+								bolChangeFound = True
+							End If
+						End If
+						
+						If IsNull(objParentData(7)) Then
+							If CStr(arrParentData(7)) <> "" Then
+								bolChangeFound = True
+							End If
+						Else
+							If CStr(objParentData(7)) <> CStr(arrParentData(7)) Then 'Unit Number
+								bolChangeFound = True
+							End If
+						End If
+
+						If IsNull(objParentData(8)) Then
+							If CStr(arrParentData(8)) <> "" Then
+								bolChangeFound = True
+							End If
+						Else
+							If CStr(objParentData(8)) <> CStr(arrParentData(8)) Then 'Street Name
+								bolChangeFound = True
+							End If
+						End If
+
+						If IsNull(objParentData(9)) Then
+							If CStr(arrParentData(9)) <> "" Then
+								bolChangeFound = True
+							End If
+						Else
+							If CStr(objParentData(9)) <> CStr(arrParentData(9)) Then 'Address2
+								bolChangeFound = True
+							End If
+						End If
+
+						If IsNull(objParentData(10)) Then
+							If CStr(arrParentData(10)) <> "" Then
+								bolChangeFound = True
+							End If
+						Else
+							If CStr(objParentData(10)) <> CStr(arrParentData(10)) Then 'City
+								bolChangeFound = True
+							End If
+						End If
+						
+						If IsNull(objParentData(11)) Then
+							If CStr(arrParentData(11)) <> "" Then
+								bolChangeFound = True
+							End If
+						Else
+							If CStr(objParentData(11)) <> CStr(arrParentData(11)) Then 'State
+								bolChangeFound = True
+							End If
+						End If
+						
+						If IsNull(objParentData(12)) Then
+							If CStr(arrParentData(12)) <> "" Then
+								bolChangeFound = True
+							End If
+						Else
+							If CStr(objParentData(12)) <> CStr(arrParentData(12)) Then 'Zip
+								bolChangeFound = True
+							End If
+						End If	
+						
+						'Update the database
+						If bolChangeFound Then
+							strSQL = "UPDATE Parents SET " & _
+								"FirstName='" & Replace(arrParentData(2),"'","''") & "'," & _
+								"LastName='" & Replace(arrParentData(3),"'","''") & "'," & _
+								"Relationship='" & Replace(arrParentData(4),"'","''") & "'," & _
+								"EMail='" & Replace(arrParentData(5),"'","''") & "'," & _
+								"StreetNumber='" & Replace(arrParentData(6),"'","''") & "'," & _
+								"UnitNumber='" & Replace(arrParentData(7),"'","''") & "'," & _
+								"StreetName='" & Replace(arrParentData(8),"'","''") & "'," & _
+								"Address2='" & Replace(arrParentData(9),"'","''") & "'," & _
+								"City='" & Replace(arrParentData(10),"'","''") & "'," & _
+								"State='" & Replace(arrParentData(11),"'","''") & "'," & _
+								"ZIP='" & Replace(arrParentData(12),"'","''") & "'" & _
+								"WHERE StudentID=" & arrParentData(0) & " AND ParentID=" & arrParentData(1)
+							objDBConnection.Execute(strSQL)	
+							intUpdateCount = intUpdateCount + 1
+						End If
+						
+					End If
+				End If
+				
+				objParentData.MoveNext
+			Loop
+			objParentData.MoveFirst	
+	
+			If Not bolContactFound Then
+				strSQL = "INSERT INTO Parents (StudentID,ParentID,FirstName,LastName,Relationship,EMail,StreetNumber,UnitNumber,StreetName,Address2,City,State,Zip) " & _
+					"VALUES (" & _
+					Replace(arrParentData(0),"'","''") & "," & _
+					Replace(arrParentData(1),"'","''") & ",'" & _
+					Replace(arrParentData(2),"'","''") & "','" & _
+					Replace(arrParentData(3),"'","''") & "','" & _
+					Replace(arrParentData(4),"'","''") & "','" & _
+					Replace(arrParentData(5),"'","''") & "','" & _
+					Replace(arrParentData(6),"'","''") & "','" & _
+					Replace(arrParentData(7),"'","''") & "','" & _
+					Replace(arrParentData(8),"'","''") & "','" & _
+					Replace(arrParentData(9),"'","''") & "','" & _
+					Replace(arrParentData(10),"'","''") & "','" & _
+					Replace(arrParentData(11),"'","''") & "','" & _
+					Replace(arrParentData(12),"'","''") & "')"
+				objDBConnection.Execute(strSQL)
+				intAddedCount = intAddedCount + 1
+			End If
+	
+		Wend
+	
+	End If
+	
+	'MsgBox "Updated: " & intUpdateCount & vbCRLF & "Added: " & intAddedCount
+
+End Sub
+
+
 Function GetLastPasswordSet(strUserName)
 
-   'This function returns a date of when the user's password was last set
+	'This function returns a date of when the user's password was last set
 
-   Dim objRootDSE, objUserLookup, objUser, objPwdLastSet
-   
-   'Create a RootDSE object for the domain
-   Set objRootDSE = GetObject("LDAP://RootDSE")
-   
-   'Get the user object from Active Diretory
-   objADCommand.CommandText = "<LDAP://" & objRootDSE.Get("DefaultNamingContext") & _
-   ">;(&(objectClass=user)(SamAccountName=" & strUserName & "));DistinguishedName"
-   Set objUserLookup = objADCommand.Execute
+	Dim objRootDSE, objUserLookup, objUser, objPwdLastSet
+	
+	'Create a RootDSE object for the domain
+	Set objRootDSE = GetObject("LDAP://RootDSE")
+	
+	'Get the user object from Active Diretory
+	objADCommand.CommandText = "<LDAP://" & objRootDSE.Get("DefaultNamingContext") & _
+	">;(&(objectClass=user)(SamAccountName=" & strUserName & "));DistinguishedName"
+	Set objUserLookup = objADCommand.Execute
 	
 	If Not objUserLookup.EOF Then
 		Set objUser = GetObject("LDAP://" & objUserLookup(0))
@@ -2651,70 +2859,70 @@ Function GetLastPasswordSet(strUserName)
 		GetLastPasswordSet = #1/1/1601 12:00:00AM#
 	
 	End If
-   
-   Set objRootDSE = Nothing
+
+	Set objRootDSE = Nothing
 
 End Function
 
 Function ConvertToDate(objDate)
 
-   'This fuction takes the pwdLastSet property from AD and returns the date
+	'This fuction takes the pwdLastSet property from AD and returns the date
 
-   Dim intDate, intHigh, intLow, intTimeZoneAdjust
-   
-   If IsDST(Date) Then
-   	intTimeZoneAdjust = 240
-   Else
-   	intTimeZoneAdjust = 300
-   End If
+	Dim intDate, intHigh, intLow, intTimeZoneAdjust
+	
+	If IsDST(Date) Then
+		intTimeZoneAdjust = 240
+	Else
+		intTimeZoneAdjust = 300
+	End If
 
-   'Grab the high and low parts of the 64bit number
-   intHigh = objDate.HighPart
-   intLow = objDate.LowPart
+	'Grab the high and low parts of the 64bit number
+	intHigh = objDate.HighPart
+	intLow = objDate.LowPart
 
-   'Correct for difference if the low value is 0
-   If (intLow < 0) Then
-      intHigh = intHigh + 1
-   End If
-    
-   'Add the number of 100 nanosecond intervals to 1/1/1601 then convert that to a date
-   intDate = #1/1/1601# + (((intHigh * (2 ^ 32)) + intLow) / 600000000 - intTimeZoneAdjust) / 1440
-   ConvertToDate = CDate(intDate)
+	'Correct for difference if the low value is 0
+	If (intLow < 0) Then
+		intHigh = intHigh + 1
+	End If
+		
+	'Add the number of 100 nanosecond intervals to 1/1/1601 then convert that to a date
+	intDate = #1/1/1601# + (((intHigh * (2 ^ 32)) + intLow) / 600000000 - intTimeZoneAdjust) / 1440
+	ConvertToDate = CDate(intDate)
 
 End Function
 
 Function IsDST(datDate)
 
-   'DST starts on the second sunday of March and ends on the first Sunday in November.  
-   'This function will determine the start and end dates for the year passed to it and see
-   'if the data falls within the range.  If so it will return a true, of not a false.
+	'DST starts on the second sunday of March and ends on the first Sunday in November.  
+	'This function will determine the start and end dates for the year passed to it and see
+	'if the data falls within the range.  If so it will return a true, of not a false.
 
-   Dim intIndex, datStartOfDST, datEndOfDST
-   
-   'Get the start date
-   datStartOfDST = "3/1/" & Year(datDate)
-   For intIndex = 0 to 6 
-      If Weekday(DateAdd("d",intIndex,datStartOfDST)) = 1 Then
-         datStartOfDST = DateAdd("d",intIndex + 7,datStartOfDST)
-         Exit For
-      End If
-   Next
-   
-   'Get the end date
-   datEndOfDST = "11/1/" & Year(datDate)
-   For intIndex = 0 to 6 
-      If Weekday(DateAdd("d",intIndex,datEndOfDST)) = 1 Then
-         datEndOfDST = DateAdd("d",intIndex,datEndOfDST)
-         Exit For
-      End If
-   Next
-   
-   'If the date falls in the range then it's in DST
-   If CDate(datDate) >= CDate(datStartOfDST) AND CDate(datDate) < CDate(datEndOfDST) Then
-      IsDST = True
-   Else
-      IsDST = False
-   End If
+	Dim intIndex, datStartOfDST, datEndOfDST
+	
+	'Get the start date
+	datStartOfDST = "3/1/" & Year(datDate)
+	For intIndex = 0 to 6 
+		If Weekday(DateAdd("d",intIndex,datStartOfDST)) = 1 Then
+			datStartOfDST = DateAdd("d",intIndex + 7,datStartOfDST)
+			Exit For
+		End If
+	Next
+	
+	'Get the end date
+	datEndOfDST = "11/1/" & Year(datDate)
+	For intIndex = 0 to 6 
+		If Weekday(DateAdd("d",intIndex,datEndOfDST)) = 1 Then
+			datEndOfDST = DateAdd("d",intIndex,datEndOfDST)
+			Exit For
+		End If
+	Next
+	
+	'If the date falls in the range then it's in DST
+	If CDate(datDate) >= CDate(datStartOfDST) AND CDate(datDate) < CDate(datEndOfDST) Then
+		IsDST = True
+	Else
+		IsDST = False
+	End If
 
 End Function
 
@@ -2779,19 +2987,19 @@ End Sub
 
 Function PasswordValid(strPassword)
 
-   'This is a very basic validation function.  It verifies the length of the password is 8 characters or more.
-   'It's more of a place holder incase you want to get more complex in the future
+	'This is a very basic validation function.  It verifies the length of the password is 8 characters or more.
+	'It's more of a place holder incase you want to get more complex in the future
 
-   If Len(strPassword) >= 8 Then
-      If Len(strPassword) <= 120 Then
-      	PasswordValid = True
-      Else
-      	PasswordValid = False
-      End If
-   Else
-      PasswordValid = False
-   End If
-   
+	If Len(strPassword) >= 8 Then
+		If Len(strPassword) <= 120 Then
+			PasswordValid = True
+		Else
+			PasswordValid = False
+		End If
+	Else
+		PasswordValid = False
+	End If
+	
 End Function
 
 Function PasswordExpires(strUserName)
@@ -2804,26 +3012,26 @@ Function PasswordExpires(strUserName)
 	Set objADCommand = ConnectToActiveDirectory
 	Set objRootDSE = GetObject("LDAP://RootDSE")
 		
-   'Get the user's distinguished name from Active Directory	
+	'Get the user's distinguished name from Active Directory	
 	objADCommand.CommandText = "<LDAP://" & objRootDSE.Get("DefaultNamingContext") & _
 	">;(&(objectClass=user)(samAccountName=" & strUserName & "));distinguishedName"
 	Set objUserLookup = objADCommand.Execute
 		
 	If Not objUserLookup.EOF Then
-      'Build the user object
-      Set objUser = GetObject("LDAP://" & objUserLookup(0))
-      
-      'See if the change password bit is turned on.
-      strUACBinary = ConvertToBinary(objUser.userAccountControl,32)
-      If Mid(strUACBinary,16,1) = "1" Then
-         PasswordExpires = False
-      Else
-         PasswordExpires = True
-      End If
-   Else
-      PasswordExpires = "User Not Found"
-   End If
-   
+		'Build the user object
+		Set objUser = GetObject("LDAP://" & objUserLookup(0))
+		
+		'See if the change password bit is turned on.
+		strUACBinary = ConvertToBinary(objUser.userAccountControl,32)
+		If Mid(strUACBinary,16,1) = "1" Then
+			PasswordExpires = False
+		Else
+			PasswordExpires = True
+		End If
+	Else
+		PasswordExpires = "User Not Found"
+	End If
+	
 	'Close open objects
 	Set objRootDSE = Nothing
 	Set objADCommand = Nothing
@@ -2832,58 +3040,58 @@ End Function
 
 Function ConvertToBinary(intNumber, intBits)
 
-   Dim intExponent, intIndex
+	Dim intExponent, intIndex
 
-   'Set the number of bits you want to process
-   intExponent = 2 ^ (intBits - 1)
-   
-   'Keep looping until you get down to the last bit.
-   For intIndex = intBits To 1 Step -1
-      
-      'If the number is bigger then the exponet then turn on
-      'the 1 and subtract the exponent from the number, otherwise
-      'set the value to 0.
-      If intNumber >= intExponent Then
-         ConvertToBinary = ConvertToBinary & "1"
-         intNumber = intNumber - intExponent
-      Else
-         ConvertToBinary = ConvertToBinary & "0"
-      End If
-      
-      'Move to the next exponent
-      intExponent = intExponent / 2
-   
-   Next
+	'Set the number of bits you want to process
+	intExponent = 2 ^ (intBits - 1)
+	
+	'Keep looping until you get down to the last bit.
+	For intIndex = intBits To 1 Step -1
+		
+		'If the number is bigger then the exponet then turn on
+		'the 1 and subtract the exponent from the number, otherwise
+		'set the value to 0.
+		If intNumber >= intExponent Then
+			ConvertToBinary = ConvertToBinary & "1"
+			intNumber = intNumber - intExponent
+		Else
+			ConvertToBinary = ConvertToBinary & "0"
+		End If
+		
+		'Move to the next exponent
+		intExponent = intExponent / 2
+	
+	Next
 
 End Function
 
 Function CreateUsername(strFirst,strLast,intClassOf)
-   
-   'This function will generate a student's username and make sure it doesn't already
-   'exist in Active Directory before returning it.
-   
-   Dim strFixedLast, strInitial, strUserName, objLast, strYear, objUserLookup, intIndex
-   Dim objRootDSE
-   
-   'Create a RootDSE object for the domain
-   Set objRootDSE = GetObject("LDAP://RootDSE")
-   
-   'Remove unwanted characters from the first name
-   strFirst = Replace(strFirst,"'","")
-   strFirst = Replace(strFirst," ","")
-   strFirst = Replace(strFirst,"-","")
-   
-   'Remove unwanted characters from the last name
-   objLast = Split(strLast," ")
-   strFixedLast = objLast(0)
-   strFixedLast = Replace(strFixedLast,"'","")
-   strFixedLast = Replace(strFixedLast," ","")
-   strFixedLast = Replace(strFixedLast,"-","")
-   strYear = Right(intClassOf,2)
+	
+	'This function will generate a student's username and make sure it doesn't already
+	'exist in Active Directory before returning it.
+	
+	Dim strFixedLast, strInitial, strUserName, objLast, strYear, objUserLookup, intIndex
+	Dim objRootDSE
+	
+	'Create a RootDSE object for the domain
+	Set objRootDSE = GetObject("LDAP://RootDSE")
+	
+	'Remove unwanted characters from the first name
+	strFirst = Replace(strFirst,"'","")
+	strFirst = Replace(strFirst," ","")
+	strFirst = Replace(strFirst,"-","")
+	
+	'Remove unwanted characters from the last name
+	objLast = Split(strLast," ")
+	strFixedLast = objLast(0)
+	strFixedLast = Replace(strFixedLast,"'","")
+	strFixedLast = Replace(strFixedLast," ","")
+	strFixedLast = Replace(strFixedLast,"-","")
+	strYear = Right(intClassOf,2)
 
-   'Find an available username
-   For intIndex = 1 to Len(strFirst)
-      
+	'Find an available username
+	For intIndex = 1 to Len(strFirst)
+		
 		strInitial = Left(strFirst,intIndex)
 
 		strUserName = strYear & strFixedLast & strInitial
@@ -2897,39 +3105,39 @@ Function CreateUsername(strFirst,strLast,intClassOf)
 			CreateUsername = LCase(strUserName)
 			Exit For
 		End If
-   
-   Next
-   
-   Set objRootDSE = Nothing
-   
+	
+	Next
+	
+	Set objRootDSE = Nothing
+	
 End Function
 
 Function GetGrade(intGraduatingYear)
-   
-   'This function will return a students current grade based on their graduating
-   'year using the format K-12.  Students are moved up to the next grade level
-   'on July 1st.
-   
-   Dim datToday, intMonth, intCurrentYear, intShortGraduatingYear
-   
-   'Get the current month and year
-   datToday = Date
-   intMonth = DatePart("m",datToday)
-   intCurrentYear = Right(DatePart("yyyy",datToday),2)
-   intShortGraduatingYear = Right(intGraduatingYear,2)
+	
+	'This function will return a students current grade based on their graduating
+	'year using the format K-12.  Students are moved up to the next grade level
+	'on July 1st.
+	
+	Dim datToday, intMonth, intCurrentYear, intShortGraduatingYear
+	
+	'Get the current month and year
+	datToday = Date
+	intMonth = DatePart("m",datToday)
+	intCurrentYear = Right(DatePart("yyyy",datToday),2)
+	intShortGraduatingYear = Right(intGraduatingYear,2)
 
-	'If it's after July then the graduating year is the next year
-   If intMonth >= 7 And intMonth <= 12 Then
-      intCurrentYear = intCurrentYear + 1
-   End If
-   
-   'Subtract the number of years remaining in school from 12 to find the current grade
-   GetGrade = 12 - (intShortGraduatingYear - intCurrentYear)
-   
-   'Fix kindergarten
-   If GetGrade = 0 Then
-      GetGrade = "K"
-   End If
+		'If it's after July then the graduating year is the next year
+	If intMonth >= 7 And intMonth <= 12 Then
+		intCurrentYear = intCurrentYear + 1
+	End If
+	
+	'Subtract the number of years remaining in school from 12 to find the current grade
+	GetGrade = 12 - (intShortGraduatingYear - intCurrentYear)
+	
+	'Fix kindergarten
+	If GetGrade = 0 Then
+		GetGrade = "K"
+	End If
 
 End Function
 
@@ -2937,16 +3145,16 @@ Function GetGraduationYear(intGrade)
 
 	Dim datToday, intMonth, intCurrentYear
 
-   datToday = Date
-   intMonth = DatePart("m",datToday)
-   intCurrentYear = DatePart("yyyy",datToday)
-   
-   If intMonth >= 7 And intMonth <= 12 Then
-      intCurrentYear = intCurrentYear + 1
-   End If
-   
-   GetGraduationYear = intCurrentyear + (12 - intGrade)
-   
+	datToday = Date
+	intMonth = DatePart("m",datToday)
+	intCurrentYear = DatePart("yyyy",datToday)
+	
+	If intMonth >= 7 And intMonth <= 12 Then
+		intCurrentYear = intCurrentYear + 1
+	End If
+	
+	GetGraduationYear = intCurrentyear + (12 - intGrade)
+	
 End Function
 
 Function GetOU(strRole,strSite)
@@ -2962,30 +3170,30 @@ End Function
 
 Function GetRole(intYear)
 
-   Dim datToday, intMonth, intCurrentYear, intGrade, strSQL, objRole
-   
-   'If they're an adult then get their role from the database
-   If intYear <= 1000 Then
-   	strSQL = "SELECT Role FROM Roles WHERE RoleID=" & intYear
-   	Set objRole = objDBConnection.Execute(strSQL)
-   	
-   	If Not objRole.EOF Then
-   		GetRole = objRole(0)
-   		Exit Function
-   	End If
-   End If
-      
-   'Convert the graduating year to a grade
-   datToday = Date
-   intMonth = DatePart("m",datToday)
-   intCurrentYear = Right(DatePart("yyyy",datToday),2)
-   intYear = Right(intYear,2)
+	Dim datToday, intMonth, intCurrentYear, intGrade, strSQL, objRole
+	
+	'If they're an adult then get their role from the database
+	If intYear <= 1000 Then
+		strSQL = "SELECT Role FROM Roles WHERE RoleID=" & intYear
+		Set objRole = objDBConnection.Execute(strSQL)
+		
+		If Not objRole.EOF Then
+			GetRole = objRole(0)
+			Exit Function
+		End If
+	End If
+		
+	'Convert the graduating year to a grade
+	datToday = Date
+	intMonth = DatePart("m",datToday)
+	intCurrentYear = Right(DatePart("yyyy",datToday),2)
+	intYear = Right(intYear,2)
 
-   If intMonth >= 7 And intMonth <= 12 Then
-      intCurrentYear = intCurrentYear + 1
-   End If
+	If intMonth >= 7 And intMonth <= 12 Then
+		intCurrentYear = intCurrentYear + 1
+	End If
 
-   intGrade = 12 - (intYear - intCurrentYear)
+	intGrade = 12 - (intYear - intCurrentYear)
 
 	If GetRole = "" Then
 	
@@ -3000,7 +3208,7 @@ Function GetRole(intYear)
 			Case 3
 				GetRole = "3rd Grade Student"
 			Case 4
-				GetRole = "4th Grade Student"   
+				GetRole = "4th Grade Student"
 			Case 5
 				GetRole = "5th Grade Student"
 			Case 6
@@ -3027,69 +3235,69 @@ End Function
 
 Function ConnectToDatabase
 
-   'This function returns a connection object used to run SQL commands against the database
+	'This function returns a connection object used to run SQL commands against the database
 
-   Dim objFSO, strCurrentFolder, strDatabase, strConnection
+	Dim objFSO, strCurrentFolder, strDatabase, strConnection
 
-   'Get the database path
-   Set objFSO = CreateObject("Scripting.FileSystemObject")
-   strCurrentFolder = objFSO.GetAbsolutePathName(".")
-   strCurrentFolder = objFSO.GetParentFolderName(strCurrentFolder)
-   strCurrentFolder = strCurrentFolder & "\Database\"
-   strDatabase = strCurrentFolder & "Inventory.mdb"
+	'Get the database path
+	Set objFSO = CreateObject("Scripting.FileSystemObject")
+	strCurrentFolder = objFSO.GetAbsolutePathName(".")
+	strCurrentFolder = objFSO.GetParentFolderName(strCurrentFolder)
+	strCurrentFolder = strCurrentFolder & "\Database\"
+	strDatabase = strCurrentFolder & "Inventory.mdb"
 
-   'Create the connection to the database
-   Set ConnectToDatabase = CreateObject("ADODB.Connection")
-   strConnection = "Provider=Microsoft.ACE.OLEDB.12.0;Data Source=" & strDatabase & ";"
-   ConnectToDatabase.Open strConnection
-   
-   Set objFSO = Nothing
+	'Create the connection to the database
+	Set ConnectToDatabase = CreateObject("ADODB.Connection")
+	strConnection = "Provider=Microsoft.ACE.OLEDB.12.0;Data Source=" & strDatabase & ";"
+	ConnectToDatabase.Open strConnection
+	
+	Set objFSO = Nothing
 
 End Function
 
 Function ConnectToActiveDirectory
 
-   'This function returns a command object used to run commands against Active Directory
+	'This function returns a command object used to run commands against Active Directory
 
-   Dim objADConnection
+	Dim objADConnection
 
-   'Establish a connection to Active Directory using ActiveX Data Object
-   Set objADConnection = CreateObject("ADODB.Connection")
-   objADConnection.Open "Provider=ADSDSOObject;"
+	'Establish a connection to Active Directory using ActiveX Data Object
+	Set objADConnection = CreateObject("ADODB.Connection")
+	objADConnection.Open "Provider=ADSDSOObject;"
 
-   'Create the command object and attach it to the connection object
-   Set ConnectToActiveDirectory = CreateObject("ADODB.Command")
-   ConnectToActiveDirectory.ActiveConnection = objADConnection
- 
-   Set objADConnection = Nothing
+	'Create the command object and attach it to the connection object
+	Set ConnectToActiveDirectory = CreateObject("ADODB.Command")
+	ConnectToActiveDirectory.ActiveConnection = objADConnection
+	
+	Set objADConnection = Nothing
 
 End Function
 
 Function SortArray(arrArray)
 
-   Dim i, j, strTemp
-   
-   'i is used to keep track of what has been done so far.  There is no need to sort
-   'later parts of the array with each loop because the have already been sorted.  
-   For i = UBound(arrArray) - 1 To 0 Step - 1
-      
-      'Loop through each item in the array, each loop will push the values later
-      'in the alphabet farther to the right.  We only have to go to i since with
-      'each pass we will be pushing the last value all the way to the right.  there
-      'is no need to sort the values all the way to the right as the loop progresses.
-      For j = 0 to i
-         
-         'If the current value is later in the alphabet push it to the right
-         If arrArray(j) > arrArray(j + 1) Then
-            strTemp = arrArray(j + 1)
-            arrArray(j + 1) = arrArray(j)
-            arrArray(j) = strTemp
-         End If
-      Next
-   Next
-   
-   'Return the array
-   SortArray = arrArray
+	Dim i, j, strTemp
+	
+	'i is used to keep track of what has been done so far.  There is no need to sort
+	'later parts of the array with each loop because the have already been sorted.  
+	For i = UBound(arrArray) - 1 To 0 Step - 1
+		
+		'Loop through each item in the array, each loop will push the values later
+		'in the alphabet farther to the right.  We only have to go to i since with
+		'each pass we will be pushing the last value all the way to the right.  there
+		'is no need to sort the values all the way to the right as the loop progresses.
+		For j = 0 to i
+			
+			'If the current value is later in the alphabet push it to the right
+			If arrArray(j) > arrArray(j + 1) Then
+				strTemp = arrArray(j + 1)
+				arrArray(j + 1) = arrArray(j)
+				arrArray(j) = strTemp
+			End If
+		Next
+	Next
+	
+	'Return the array
+	SortArray = arrArray
 
 End Function
 
