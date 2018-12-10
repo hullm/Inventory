@@ -17,13 +17,13 @@ strSQL = "SELECT OldValue,NewValue FROM Log WHERE Type='StudentGradeChange'"
 Set objChangedAccounts = objConnection.Execute(strSQL)
 
 If Not objChangedAccounts.EOF Then
-   Do Until objChangedAccounts.EOF
-      
-      strSQL = "UPDATE Log SET UserName='" & Replace(objChangedAccounts(1),"'","''") & "' WHERE UserName='" & Replace(objChangedAccounts(0),"'","''") & "'"
-      objConnection.Execute(strSQL)
-      
-      objChangedAccounts.MoveNext
-   Loop
+	Do Until objChangedAccounts.EOF
+		
+		strSQL = "UPDATE Log SET UserName='" & Replace(objChangedAccounts(1),"'","''") & "' WHERE UserName='" & Replace(objChangedAccounts(0),"'","''") & "'"
+		objConnection.Execute(strSQL)
+		
+		objChangedAccounts.MoveNext
+	Loop
 End If
 
 MsgBox "Done"
