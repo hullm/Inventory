@@ -21,23 +21,23 @@ Set objNotes = objConnection.Execute(strSQL)
 
 'Loop through each returned device
 If Not objNotes.EOF Then
-   Do Until objNotes.EOF
-      
-      strSQL = "SELECT Notes FROM Devices WHERE LGTag='" & objNotes(0) & "'"
-      Set objCurrentNotes = objConnection.Execute(strSQL)
-      
-      If objCurrentNotes(0) <> "" Then
-         strNotes = objCurrentNotes(0) & vbCRLF & vbCRLF & objNotes(1)
-      Else
-         strNotes = objNotes(1)
-      End If
-     
-      'Set the assigned field to true on the device
-      strSQL = "UPDATE Devices SET Notes='" & Replace(strNotes,"'","''") & "' WHERE LGTag='" & objNotes(0) & "'"
-      objConnection.Execute(strSQL)
-      
-      objNotes.MoveNext
-   Loop
+	Do Until objNotes.EOF
+		
+		strSQL = "SELECT Notes FROM Devices WHERE LGTag='" & objNotes(0) & "'"
+		Set objCurrentNotes = objConnection.Execute(strSQL)
+		
+		If objCurrentNotes(0) <> "" Then
+			strNotes = objCurrentNotes(0) & vbCRLF & vbCRLF & objNotes(1)
+		Else
+			strNotes = objNotes(1)
+		End If
+	
+		'Set the assigned field to true on the device
+		strSQL = "UPDATE Devices SET Notes='" & Replace(strNotes,"'","''") & "' WHERE LGTag='" & objNotes(0) & "'"
+		objConnection.Execute(strSQL)
+		
+		objNotes.MoveNext
+	Loop
 End If
-  
+
 MsgBox "Done"

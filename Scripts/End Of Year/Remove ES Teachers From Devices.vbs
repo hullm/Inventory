@@ -95,5 +95,4 @@ objConnection.Execute(strSQL & Replace(strSQLWhere,"%Teacher%","Crotty") & "'" &
 objConnection.Execute(strSQL & Replace(strSQLWhere,"%Teacher%","Lewis / Compositor") & "'" & strModel & "'")
 objConnection.Execute(strSQL & Replace(strSQLWhere,"%Teacher%","Lewis") & "'" & strModel & "'")
 
-
 MsgBox "Done"

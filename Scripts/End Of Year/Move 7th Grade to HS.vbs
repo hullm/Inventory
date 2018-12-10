@@ -25,5 +25,4 @@ objConnection.Execute(strSQL)
 strSQL = "UPDATE People Set Site='High School' WHERE Active=True AND ClassOf=" & strCurrentYear + 6
 objConnection.Execute(strSQL)
 
-
 MsgBox "Done"
