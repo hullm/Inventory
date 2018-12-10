@@ -21,7 +21,7 @@ Sub VerifyADandDBMatch
 	Dim strUserName, strFirstName, strLastName, strDescription, strRoom, strPhone, bolActive, strSite, intClassOf
 	
 	'Create a connection to the database
-   Set objDBConnection = ConnectToDatabase
+	Set objDBConnection = ConnectToDatabase
 
 	'Get the list of users in the database with phone numbers
 	strSQL = "SELECT UserName,FirstName,LastName,Description,RoomNumber,PhoneNumber,Active,Site,ClassOf FROM People WHERE Role='Teacher'"
@@ -66,7 +66,7 @@ Sub VerifyADandDBMatch
 				If Err Then
 					If strFirstName <> "" Then
 						MsgBox "FirstName",,strUserName
-                  bolError = True
+						bolError = True
 						Err.Clear
 					End If
 				Else
@@ -77,7 +77,7 @@ Sub VerifyADandDBMatch
 				If Err Then
 					If strLastName <> "" Then
 						MsgBox "LastName",,strUserName
-                  bolError = True
+						bolError = True
 						Err.Clear
 					End If
 				Else
@@ -88,7 +88,7 @@ Sub VerifyADandDBMatch
 				If Err Then
 					If strDescription <> "" Then
 						MsgBox "Description",,strUserName
-                  bolError = True
+						bolError = True
 						Err.Clear
 					End If
 				Else
@@ -98,7 +98,7 @@ Sub VerifyADandDBMatch
 			If objADUser.Get("physicalDeliveryOfficeName") <> strRoom Then
 				If Err Then
 					If strRoom <> "" Then
-                  MsgBox "Room",,strUserName
+						MsgBox "Room",,strUserName
 						bolError = True
 						Err.Clear
 					End If
@@ -109,7 +109,7 @@ Sub VerifyADandDBMatch
 			If objADUser.Get("telephoneNumber") <> strPhone Then
 				If Err Then
 					If strPhone <> "" Then
-                  MsgBox "Phone",,strUserName
+						MsgBox "Phone",,strUserName
 						bolError = True
 						Err.Clear
 					End If
@@ -120,7 +120,7 @@ Sub VerifyADandDBMatch
 			If objADUser.Get("ipPhone") <> strPhone Then
 				If Err Then
 					If strPhone <> "" Then
-                  MsgBox "IP Phone",,strUserName
+						MsgBox "IP Phone",,strUserName
 						bolError = True
 						Err.Clear
 					End If
@@ -166,40 +166,40 @@ End Sub
 
 Function ConnectToDatabase
 
-   'This function returns a connection object used to run SQL commands against the database
+	'This function returns a connection object used to run SQL commands against the database
 
-   Dim objFSO, strCurrentFolder, strDatabase, strConnection
+	Dim objFSO, strCurrentFolder, strDatabase, strConnection
 
-   'Get the database path
-   Set objFSO = CreateObject("Scripting.FileSystemObject")
-   strCurrentFolder = objFSO.GetAbsolutePathName(".")
-   strCurrentFolder = objFSO.GetParentFolderName(strCurrentFolder)
-   strCurrentFolder = strCurrentFolder & "\Database\"
-   strDatabase = strCurrentFolder & "Inventory.mdb"
+	'Get the database path
+	Set objFSO = CreateObject("Scripting.FileSystemObject")
+	strCurrentFolder = objFSO.GetAbsolutePathName(".")
+	strCurrentFolder = objFSO.GetParentFolderName(strCurrentFolder)
+	strCurrentFolder = strCurrentFolder & "\Database\"
+	strDatabase = strCurrentFolder & "Inventory.mdb"
 
-   'Create the connection to the database
-   Set ConnectToDatabase = CreateObject("ADODB.Connection")
-   strConnection = "Provider=Microsoft.ACE.OLEDB.12.0;Data Source=" & strDatabase & ";"
-   ConnectToDatabase.Open strConnection
-   
-   Set objFSO = Nothing
+	'Create the connection to the database
+	Set ConnectToDatabase = CreateObject("ADODB.Connection")
+	strConnection = "Provider=Microsoft.ACE.OLEDB.12.0;Data Source=" & strDatabase & ";"
+	ConnectToDatabase.Open strConnection
+	
+	Set objFSO = Nothing
 
 End Function
 
 Function ConnectToActiveDirectory
 
-   'This function returns a command object used to run commands against Active Directory
+	'This function returns a command object used to run commands against Active Directory
 
-   Dim objADConnection
+	Dim objADConnection
 
-   'Establish a connection to Active Directory using ActiveX Data Object
-   Set objADConnection = CreateObject("ADODB.Connection")
-   objADConnection.Open "Provider=ADSDSOObject;"
+	'Establish a connection to Active Directory using ActiveX Data Object
+	Set objADConnection = CreateObject("ADODB.Connection")
+	objADConnection.Open "Provider=ADSDSOObject;"
 
-   'Create the command object and attach it to the connection object
-   Set ConnectToActiveDirectory = CreateObject("ADODB.Command")
-   ConnectToActiveDirectory.ActiveConnection = objADConnection
- 
-   Set objADConnection = Nothing
+	'Create the command object and attach it to the connection object
+	Set ConnectToActiveDirectory = CreateObject("ADODB.Command")
+	ConnectToActiveDirectory.ActiveConnection = objADConnection
+	
+	Set objADConnection = Nothing
 
 End Function
