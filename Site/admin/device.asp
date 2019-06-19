@@ -1846,14 +1846,22 @@ End Sub%>
 			LogEntryType = "AUP Turned In"
 		Case "AutoLogOut"
 			LogEntryType = "Logout"
+		Case "CaseFound"
+			LogEntryType = "Case Found"
+		Case "CasePurchased"
+			LogEntryType = "Case Purchased"
 		Case "ComputerNameChange"
 			LogEntryType = "Computer Name Changed"
 		Case "ComputerImaged"
 			LogEntryType = "Computer Imaged"
+		Case "ComputerPollinated"
+			LogEntryType = "Computer Pollinated"
 		Case "DatabaseUpgraded"
 			LogEntryType = "Database Upgraded"
 		Case "DeviceAssigned"
 			LogEntryType = "Device Assigned"
+		Case "DebtForgiven"
+			LogEntryType = "Debt Forgiven"
 		Case "DeviceAdded"
 			LogEntryType = "New Device Added"
 		Case "DeviceDecommissioned"
@@ -2935,7 +2943,8 @@ End Sub%>
 	Application("Connection").Execute(strSQL)
 
 	'If they forgot their case or bag then turn on the warning flag
-	If Not bolAdapterReturned Or Not bolCaseReturned Then
+	'If Not bolAdapterReturned Or Not bolCaseReturned Then
+	If Not bolAdapterReturned Then 'Modified since we aren't charging for cases anymore
 		strSQL = "UPDATE People SET Warning=True Where ID=" & objAssignmentInfo(0)
 		Application("Connection").Execute(strSQL)
 	End If
@@ -2968,7 +2977,9 @@ End Sub%>
 
 	If Not bolCaseReturned Then
 		If InStr(objDevice(2),"MacBook") Then
-			BillUser objAssignmentInfo(0),"Laptop Case",strUserName
+			'BillUser objAssignmentInfo(0),"Laptop Case",strUserName
+			strSQL = "UPDATE People SET NoCase=True Where ID=" & objAssignmentInfo(0) 
+			Application("Connection").Execute(strSQL)
 		End If
 		UpdateLog "DeviceReturnedCaseMissing",intTag,strUserName,GetDisplayName(strUserName),"",""
 	End If

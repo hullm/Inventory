@@ -1,6 +1,6 @@
 <%@LANGUAGE="VBSCRIPT" CODEPAGE="1252"%>
 <%
-On Error Resume Next
+'On Error Resume Next
 
 Dim strRole, strSiteVersion, strSourcePage, strReturnLink
 
@@ -242,7 +242,7 @@ End If
 			<%	If Not IsMobile And Not IsiPad Then%>
 					$( document ).tooltip({track: true});
 			<%	End If %>	
-			}
+			})
 		</script>
 		
 </head>

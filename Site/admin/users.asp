@@ -164,31 +164,31 @@ End If %>
 	If strMissing <> "" Then
 		Select Case strMissing
 			Case "Anything"
-				strSQL = "SELECT People.ID,FirstName,LastName,UserName,StudentID,ClassOf,HomeRoom,Role,DeviceCount,People.Active,Warning,Loaned,PWord,AUP,Site,People.Notes,PWordLastSet,PhoneNumber,RoomNumber,Description,PWordNeverExpires,LastExternalCheckIn,LastInternalCheckIn,Birthday,InternetAccess" & vbCRLF
+				strSQL = "SELECT People.ID,FirstName,LastName,UserName,StudentID,ClassOf,HomeRoom,Role,DeviceCount,People.Active,Warning,Loaned,PWord,AUP,Site,People.Notes,PWordLastSet,PhoneNumber,RoomNumber,Description,PWordNeverExpires,LastExternalCheckIn,LastInternalCheckIn,Birthday,InternetAccess,NoCase" & vbCRLF
 				strSQL = strSQL & "FROM People INNER JOIN Assignments ON People.ID = Assignments.AssignedTo" & vbCRLF
 				strSQL = strSQL & strSQLWhere & " AND (CaseReturned=False OR AdapterReturned=False) AND Assignments.Active=False"
 			Case "Case"
-				strSQL = "SELECT People.ID,FirstName,LastName,UserName,StudentID,ClassOf,HomeRoom,Role,DeviceCount,People.Active,Warning,Loaned,PWord,AUP,Site,People.Notes,PWordLastSet,PhoneNumber,RoomNumber,Description,PWordNeverExpires,LastExternalCheckIn,LastInternalCheckIn,Birthday,InternetAccess" & vbCRLF
+				strSQL = "SELECT People.ID,FirstName,LastName,UserName,StudentID,ClassOf,HomeRoom,Role,DeviceCount,People.Active,Warning,Loaned,PWord,AUP,Site,People.Notes,PWordLastSet,PhoneNumber,RoomNumber,Description,PWordNeverExpires,LastExternalCheckIn,LastInternalCheckIn,Birthday,InternetAccess,NoCase" & vbCRLF
 				strSQL = strSQL & "FROM People INNER JOIN Assignments ON People.ID = Assignments.AssignedTo" & vbCRLF
 				strSQL = strSQL & strSQLWhere & " AND CaseReturned=False AND Assignments.Active=False"
 			Case "Power Supply"
-				strSQL = "SELECT People.ID,FirstName,LastName,UserName,StudentID,ClassOf,HomeRoom,Role,DeviceCount,People.Active,Warning,Loaned,PWord,AUP,Site,People.Notes,PWordLastSet,PhoneNumber,RoomNumber,Description,PWordNeverExpires,LastExternalCheckIn,LastInternalCheckIn,Birthday,InternetAccess" & vbCRLF
+				strSQL = "SELECT People.ID,FirstName,LastName,UserName,StudentID,ClassOf,HomeRoom,Role,DeviceCount,People.Active,Warning,Loaned,PWord,AUP,Site,People.Notes,PWordLastSet,PhoneNumber,RoomNumber,Description,PWordNeverExpires,LastExternalCheckIn,LastInternalCheckIn,Birthday,InternetAccess,NoCase" & vbCRLF
 				strSQL = strSQL & "FROM People INNER JOIN Assignments ON People.ID = Assignments.AssignedTo" & vbCRLF
 				strSQL = strSQL & strSQLWhere & " AND AdapterReturned=False AND Assignments.Active=False"
 		End Select
 	ElseIf strLoanedOut <> "" Then
 		Select Case strLoanedOut
 			Case "Anything"
-				strSQL = "SELECT DISTINCT People.ID,FirstName,LastName,UserName,StudentID,ClassOf,HomeRoom,Role,DeviceCount,People.Active,Warning,Loaned,PWord,AUP,Site,People.Notes,PWordLastSet,PhoneNumber,RoomNumber,Description,PWordNeverExpires,LastExternalCheckIn,LastInternalCheckIn,Birthday,InternetAccess" & vbCRLF
+				strSQL = "SELECT DISTINCT People.ID,FirstName,LastName,UserName,StudentID,ClassOf,HomeRoom,Role,DeviceCount,People.Active,Warning,Loaned,PWord,AUP,Site,People.Notes,PWordLastSet,PhoneNumber,RoomNumber,Description,PWordNeverExpires,LastExternalCheckIn,LastInternalCheckIn,Birthday,InternetAccess,NoCase" & vbCRLF
 				strSQL = strSQL & "FROM People INNER JOIN Loaned ON People.ID = Loaned.AssignedTo" & vbCRLF
 				strSQL = strSQL & strSQLWhere & " AND (Loaned.Returned=False)"
 			Case Else
-				strSQL = "SELECT DISTINCT People.ID,FirstName,LastName,UserName,StudentID,ClassOf,HomeRoom,Role,DeviceCount,People.Active,Warning,Loaned,PWord,AUP,Site,People.Notes,PWordLastSet,PhoneNumber,RoomNumber,Description,PWordNeverExpires,LastExternalCheckIn,LastInternalCheckIn,Birthday,InternetAccess" & vbCRLF
+				strSQL = "SELECT DISTINCT People.ID,FirstName,LastName,UserName,StudentID,ClassOf,HomeRoom,Role,DeviceCount,People.Active,Warning,Loaned,PWord,AUP,Site,People.Notes,PWordLastSet,PhoneNumber,RoomNumber,Description,PWordNeverExpires,LastExternalCheckIn,LastInternalCheckIn,Birthday,InternetAccess,NoCase" & vbCRLF
 				strSQL = strSQL & "FROM People INNER JOIN Loaned ON People.ID = Loaned.AssignedTo" & vbCRLF
 				strSQL = strSQL & strSQLWhere & " AND (Loaned.Returned=False) AND Loaned.Item='" & Replace(strLoanedOut,"'","''") & "'"
 		End Select
 	Else
-		strSQL = "SELECT ID,FirstName,LastName,UserName,StudentID,ClassOf,HomeRoom,Role,DeviceCount,Active,Warning,Loaned,PWord,AUP,Site,Notes,PWordLastSet,PhoneNumber,RoomNumber,Description,PWordNeverExpires,LastExternalCheckIn,LastInternalCheckIn,Birthday,InternetAccess FROM People " & strSQLWhere
+		strSQL = "SELECT ID,FirstName,LastName,UserName,StudentID,ClassOf,HomeRoom,Role,DeviceCount,Active,Warning,Loaned,PWord,AUP,Site,Notes,PWordLastSet,PhoneNumber,RoomNumber,Description,PWordNeverExpires,LastExternalCheckIn,LastInternalCheckIn,Birthday,InternetAccess,NoCase FROM People " & strSQLWhere
 	End If
 
 	strSQL = strSQL & " ORDER BY LastName, FirstName"
@@ -244,45 +244,45 @@ End If %>
 			Case "Student"
 				If IsMobile Then
 					If Application("ShowPasswords") Then
-						strDisplayColumns = "0,1,3,4,5,6,7,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26"  
+						strDisplayColumns = "0,1,3,4,5,6,7,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27"  
 					Else
-						strDisplayColumns = "0,1,3,4,5,6,7,8,9,10,11,12,13,14,15,16,18,19,20,21,22,23,24"  
+						strDisplayColumns = "0,1,3,4,5,6,7,8,9,10,11,12,13,14,15,16,18,19,20,21,22,23,24,25"  
 					End If
 				Else
 					If Application("ShowPasswords") Then
-						strDisplayColumns = "0,1,3,4,6,7,9,10,11,13,14,16,17,19,21,22,23,24,25,26"  
+						strDisplayColumns = "0,1,3,4,6,7,9,10,11,13,14,16,17,19,21,22,23,24,25,26,27"  
 					Else
-						strDisplayColumns = "0,1,3,4,6,7,8,9,10,11,12,14,17,19,20,21,22,23,24"  
+						strDisplayColumns = "0,1,3,4,6,7,8,9,10,11,12,14,17,19,20,21,22,23,24,25"  
 					End If
 				End If
 
 			Case "Adult"
 				If IsMobile Then
 					If Application("ShowPasswords") Then
-						strDisplayColumns = "0,1,3,4,5,6,7,8,9,10,12,13,15,16,17,18,19,20,21,22,23,24,25,26"  
+						strDisplayColumns = "0,1,3,4,5,6,7,8,9,10,12,13,15,16,17,18,19,20,21,22,23,24,25,26,27"  
 					Else
-						strDisplayColumns = "0,1,3,4,5,6,7,8,10,11,13,14,15,16,17,18,19,20,21,22,23,24"  
+						strDisplayColumns = "0,1,3,4,5,6,7,8,10,11,13,14,15,16,17,18,19,20,21,22,23,24,25"  
 					End If
 				Else
 					If Application("ShowPasswords") Then
-						strDisplayColumns = "0,1,3,4,6,7,8,9,10,12,15,16,17,18,19,21,22,23,24,25,26"  
+						strDisplayColumns = "0,1,3,4,6,7,8,9,10,12,15,16,17,18,19,21,22,23,24,25,26,27"  
 					Else
-						strDisplayColumns = "0,1,3,4,6,7,8,10,13,14,15,16,17,19,20,21,22,23,24"  
+						strDisplayColumns = "0,1,3,4,6,7,8,10,13,14,15,16,17,19,20,21,22,23,24,25"  
 					End If
 				End If		
 		
 			Case Else
 				If IsMobile Then
 					If Application("ShowPasswords") Then
-						strDisplayColumns = "0,1,3,4,5,6,7,9,10,11,12,13,14,15,16,17,18,19,21,22,23,24,25,26"  
+						strDisplayColumns = "0,1,3,4,5,6,7,9,10,11,12,13,14,15,16,17,18,19,21,22,23,24,25,26,27"  
 					Else
-						strDisplayColumns = "0,1,3,4,5,6,7,8,9,10,11,12,13,14,15,16,18,19,20,21,22,23,24"  
+						strDisplayColumns = "0,1,3,4,5,6,7,8,9,10,11,12,13,14,15,16,18,19,20,21,22,23,24,25"  
 					End If
 				Else
 					If Application("ShowPasswords") Then
-						strDisplayColumns = "0,1,3,4,6,7,9,10,11,13,14,15,18,19,21,22,23,24,25,26"  
+						strDisplayColumns = "0,1,3,4,6,7,9,10,11,13,14,15,18,19,21,22,23,24,25,26,27"  
 					Else
-						strDisplayColumns = "0,1,3,4,6,7,8,9,11,12,13,17,19,20,21,22,23,24"  
+						strDisplayColumns = "0,1,3,4,6,7,8,9,11,12,13,17,19,20,21,22,23,24,25"  
 					End If
 				End If
 
@@ -295,28 +295,28 @@ End If %>
 				intOrderColumn = 2
 				If IsMobile Then
 					If Application("ShowPasswords") Then
-						strDisplayColumns = "0,1,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,23,25,26"  
+						strDisplayColumns = "0,1,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,23,25,26,27"  
 					Else
-						strDisplayColumns = "0,1,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,21,23,24"  
+						strDisplayColumns = "0,1,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,21,23,24,25"  
 					End If
 				Else
 					If Application("ShowPasswords") Then
-						strDisplayColumns = "0,1,3,4,6,7,9,10,11,13,14,16,17,19,20,21,23,25,26"  
+						strDisplayColumns = "0,1,3,4,6,7,9,10,11,13,14,16,17,19,20,21,23,25,26,27"  
 					Else
-						strDisplayColumns = "0,1,3,4,6,7,8,9,10,11,12,14,17,20,22,23"  
+						strDisplayColumns = "0,1,3,4,6,7,8,9,10,11,12,14,17,20,22,23,24"  
 					End If
 				End If
 			Case "CheckIn"
 				If IsMobile Then
 					If Application("ShowPasswords") Then
-						strDisplayColumns = "0,1,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24"  
+						strDisplayColumns = "0,1,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25"  
 						If Request.QueryString("Internal") = "True" Then
 							intOrderColumn = 24
 						Else
 							intOrderColumn = 23
 						End If
 					Else
-						strDisplayColumns = "0,1,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22"  
+						strDisplayColumns = "0,1,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23"  
 						If Request.QueryString("Internal") = "True" Then
 							intOrderColumn = 22
 						Else
@@ -325,14 +325,14 @@ End If %>
 					End If
 				Else
 					If Application("ShowPasswords") Then
-						strDisplayColumns = "0,1,3,4,6,7,9,10,11,13,14,16,17,19,21,22,23,24"  
+						strDisplayColumns = "0,1,3,4,6,7,9,10,11,13,14,16,17,19,21,22,23,24,25"  
 						If Request.QueryString("Internal") = "True" Then
 							intOrderColumn = 24
 						Else
 							intOrderColumn = 23
 						End If
 					Else
-						strDisplayColumns = "0,1,3,4,6,7,8,9,10,11,12,14,17,19,20,21"  
+						strDisplayColumns = "0,1,3,4,6,7,8,9,10,11,12,14,17,19,20,21,22"  
 						If Request.QueryString("Internal") = "True" Then
 							intOrderColumn = 22
 						Else
@@ -710,6 +710,7 @@ End Sub%>
 			<th>Owes</th>
 			<th>External Access</th>
 			<th>Internal Access</th>
+			<th>Missing Case</th>
 			</thead>
 			<tbody>
 	<%	Do Until objUserList.EOF 
@@ -850,6 +851,11 @@ End Sub%>
 			<%	End If %>
 				<td <%=strRowClass%> id="center"><%=objUserList(21)%></td>
 				<td <%=strRowClass%> id="center"><%=objUserList(22)%></td>
+			<% 	If objUserList(25) Then %>
+					<td <%=strRowClass%> id="center">Yes</td>
+			<%	Else %>
+					<td <%=strRowClass%> id="center">&nbsp;</td>
+			<%	End If %>
 			</tr>
 		<%	objUserList.MoveNext
 		Loop %>

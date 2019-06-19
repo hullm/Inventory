@@ -25,7 +25,7 @@ End If %>
 	Select Case Request.Form("Submit")
 		Case "Upgrade Database"
 			UpgradeDatabase
-			UpdateLog "DatabaseUpgraded","","","","0.060",""
+			UpdateLog "DatabaseUpgraded","","","","0.061",""
 	End Select
 	
 	'Get the URL used to submit forms
@@ -163,6 +163,7 @@ End Sub%>
 	bolLastExternalCheckIn = False
 	bolLastInternalCheckIn = False
 	bolInternetAccessFound = False
+	bolNoCaseFound = False
 	
 	Set objPeopleTable = objCatalog.Tables("People")
 	For Each Column in objPeopleTable.Columns
@@ -205,6 +206,8 @@ End Sub%>
 				bolLastInternalCheckIn = True
 			Case "internetaccess"
 				bolInternetAccessFound = True
+			Case "nocase"
+				bolNoCaseFound = True
 		End Select
 	Next
 	
@@ -304,8 +307,12 @@ End Sub%>
 		strSQL = strSQL & "Add InternetAccess TEXT(255) WITH COMPRESSION"
 		Application("Connection").Execute(strSQL)
 	End If
-	
-	
+	If NOT bolNoCaseFound Then
+		strSQL = "ALTER TABLE People" & vbCRLF
+		strSQL = strSQL & "Add NoCase BIT"
+		Application("Connection").Execute(strSQL)
+	End If
+		
 	'***********************************************************************************
 	
 	'Check the Devices table for required fields.

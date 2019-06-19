@@ -16,7 +16,8 @@ CONST COMPUTERNAME = 3
 CONST LASTUSER = 4
 CONST OSVERSION = 5
 CONST INTERNAL_IP_ROOT = "10.15."
-CONST EXTERNAL_IP_ROOT = "163.153.220."
+CONST EXTERNAL_IP_ROOT = "10.15."
+CONST EXTERNAL_IP_ROOT2 = "163.153.220."
 
 Dim strSerialNumber, strIPAddress, strComputerName, strLastUser
 
@@ -42,6 +43,8 @@ Select Case strTask
 
 	Case "Imaged"
 		UpdateLog "ComputerImaged",objDevice(0),"","","",""
+	Case "Pollinated"
+		UpdateLog "ComputerPollinated",objDevice(0),"","","",""
 	Case "AdminCheckIn"
 		AdminCheckIn
 	Case Else
@@ -82,13 +85,17 @@ Sub UpdateInventory
 			End If
 		End If
 
-		If IsNull(objDevice(EXTERNALIP)) Or objDevice(EXTERNALIP) <> strExternalIP Then
-			If Left(strExternalIP,Len(EXTERNAL_IP_ROOT)) <> EXTERNAL_IP_ROOT Then
-				strSQLExternalIP = "ExternalIP='" & strExternalIP & "',"
-				If IsNull(objDevice(EXTERNALIP)) Then
-					UpdateLog "ExternalIPChange",objDevice(LGTAG),strLastUser,"",strExternalIP,""
-				Else
-					UpdateLog "ExternalIPChange",objDevice(LGTAG),strLastUser,objDevice(EXTERNALIP),strExternalIP,""
+		If strExternalIP <> "" Then
+			If IsNull(objDevice(EXTERNALIP)) Or objDevice(EXTERNALIP) <> strExternalIP Then
+				If Left(strExternalIP,Len(EXTERNAL_IP_ROOT)) <> EXTERNAL_IP_ROOT Then
+					If Left(strExternalIP,Len(EXTERNAL_IP_ROOT2)) <> EXTERNAL_IP_ROOT2 Then
+						strSQLExternalIP = "ExternalIP='" & strExternalIP & "',"
+						If IsNull(objDevice(EXTERNALIP)) Then
+							UpdateLog "ExternalIPChange",objDevice(LGTAG),strLastUser,"",strExternalIP,""
+						Else
+							UpdateLog "ExternalIPChange",objDevice(LGTAG),strLastUser,objDevice(EXTERNALIP),strExternalIP,""
+						End If
+					End If
 				End If
 			End If
 		End If
@@ -142,8 +149,10 @@ Sub UpdateInventory
 		If strLastUser <> "" Then
 			If strInternalIP <> "" Then
 				If Left(strInternalIP,Len(INTERNAL_IP_ROOT)) = INTERNAL_IP_ROOT Then
-					strSQL = "UPDATE People SET LastInternalCheckIn=#" & datDate & "# WHERE UserName='" & strLastUser & "'"
-					Application("Connection").Execute(strSQL)
+					If Left(strExternalIP,Len(EXTERNAL_IP_ROOT2)) <> EXTERNAL_IP_ROOT2 Then
+						strSQL = "UPDATE People SET LastInternalCheckIn=#" & datDate & "# WHERE UserName='" & strLastUser & "'"
+						Application("Connection").Execute(strSQL)
+					End If
 				End If
 			End If
 		End If
@@ -221,43 +230,43 @@ Sub SendLostEMail
 	Dim strSMTPPickupFolder, objMessage, objConf, strMessage, strSubject, bolHTMLMEssage
 	Dim bolSendAsAdmin, strURL
 
-	Const cdoSendUsingPickup = 1
+   Const cdoSendUsingPickup = 1
 
-	strSMTPPickupFolder = "C:\Inetpub\mailroot\Pickup"
-	
-	strURL = "http://" & Request.ServerVariables("server_name")
-	strURL = strURL & Left(Request.ServerVariables("path_info"),Len(Request.ServerVariables("path_info")) - 16)
-	strURL = strURL & "device.asp?Tag=" & objDevice(0)
-	
-	'Get the message body
-	strMessage =  "The device with the tag of " & objDevice(0) & " has checked into the inventory system.  "
-	If strLastUser <> "" Then
-		strMessage = strMessage & "The last user was " &  strLastUser & ".  "
-	End If
+   strSMTPPickupFolder = "C:\Inetpub\mailroot\Pickup"
+   
+   strURL = "http://" & Request.ServerVariables("server_name")
+   strURL = strURL & Left(Request.ServerVariables("path_info"),Len(Request.ServerVariables("path_info")) - 16)
+   strURL = strURL & "device.asp?Tag=" & objDevice(0)
+   
+   'Get the message body
+   strMessage =  "The device with the tag of " & objDevice(0) & " has checked into the inventory system.  "
+   If strLastUser <> "" Then
+   	strMessage = strMessage & "The last user was " &  strLastUser & ".  "
+   End If
 
-	strMessage = strMessage & vbCRLF & vbCRLF & strURL
-	
-	strSubject = "Missing Device Checked In - Asset Tag " & objDevice(0)
+   strMessage = strMessage & vbCRLF & vbCRLF & strURL
+   
+   strSubject = "Missing Device Checked In - Asset Tag " & objDevice(0)
 
-	'Create the objects required to send the mail.
-	Set objMessage = CreateObject("CDO.Message")
-	Set objConf = objMessage.Configuration
-	With objConf.Fields
-		.item("http://schemas.microsoft.com/cdo/configuration/sendusing") = cdoSendUsingPickup
-		.item("http://schemas.microsoft.com/cdo/configuration/smtpserverpickupdirectory") = strSMTPPickupFolder
-		.Update
-	End With
-	
-	objMessage.TextBody = strMessage
-	objMessage.From = Application("EMailNotifications")
-	objMessage.To = Application("LostDeviceNotify")
-	objMessage.Subject = strSubject
-	objMessage.Send
-	
-	'Close objects
-	Set objMessage = Nothing
-	Set objConf = Nothing
-	
+   'Create the objects required to send the mail.
+   Set objMessage = CreateObject("CDO.Message")
+   Set objConf = objMessage.Configuration
+   With objConf.Fields
+      .item("http://schemas.microsoft.com/cdo/configuration/sendusing") = cdoSendUsingPickup
+      .item("http://schemas.microsoft.com/cdo/configuration/smtpserverpickupdirectory") = strSMTPPickupFolder
+      .Update
+   End With
+   
+   objMessage.TextBody = strMessage
+   objMessage.From = Application("EMailNotifications")
+   objMessage.To = Application("LostDeviceNotify")
+   objMessage.Subject = strSubject
+   objMessage.Send
+   
+   'Close objects
+   Set objMessage = Nothing
+   Set objConf = Nothing
+   
 End Sub
 
 Sub SendNotificationEMail
@@ -267,43 +276,43 @@ Sub SendNotificationEMail
 	Dim strSMTPPickupFolder, objMessage, objConf, strMessage, strSubject, bolHTMLMEssage
 	Dim bolSendAsAdmin, strURL
 
-	Const cdoSendUsingPickup = 1
+   Const cdoSendUsingPickup = 1
 
-	strSMTPPickupFolder = "C:\Inetpub\mailroot\Pickup"
-	
-	strURL = "http://" & Request.ServerVariables("server_name")
-	strURL = strURL & Left(Request.ServerVariables("path_info"),Len(Request.ServerVariables("path_info")) - 16)
-	strURL = strURL & "device.asp?Tag=" & objDevice(0)
-	
-	'Get the message body
-	strMessage =  "The device with the tag of " & objDevice(0) & " has checked into the inventory system.  "
-	If strLastUser <> "" Then
-		strMessage = strMessage & "The last user was " &  strLastUser & ".  "
-	End If
+   strSMTPPickupFolder = "C:\Inetpub\mailroot\Pickup"
+   
+   strURL = "http://" & Request.ServerVariables("server_name")
+   strURL = strURL & Left(Request.ServerVariables("path_info"),Len(Request.ServerVariables("path_info")) - 16)
+   strURL = strURL & "device.asp?Tag=" & objDevice(0)
+   
+   'Get the message body
+   strMessage =  "The device with the tag of " & objDevice(0) & " has checked into the inventory system.  "
+   If strLastUser <> "" Then
+   	strMessage = strMessage & "The last user was " &  strLastUser & ".  "
+   End If
 
-	strMessage = strMessage & vbCRLF & vbCRLF & strURL
-	
-	strSubject = "Inventory Check In - Asset Tag " & objDevice(0)
+   strMessage = strMessage & vbCRLF & vbCRLF & strURL
+   
+   strSubject = "Inventory Check In - Asset Tag " & objDevice(0)
 
-	'Create the objects required to send the mail.
-	Set objMessage = CreateObject("CDO.Message")
-	Set objConf = objMessage.Configuration
-	With objConf.Fields
-		.item("http://schemas.microsoft.com/cdo/configuration/sendusing") = cdoSendUsingPickup
-		.item("http://schemas.microsoft.com/cdo/configuration/smtpserverpickupdirectory") = strSMTPPickupFolder
-		.Update
-	End With
-	
-	objMessage.TextBody = strMessage
-	objMessage.From = Application("EMailNotifications")
-	objMessage.To = Application("LostDeviceNotify")
-	objMessage.Subject = strSubject
-	objMessage.Send
-	
-	'Close objects
-	Set objMessage = Nothing
-	Set objConf = Nothing
-	
+   'Create the objects required to send the mail.
+   Set objMessage = CreateObject("CDO.Message")
+   Set objConf = objMessage.Configuration
+   With objConf.Fields
+      .item("http://schemas.microsoft.com/cdo/configuration/sendusing") = cdoSendUsingPickup
+      .item("http://schemas.microsoft.com/cdo/configuration/smtpserverpickupdirectory") = strSMTPPickupFolder
+      .Update
+   End With
+   
+   objMessage.TextBody = strMessage
+   objMessage.From = Application("EMailNotifications")
+   objMessage.To = Application("LostDeviceNotify")
+   objMessage.Subject = strSubject
+   objMessage.Send
+   
+   'Close objects
+   Set objMessage = Nothing
+   Set objConf = Nothing
+   
 End Sub
 
 Sub UpdateLog(EntryType,DeviceTag,UserName,OldValue,NewValue,EventNumber)

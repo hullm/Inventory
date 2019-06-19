@@ -39,7 +39,7 @@ End If %>
 	End If
 
 	'Get the user's information
-	strSQL = "SELECT ID,FirstName,LastName,UserName,StudentID,ClassOf,HomeRoom,Role,Active,Warning,PWord,AUP,Notes,PWordLastSet,PhoneNumber,RoomNumber,Description,Site,PWordNeverExpires,LastExternalCheckIn,LastInternalCheckIn,Birthday,InternetAccess" & vbCRLF
+	strSQL = "SELECT ID,FirstName,LastName,UserName,StudentID,ClassOf,HomeRoom,Role,Active,Warning,PWord,AUP,Notes,PWordLastSet,PhoneNumber,RoomNumber,Description,Site,PWordNeverExpires,LastExternalCheckIn,LastInternalCheckIn,Birthday,InternetAccess,NoCase" & vbCRLF
 	strSQL = strSQL & "FROM People" & vbCRLF
 	strSQL = strSQL & "WHERE UserName='" & Replace(strUserName,"'","''") & "' AND NOT Deleted" & vbCRLF
 	Set objUser = Application("Connection").Execute(strSQL)
@@ -62,12 +62,16 @@ End If %>
 			BillUser
 		Case "Paid"
 			UserPaid
+		Case "Cancel"
+			ForgiveDebt
 		Case "PasswordExpire"
 			SetUserPasswordToExpire
 		Case "PasswordNotExpire"
 			SetUserPasswordNotToExpire
 		Case "Change Password"
 			UpdateUserPassword
+		Case "Found", "Purchased"
+			CaseFoundOrPurchased
 		Case "Notify"
 			If IsEmailValid(Request.Form("NotifyEmail")) Then
 				EMailGuardian "OwesMoney"
@@ -632,6 +636,28 @@ End Sub%>
 
 			function setSubmitValue(value) {
 					jQuery('#mouseOnValue').val(value);
+					jQuery('#missingOnValue').val(value);
+
+				<%	Dim intCounter 
+					If Not objOwes.EOF Then
+						intCounter = 0
+						Do Until objOwes.EOF
+							intCounter = intCounter + 1
+							Response.Write "jQuery('#paidOnValue" & intCounter & "').val(value);" & vbCRLF
+							objOwes.MoveNext
+						Loop
+						objOwes.MoveFirst
+					End If %>
+
+				<%	If Not objLoanedOut.EOF Then
+						intCounter = 0
+						Do Until objLoanedOut.EOF
+							intCounter = intCounter + 1
+							Response.Write "jQuery('#borrowOnValue" & intCounter & "').val(value);" & vbCRLF
+							objLoanedOut.MoveNext
+						Loop
+						objLoanedOut.MoveFirst
+					End If %>
 				}
 		</script>
 	</head>
@@ -1508,7 +1534,7 @@ End Sub%>
 
 <%Sub EquipmentCard
 
-	Dim strSQL, objItemLookup, objTotal, objParents %>
+	Dim strSQL, objItemLookup, objTotal, objParents, intCounter %>
 
 	<div class="Card NormalCard">
 
@@ -1552,19 +1578,22 @@ End Sub%>
 
 			<div Class="Center">Borrowed Items</div>
 			<br />
-			<%	Do Until objLoanedOut.EOF %>
+			<%	intCounter = 0
+				Do Until objLoanedOut.EOF 
+					intCounter = intCounter + 1 %>
 					<form method="POST" action="<%=strSubmitTo%>">
 					<input type="hidden" name="LoanID" value="<%=objLoanedOut(0)%>" />
+					<input type="hidden" name="Submit" value="" id="borrowOnValue<%=intCounter%>" />
 					<div>
 						<a href="users.asp?LoanedOut=<%=Replace(objLoanedOut(1)," ","%20")%>"><%=objLoanedOut(1)%></a>&nbsp;&nbsp;&nbsp;
 					<%	strSQL = "SELECT ID FROM Purchasable WHERE Item='" & objLoanedOut(1) & "'"
 
 						Set objItemLookup = Application("Connection").Execute(strSQL) %>
 
-						<div class="Button"><input type="submit" value="Return" name="Submit" /></div>
+						<div class="Button"><input type="image" src="../images/return.png" width="18" height="18" title="Item Returned" onmouseover="setSubmitValue('Return')" onmouseout="setSubmitValue('')"/></div>
 
 					<%	If Not objItemLookup.EOF Then	%>
-							<div class="Button"><input type="submit" value="Bill" name="Submit" /></div>
+							<div class="Button"><input type="image" src="../images/bill.png" width="18" height="18" title="Bill User for Item" onmouseover="setSubmitValue('Bill')" onmouseout="setSubmitValue('')"/></div>
 					<%	End If %>
 					</div>
 					</form>
@@ -1589,14 +1618,19 @@ End Sub%>
 				%>
 
 					<div Class="Center"><a href="" id="emailToggle"><image src="../images/email.png" height="20" width="20" title="Email Parents"></a> Owes $<%=objTotal(0)%></div><br/>
-			<%	Do Until objOwes.EOF %>
+			<%	intCounter = 0
+				Do Until objOwes.EOF 
+					intCounter = intCounter + 1%>
 					<form method="POST" action="<%=strSubmitTo%>">
 						<input type="hidden" name="OwedID" value="<%=objOwes(0)%>" />
+						<input type="hidden" name="Submit" value="" id="paidOnValue<%=intCounter%>" />
 						<%=objOwes(1)%> - $<%=objOwes(2)%>
-						<div class="Button"><input type="submit" value="Paid" name="Submit" /></div>
+						
+						<div class="Button"><input type="image" src="../images/paid.png" width="18" height="18" title="Item Paid For" onmouseover="setSubmitValue('Paid')" onmouseout="setSubmitValue('')"/></div>
 					<%	If objOwes(4) Then %>
-							<div class="Button"><input type="submit" value="Return" name="Submit" /></div>
+							<div class="Button"><input type="image" src="../images/return.png" width="18" height="18" title="Item Returned" onmouseover="setSubmitValue('Return')" onmouseout="setSubmitValue('')"/></div>
 					<%	End If %>
+						<div class="Button"><input type="image" src="../images/disable.png" width="18" height="18" title="Forgive Debt" onmouseover="setSubmitValue('Cancel')" onmouseout="setSubmitValue('')"/></div>
 					</form>
 				<%	objOwes.MoveNext
 				Loop %>
@@ -1632,6 +1666,23 @@ End Sub%>
 				<%	End If %>
 			</div>
 		<%	End If %>
+
+		<%	If objUser(23) Then %>
+				<br />
+				<hr />
+				<div Class="Center">Missing Items</div>
+				<br />
+				<form method="POST" action="<%=strSubmitTo%>">	
+				<div class="CardMerged">
+					Laptop Case
+					<input type="hidden" name="UserID" value="<%=intUserID%>" />
+					<input type="hidden" name="Submit" value="" id="missingOnValue" />
+					<div class="Button"><input type="image" src="../images/paid.png" width="18" height="18" title="Purchased Replacement" onmouseover="setSubmitValue('Purchased')" onmouseout="setSubmitValue('')"/></div>
+					<div class="Button"><input type="image" src="../images/found.png" width="18" height="18" title="Case was Found" onmouseover="setSubmitValue('Found')" onmouseout="setSubmitValue('')"/></div>
+				</div>
+				</form>
+		<% 	End If %>
+
 		</div>
 	</div>
 
@@ -1823,12 +1874,20 @@ End Sub%>
 			LogEntryType = "AUP Turned In"
 		Case "AutoLogOut"
 			LogEntryType = "Logout"
+		Case "CaseFound"
+			LogEntryType = "Case Found"
+		Case "CasePurchased"
+			LogEntryType = "Case Purchased"
 		Case "ComputerNameChange"
 			LogEntryType = "Computer Name Changed"
 		Case "ComputerImaged"
 			LogEntryType = "Computer Imaged"
+		Case "ComputerPollinated"
+			LogEntryType = "Computer Pollinated"
 		Case "DatabaseUpgraded"
 			LogEntryType = "Database Upgraded"
+		Case "DebtForgiven"
+			LogEntryType = "Debt Forgiven"
 		Case "DeviceAssigned"
 			LogEntryType = "Device Assigned"
 		Case "DeviceAdded"
@@ -2928,6 +2987,48 @@ End Sub%>
 		UpdateLog "ItemPaidFor","",strUserName,"",objUserID(1) & " - $" & objUserID(2),""
 
 	End If
+
+End Sub%>
+
+<%Sub ForgiveDebt
+
+	Dim intOwedID, strSQL, objUserID, objUserCheck
+
+	intOwedID = Request.Form("OwedID")
+
+	If Not intOwedID = "" Then
+
+		strSQL = "SELECT OwedBy,Item,Price FROM Owed WHERE ID=" & intOwedID
+		Set objUserID = Application("Connection").Execute(strSQL)
+
+		strSQL = "UPDATE Owed SET Active=False WHERE ID=" & intOwedID
+		Application("Connection").Execute(strSQL)
+
+		strSQL = "SELECT ID FROM Owed WHERE Active=True AND OwedBy=" & objUserID(0)
+		Set objUserCheck = Application("Connection").Execute(strSQL)
+
+		If objUserCheck.EOF Then
+			strSQL = "UPDATE People SET Warning=False WHERE ID=" & objUserID(0)
+			Application("Connection").Execute(strSQL)
+		End If
+
+		UpdateLog "DebtForgiven","",strUserName,"",objUserID(1) & " - $" & objUserID(2),""
+
+	End If
+
+End Sub%>
+
+<%Sub CaseFoundOrPurchased 
+
+	Dim strCaseStatus, intUserID, strSQL
+
+	strCaseStatus = Request.Form("Submit")
+	intUserID = Request.Form("UserID")
+
+	strSQL = "UPDATE People SET NoCase=False Where ID=" & intUserID
+	Application("Connection").Execute(strSQL)
+
+	UpdateLog "Case" & strCaseStatus,"",strUserName,"","",""
 
 End Sub%>
 

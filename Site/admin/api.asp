@@ -9,7 +9,7 @@ Option Explicit
 
 'On Error Resume Next
 
-Dim strLookupType, strUserName, strSQL, objLookUp
+Dim strLookupType, strUserName, strSQL, objLookUp, strSerialNumber
 
 strLookupType = Request.QueryString("Type")
 
@@ -20,6 +20,16 @@ Select Case strLookupType
 		strUserName = Request.QueryString("UserName")
 	
 		strSQL = "SELECT StudentID FROM PEOPLE WHERE UserName='" & strUserName & "'"
+		Set objLookUp = Application("Connection").Execute(strSQL)
+		
+		If Not objLookup.EOF Then
+			Response.Write(objLookUp(0))
+		End If
+
+	Case "ComputerName"
+		strSerialNumber = Request.QueryString("Serial")
+
+		strSQL = "SELECT ComputerName FROM Devices WHERE SerialNumber='" & strSerialNumber & "'"
 		Set objLookUp = Application("Connection").Execute(strSQL)
 		
 		If Not objLookup.EOF Then
