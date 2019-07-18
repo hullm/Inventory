@@ -895,8 +895,10 @@ End Sub%>
 		End If
 	End If
 	
-	If intTag = 0 Then
-		intTag = ""
+	If IsNumeric(intTag) Then
+		If intTag = 0 Then
+			intTag = ""
+		End If
 	End If
 
 	intBOCESTag = Request.Form("BOCESTag")

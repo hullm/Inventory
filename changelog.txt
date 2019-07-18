@@ -695,3 +695,14 @@ Change Log - Inventory Site
 	- Changed the way the cards on the main page are ordered. You can now modify them in the global file.
 	- Added the ability to track what kind of Internet connection students have at home.
 	- Fixed a bug introduced with Chrome 69 that caused image based submit buttons to not work.
+
+0.061 - 6/11/19
+	- Changed the inventory system to not bill a student if they don't turn in their laptop case.
+	- When you hover over a LibreNMS graph it shows you the ID of the port.
+	- When a laptop is returned without a case it's added to a missing section on the user's page.
+	- Added a Missing Case column to the Users page to show who didn't turn in a case.
+	- Modified the Equipment card to use images instead of buttons so we could fit a forgive debt buttton.
+
+0.062
+	- Fixed a bug that casued an error if you typed in a string instead of a number when searching for a tag.
+	- Added support for asset tags with non numeric characters.

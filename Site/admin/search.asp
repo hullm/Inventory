@@ -41,8 +41,10 @@ End If %>
 
 	GetVariablesFromURL
 
-	If intTag = 0 Then
-		intTag = ""
+	If IsNumeric(intTag) Then
+		If intTag = 0 Then
+			intTag = ""
+		End If
 	End If
 
 	'Check and see if anything was submitted to the site
@@ -1006,6 +1008,8 @@ End Sub%>
 				End If
 				If IsNumeric(intTag) Then
 					intTag = Int(intTag)
+				ElseIf IsNumeric(Right(intTag,1)) Then
+					'Do nothing here but still treat it as a tag, not a user
 				Else
 					LookupUser
 					intTag = ""
@@ -1015,8 +1019,10 @@ End Sub%>
 		End If
 	End If
 	
-	If intTag = 0 Then
-		intTag = ""
+	If IsNumeric(intTag) Then
+		If intTag = 0 Then
+			intTag = ""
+		End If
 	End If
 
 	If IsNumeric(Request.Form("BOCESTag")) Then
