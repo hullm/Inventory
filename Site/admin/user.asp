@@ -549,7 +549,7 @@ End Sub%>
 		<%	If IsMobile Then %>
 				logTable.columns([0,1,3,4,6,7]).visible(false);
 		<%	Else %>
-				logTable.columns([4,7]).visible(false);
+				logTable.columns([4]).visible(false);
 		<%	End If %>
 
 			} );

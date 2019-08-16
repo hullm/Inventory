@@ -136,7 +136,10 @@ End If %>
 	End If
 
 	'Get all the tags from the database and process them
-	strSQL = "SELECT DISTINCT Tag FROM Tags ORDER BY Tag"
+	strSQL = "SELECT DISTINCT Tags.Tag" & vbCRLF
+	strSQL = strSQL & "FROM Tags INNER JOIN Devices ON Tags.LGTag = Devices.LGTag" & vbCRLF
+	strSQL = strSQL & "WHERE Devices.Active=True" & vbCRLF
+	strSQL = strSQL & "ORDER BY Tags.Tag;"
 	Set objTagList = Application("Connection").Execute(strSQL)
 
 	If Not objTagList.EOF Then

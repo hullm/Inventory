@@ -11,7 +11,7 @@ Dim objDBConnection, objADCommand, objArguments, strDomain, strStudentShare, str
 Dim intHSBegins, strHomeDrive, strScript, strGroupRoot, objPerms, strFromEMail, datFirstDayOfSchool
 Dim intPasswordLife, strFromEMailAdmin, bolEnableEmail, datStartPasswordNag, datEndPasswordNag
 Dim strEMailOverride, bolSummerMode, strDestinyExport, datTime, strHour, strMinute, objKeepEnabledInAD
-Dim objKeepEnabledInDB, strOUBase, strPaperCut
+Dim objKeepEnabledInDB, strOUBase, strPaperCut, strIReadyOriginal, strIReadyConverted, strIReadyClientID
 
 Set objKeepEnabledInAD = CreateObject("Scripting.Dictionary")
 Set objKeepEnabledInDB = CreateObject("Scripting.Dictionary")
@@ -29,9 +29,12 @@ strDomain = "lkgeorge.org"
 intHSBegins = 7
 strFromEMail = "fullenn@lkgeorge.org"
 strFromEMailAdmin = "inventory@lkgeorge.org"
-datFirstDayOfSchool = "9/07/18"
+datFirstDayOfSchool = "9/05/19"
 strURL = "https://helpdesk.lkgeorge.org/inventory/"
 strDestinyExport = "\\10.15.79.28\c$\Follett\FSC-Patron\StudentData.csv"
+strIReadyClientID = "ny-lakeg97869"
+strIReadyOriginal = "C:\Shared Data\Inventory\Scripts\CSV\IReady\"
+strIReadyConverted = "\\Lgdb01\c$\IReady\"
 datStartPasswordNag = "6/10/18"
 datEndPasswordNag = "6/22/18" 
 intPasswordLife = 90 'Days
@@ -80,6 +83,7 @@ If strHour = 5 And strMinute = 30 Then
 	UpdatePasswordExpirationDate False
 	ValidateADAccounts strStudentOU
 	FixDestinyExport
+	FixIReadyExport
 	UpdateStudentCountHistory
 	VerifyADandDBMatch
 	UpdateParentData
@@ -112,6 +116,7 @@ Sub RunAll
 	'UpdatePasswordExpirationDate False
 	'ValidateADAccounts strStudentOU
 	'FixDestinyExport
+	FixIReadyExport
 	'UpdateStudentCountHistory
 	'VerifyADandDBMatch
 	'UpdateParentData
@@ -1642,6 +1647,27 @@ Function ExistsInDatabase(intStudentID,intClassOf)
 
 End Function
 
+Function StudentInDatabase(intStudentID)
+
+	'This will check and see if a student exists in the database
+
+	Dim strSQL, objStudent
+
+	'Check and see if they are in the students table
+	strSQL = "SELECT ID,ClassOf" & vbCRLF
+	strSQL = strSQL & "FROM People" & vbCRLF
+	strSQL = strSQL & "WHERE ClassOf>2000 AND StudentID=" & intStudentID
+	Set objStudent = objDBConnection.Execute(strSQL)
+	
+	'If they aren't in the people table then they aren't in the database.
+	If objStudent.EOF Then
+		StudentInDatabase = False
+	Else		
+		StudentInDatabase = True
+	End If
+
+End Function
+
 Sub ValidateADAccounts(strOU)
 
 	Dim objOU, objUser, UserData, objUserActive, strStatus, strSQL, strUser, bolKeepEnabled, arrUserData
@@ -2098,6 +2124,406 @@ Sub FixDestinyExport
 
 End Sub
 
+Sub FixIReadyExport
+
+	Dim objFSO, strCurrentFolder, strIReadyData, txtSourceCSV, txtDestCSV, strImportedData, strOutPut
+	Dim arrData, intStudentID, intCounter, strItem, objSourceFolder, colFiles, objFile
+	Dim strFirstName, strLastName, strGrade
+	
+	'Create the source folder and collection of files
+	Set objFSO = CreateObject("Scripting.FileSystemObject")
+	Set objSourceFolder = objFSO.GetFolder(strIReadyOriginal)
+	Set colFiles = objSourceFolder.Files
+
+	'Loop through the source folder looking for CSVs
+	For each objFile in colFiles
+
+		'Verify the file is a CSV
+		If LCase(Right(objFile.Name,3)) = "csv" Then
+
+			'Open the source and destination files
+			Set txtSourceCSV = objFSO.OpenTextFile(objFile.Path)
+			Set txtDestCSV = objFSO.CreateTextFile(strIReadyConverted & objFile.Name)
+
+			Select Case objFile.Name
+				
+				Case "Student.csv"
+
+					'Set the column header to the required header
+					strOutPut = """ClientID"",""SchoolID"",""StudentID_OwnerID"",""StudentNumber"",""FirstName"",""LastName"",""Grade"",""UserName"",""Password"",""DOB"",""Ethnicity"",""Hispanic"",""Gender"",""EconomicallyDisadvantaged"",""EnglishLearner"",""SpecialEducation"",""Migrant"",""MathDevelopmentalLevel"",""EnglishDevelopmentalLevel"",""PartnerID"",""Action"",""RTI Level"",""Gifted/Talented"",""Reserved1"",""Reserved2"",""Reserved3"",""Reserved4"",""Reserved5"",""Reserved6"",""Reserved7"",""Reserved8"""
+					txtDestCSV.Writeline strOutput
+
+					'Grab the existing header so we can skip over it and get to data
+					strImportedData = txtSourceCSV.ReadLine
+
+					'Loop through each line 
+					While txtSourceCSV.AtEndOfLine = False
+
+						'Grab the active line
+						strImportedData = txtSourceCSV.ReadLine
+					
+						'Split the line into an array using the comma
+						arrData = Split(strImportedData,",")
+					
+						'Grab the student ID from the data
+						intStudentID = Replace(arrData(1),"""","")
+					
+						'Initalize variables
+						strOutput = ""
+						intCounter = 0
+
+						'Skip students who are't in the inventory yet
+						If StudentInDatabase(arrData(1)) Then
+
+							If arrData(5) <> "GD" Then
+
+								'Loop through each column 
+								For Each strItem in arrData
+							
+									Select Case intCounter
+										Case 0
+											strOutPut = """" & strIReadyClientID & ""","
+											If strItem = "Lake George Elementary" Then
+												strOutPut = strOutput & """002"","
+											Else
+												strOutPut = strOutput & """003"","
+											End If
+										Case 5
+											If strItem = "KF" Then
+												strOutput = strOutput & "0," 'Fix kidergarten
+											Else
+												strOutput = strOutput & strItem & ","
+											End If
+											strOutPut = strOutput & GetIReadyData(intStudentID)
+											strOutPut = strOutput & ","""","""","""","""","""","""",,,"""","""","""","""","""","""","""","""","""","""","""","""","
+										Case Else
+											strOutput = strOutput & """" & strItem & ""","
+									End Select
+								
+									'Increase the counter by 1
+									intCounter = intCounter + 1
+								
+								Next
+							
+								'Remove the end comma
+								strOutput = Left(strOutPut,Len(strOutPut) - 1)
+							
+								'Write the output to a file
+								txtDestCSV.Writeline strOutput
+					
+							End If
+
+						End If
+
+					Wend
+
+				Case "School.csv"
+					
+					'Set the column header to the required header
+					strOutPut = """ClientID"",""SchoolID"",""SchoolName"",""DistrictName"",""State"",""NCESID"",""PartnerID"",""Action"",""Reserved1"",""Reserved2"",""Reserved3"",""Reserved4"",""Reserved5"",""Reserved6"",""Reserved7"",""Reserved8"",""Reserved9"",""Reserved10"""
+
+					txtDestCSV.Writeline strOutput
+
+					'Grab the existing header so we can skip over it and get to data
+					strImportedData = txtSourceCSV.ReadLine
+					'strImportedData = txtSourceCSV.ReadLine 'For some reason we are getting two ES's in the export, this is dropping the first one.
+
+					'Loop through each line 
+					While txtSourceCSV.AtEndOfLine = False
+
+						'Grab the active line
+						strImportedData = txtSourceCSV.ReadLine
+					
+						'Split the line into an array using the comma
+						arrData = Split(strImportedData,",")
+
+						'Initalize variables
+						strOutput = ""
+						intCounter = 0
+
+						'Loop through each column 
+						For Each strItem in arrData
+
+							Select Case intCounter
+								Case 0
+									strOutPut = """" & strIReadyClientID & ""","
+								Case 1
+									If strItem = "Lake George Elementary" Then
+										strOutput = strOutput & """002"",""Lake George Elementary"",""Lake George CSD"",""NY"",""361647001457"","""","""","""","""","""","""","""","""","""","""","""","""","
+									Else
+										strOutput = strOutput & """003"",""Lake George Jr/Sr HS"",""Lake George CSD"",""NY"",""361647001458"","""","""","""","""","""","""","""","""","""","""","""","""","
+									End If
+							End Select
+
+							'Increase the counter by 1
+							intCounter = intCounter + 1
+
+						Next
+
+						'Remove the end comma
+						strOutput = Left(strOutPut,Len(strOutPut) - 1)
+					
+						'Write the output to a file
+						txtDestCSV.Writeline strOutput
+
+					Wend
+
+				Case "Section.csv"
+					
+					'Set the column header to the required header
+					strOutPut = """ClientID"",""SchoolID"",""SectionID"",""Name"",""Grade"",""Term"",""Code"",""Location"",""PartnerId"",""Action"",""Course"",""Subject"",""Reserved1"",""Reserved2"",""Reserved3"",""Reserved4"",""Reserved5"",""Reserved6"",""Reserved7"",""Reserved8"""
+
+					txtDestCSV.Writeline strOutput
+
+					'Grab the existing header so we can skip over it and get to data
+					strImportedData = txtSourceCSV.ReadLine
+
+					'Loop through each line 
+					While txtSourceCSV.AtEndOfLine = False
+
+						'Grab the active line
+						strImportedData = txtSourceCSV.ReadLine
+					
+						'Split the line into an array using the comma
+						arrData = Split(strImportedData,",")
+
+						'Initalize variables
+						strOutput = ""
+						intCounter = 0
+
+						'Loop through each column 
+						For Each strItem in arrData
+
+							Select Case intCounter
+								Case 0
+									strOutPut = """" & strIReadyClientID & ""","
+									If strItem = "Lake George Elementary" Then
+										strOutPut = strOutput & """002"","
+									Else
+										strOutPut = strOutput & """003"","
+									End If
+								Case 1, 3
+									strOutput = strOutput & """" & strItem & "-"
+								Case 2
+									strOutput = strOutput & strItem & ""","
+								Case 4
+									If InStr(LCase(strItem),"english") Then
+										strOutput = strOutput &  "English-"
+									ElseIf InStr(LCase(strItem),"math") Then
+										strOutput = strOutput &  "Math-"
+									Else
+										strOutput = strOutput &  "-"
+									End If
+									If IsNumeric(Mid(strItem,7,1)) Then
+										strGrade = Mid(strItem,7,1)
+									ElseIf IsNumeric(Right(strItem,1)) Then
+										strGrade = Right(strItem,1)
+									Else
+										strGrade = Mid(strItem,Len(strItem)-1,1)
+									End If
+									strOutput = strOutput & arrData(1) & "-" & arrData(2) & """," & strGrade & ",""Full Year"","""","""","""","""","
+									If InStr(LCase(strItem),"english") Then
+										strOutput = strOutput &  """" & strItem & """,""" & "English"","""","""","""","""","""","""","""","""","
+									ElseIf InStr(LCase(strItem),"math") Then
+										strOutput = strOutput &  """" & strItem & """,""" & "Math"","""","""","""","""","""","""","""","""","
+									End If
+							End Select
+
+							'Increase the counter by 1
+							intCounter = intCounter + 1
+
+						Next
+
+						'Remove the end comma
+						strOutput = Left(strOutPut,Len(strOutPut) - 1)
+					
+						'Write the output to a file
+						txtDestCSV.Writeline strOutput
+
+					Wend
+
+				Case "Staff.csv"
+					
+					'Set the column header to the required header
+					strOutPut = """ClientID"",""SchoolID"",""StaffMemberID_OwnerID"",""FirstName"",""LastName"",""Role"",""Email"",""UserName"",""Password"",""PartnerID"",""Action"",""Reserved1"",""Reserved2"",""Reserved3"",""Reserved4"",""Reserved5"",""Reserved6"",""Reserved7"",""Reserved8"",""Reserved9"",""Reserved10"""
+
+					txtDestCSV.Writeline strOutput
+
+					'Grab the existing header so we can skip over it and get to data
+					strImportedData = txtSourceCSV.ReadLine
+
+					'Loop through each line 
+					While txtSourceCSV.AtEndOfLine = False
+
+						'Grab the active line
+						strImportedData = txtSourceCSV.ReadLine
+						strImportedData = Replace(strImportedData,", Lake George Jr/Sr HS","")
+						strImportedData = Replace(strImportedData,", Lake George AHSEP","")
+						strImportedData = Replace(strImportedData,", Lake George Elementary","")
+					
+						'Split the line into an array using the comma
+						arrData = Split(strImportedData,",")
+
+						'Only run if the staff member has a user ID in SchoolTool
+						If arrData(1) <> "" Then
+
+							'Initalize variables
+							strOutput = ""
+							intCounter = 0
+
+							'Loop through each column 
+							For Each strItem in arrData
+
+								Select Case intCounter
+									Case 0
+										strOutPut = """" & strIReadyClientID & ""","
+										If InStr(strItem,"Elementary") Then
+											strOutPut = strOutput & """002"","
+										Else
+											strOutPut = strOutput & """003"","
+										End If
+									Case 2
+										strFirstName = strItem
+										strOutput = strOutput & """" & strItem & ""","
+									Case 3
+										strLastName = strItem
+										strOutput = strOutput & """" & strItem & ""","
+									Case 5
+										strOutput = strOutput & """" & strItem & ""","
+										strOutput = strOutput & """" & strLastName & Left(strFirstName,1) & ""","
+										strOutput = strOutput & """LGes1234"","""","""","""","""","""","""","""","""","""","""","""","""","
+									Case Else
+										strOutput = strOutput & """" & strItem & ""","
+								End Select
+
+								'Increase the counter by 1
+								intCounter = intCounter + 1
+
+							Next
+
+							'Remove the end comma
+							strOutput = Left(strOutPut,Len(strOutPut) - 1)
+						
+							'Write the output to a file
+							txtDestCSV.Writeline strOutput
+					
+						End If
+
+					Wend
+
+				Case "StudentSection.csv"
+					
+					'Set the column header to the required header
+					strOutPut = """ClientId"",""StudentId"",""SectionId"",""Action"",""Reserved1"",""Reserved2"",""Reserved3"",""Reserved4"",""Reserved5"",""Reserved6"",""Reserved7"",""Reserved8"",""Reserved9"",""Reserved10"""
+
+					txtDestCSV.Writeline strOutput
+
+					'Grab the existing header so we can skip over it and get to data
+					strImportedData = txtSourceCSV.ReadLine
+
+					'Loop through each line 
+					While txtSourceCSV.AtEndOfLine = False
+
+						'Grab the active line
+						strImportedData = txtSourceCSV.ReadLine
+					
+						'Split the line into an array using the comma
+						arrData = Split(strImportedData,",")
+
+						'Initalize variables
+						strOutput = ""
+						intCounter = 0
+
+						'Loop through each column 
+						For Each strItem in arrData
+
+							Select Case intCounter
+								Case 0
+									strOutPut = """" & strIReadyClientID & ""","
+									strOutput = strOutput & """" & strItem & ""","
+								Case 1
+									strOutput = strOutput & """" & strItem & "-"
+								Case 2
+									strOutput = strOutput & strItem & ""","""","""","""","""","""","""","""","""","""","""","""","
+							End Select
+
+							'Increase the counter by 1
+							intCounter = intCounter + 1
+
+						Next
+
+						'Remove the end comma
+						strOutput = Left(strOutPut,Len(strOutPut) - 1)
+					
+						'Write the output to a file
+						txtDestCSV.Writeline strOutput
+
+					Wend
+
+				Case "StaffSection.csv"
+					
+					'Set the column header to the required header
+					strOutPut = """ClientId"",""StaffId"",""SectionId"",""Action"",""Reserved1"",""Reserved2"",""Reserved3"",""Reserved4"",""Reserved5"",""Reserved6"",""Reserved7"",""Reserved8"",""Reserved9"",""Reserved10"""
+
+					txtDestCSV.Writeline strOutput
+
+					'Grab the existing header so we can skip over it and get to data
+					strImportedData = txtSourceCSV.ReadLine
+
+					'Loop through each line 
+					While txtSourceCSV.AtEndOfLine = False
+
+						'Grab the active line
+						strImportedData = Replace(txtSourceCSV.ReadLine,"Lake George Elementary, Lake George Jr/Sr HS","Lake George Elementary")
+					
+						'Split the line into an array using the comma
+						arrData = Split(strImportedData,",")
+
+						'Initalize variables
+						strOutput = ""
+						intCounter = 0
+
+						'Loop through each column 
+						For Each strItem in arrData
+
+							Select Case intCounter
+								Case 0
+									strOutPut = """" & strIReadyClientID & ""","
+									strOutput = strOutput & """" & strItem & ""","
+								Case 1
+									strOutput = strOutput & """" & strItem & "-"
+								Case 2
+									strOutput = strOutput & strItem & ""","""","""","""","""","""","""","""","""","""","""","""","
+							End Select
+
+							'Increase the counter by 1
+							intCounter = intCounter + 1
+
+						Next
+
+						'Remove the end comma
+						strOutput = Left(strOutPut,Len(strOutPut) - 1)
+					
+						'Write the output to a file
+						txtDestCSV.Writeline strOutput
+
+					Wend
+
+			End Select
+
+			'Close the text files
+			Set txtSourceCSV = Nothing
+			Set txtDestCSV = Nothing
+
+		End If
+
+	Next
+
+	'Close objects
+	Set objFSO = Nothing
+
+End Sub
+
 Function GetUserName(intStudentID)
 
 	'This will connect to the database and return the username for the student
@@ -2118,6 +2544,28 @@ Function GetUserName(intStudentID)
 	End If
 
 End Function
+
+Function GetIReadyData(intStudentID)
+
+	'This will connect to the database and return the password for the student
+
+	Dim strSQL, objStudent
+
+	'Check and see if they are in the people table
+	strSQL = "SELECT UserName, PWord, Birthday" & vbCRLF
+	strSQL = strSQL & "FROM People" & vbCRLF
+	strSQL = strSQL & "WHERE Role='Student' AND StudentID=" & intStudentID
+	Set objStudent = objDBConnection.Execute(strSQL)  
+	
+	'Return the status
+	If objStudent.EOF Then
+		GetIReadyData = """"","""","""","
+	Else
+		GetIReadyData = """" & objStudent(0) & """,""" & objStudent(1) & """,""" & objStudent(2) & ""","
+	End If
+
+End Function
+
 
 Sub SendEmail(strFirstName, strEMail, strType, arrUserData)
 
@@ -2342,6 +2790,14 @@ Sub SendEMailToTeachers(strMessageType,arrUserData)
 		SendEmail "Dane", "davisd@lkgeorge.org", strMessageType, arrUserData
 	Else
 		SendEmail "Bridget", "crossmanb@lkgeorge.org", strMessageType, arrUserData
+		SendEmail "Alison", "darbeea@lkgeorge.org", strMessageType, arrUserData
+		SendEmail "Blake", "whiteb@lkgeorge.org", strMessageType, arrUserData
+		SendEmail "Heather", "usherh@lkgeorge.org", strMessageType, arrUserData
+		SendEmail "Geoff", "bizang@lkgeorge.org", strMessageType, arrUserData
+		SendEmail "Ken", "schenkk@lkgeorge.org", strMessageType, arrUserData
+		SendEmail "Susan", "masons@lkgeorge.org", strMessageType, arrUserData
+		SendEmail "Nathalie", "martineaun@lkgeorge.org", strMessageType, arrUserData
+		SendEmail "Dante", "silettid@lkgeorge.org", strMessageType, arrUserData
 		'SendEmail "Matt", "hullm@lkgeorge.org", strMessageType, arrUserData
 	End If
 

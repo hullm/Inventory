@@ -706,3 +706,5 @@ Change Log - Inventory Site
 0.062
 	- Fixed a bug that casued an error if you typed in a string instead of a number when searching for a tag.
 	- Added support for asset tags with non numeric characters.
+	- Changed the log on the user and device page to show both old and new values by default.
+	- Modified the tag list on the search page to only include active devices.
