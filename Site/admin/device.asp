@@ -720,6 +720,7 @@ End Sub%>
 			OldAssignmentsTable
 			OldEventsTable
 			ShowLog
+			ShowChart
 
 			%>
 		</div>
@@ -1826,6 +1827,47 @@ End Sub%>
 		</table>
 	</div>
 <%	End If
+
+End Sub%>
+
+<%Sub ShowChart
+
+	If Application("LibreNMSServer") <> "" Then
+
+		Dim strSQL, objChartList, strRoom, strSite, strDeviceType
+
+		strRoom = objDevice(3)
+		strSite = objDevice(1)
+		strDeviceType = objDevice(13)
+
+		If strDeviceType = "Access Point" Then
+	
+			strSQL = "SELECT PortID FROM LibreNMS WHERE Room='" & Replace(strRoom,"'","''") & "'"
+			If strSite <> "" Then
+				strSQL = strSQL & " AND Site='" & Replace(strSite,"'","''") & "'"
+			End If
+			
+			Set objChartList = Application("Connection").Execute(strSQL)
+			If Not objChartList.EOF Then
+				Do Until objChartList.EOF
+					If Not IsMobile Then %>
+						<div class="Col3Card NormalCard">
+							<div class="Col3CardTitle">24 Hour AP Usage</div>
+							<img src="<%=Application("LibreNMSServer")%>/graph.php?id=<%=objChartList(0)%>&type=port_bits&width=650&height=150&from=end-24h" title="<%=objChartList(0)%>">
+						</div>
+				<%	Else %>
+					<div class="Card NormalCard">
+						<div class="CardTitle">24 Hour AP Usage</div>
+						<img src="<%=Application("LibreNMSServer")%>/graph.php?id=<%=objChartList(0)%>&type=port_bits&width=300&height=150&from=end-24h" title="<%=objChartList(0)%>">
+					</div>
+				<%	End If 
+					objChartList.MoveNext
+				Loop
+			End If
+
+		End If
+	
+	End If
 
 End Sub%>
 
