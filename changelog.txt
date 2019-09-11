@@ -708,4 +708,3 @@ Change Log - Inventory Site
 	- Added support for asset tags with non numeric characters.
 	- Changed the log on the user and device page to show both old and new values by default.
 	- Modified the tag list on the search page to only include active devices.
-	- Added the LibreNMS graph to a device's pages if the device type is Access Point.
