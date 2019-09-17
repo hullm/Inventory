@@ -179,6 +179,8 @@ End If %>
 			strAvailableTags = strAvailableTags & "Screenshot - Grabs Screnshots" & " &#013 "
 			strAvailableTags = strAvailableTags & "Notify - Emails Techs" & " &#013 "
 			strAvailableTags = strAvailableTags & "See Me - Notifies User" & " &#013 "
+			strAvailableTags = strAvailableTags & "Backup - Backs up user's data" & " &#013 "
+			strAvailableTags = strAvailableTags & "NoBackup - Prevents backup" & " &#013 "
 
 		Case "Schuylerville Inventory"
 

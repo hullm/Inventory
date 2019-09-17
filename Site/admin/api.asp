@@ -9,7 +9,7 @@ Option Explicit
 
 'On Error Resume Next
 
-Dim strLookupType, strUserName, strSQL, objLookUp, strSerialNumber
+Dim strLookupType, strUserName, strSQL, objLookUp, strSerialNumber, strLGTag
 
 strLookupType = Request.QueryString("Type")
 
@@ -22,7 +22,7 @@ Select Case strLookupType
 		strSQL = "SELECT StudentID FROM PEOPLE WHERE UserName='" & strUserName & "'"
 		Set objLookUp = Application("Connection").Execute(strSQL)
 		
-		If Not objLookup.EOF Then
+		If Not objLookUp.EOF Then
 			Response.Write(objLookUp(0))
 		End If
 
@@ -32,8 +32,36 @@ Select Case strLookupType
 		strSQL = "SELECT ComputerName FROM Devices WHERE SerialNumber='" & strSerialNumber & "'"
 		Set objLookUp = Application("Connection").Execute(strSQL)
 		
-		If Not objLookup.EOF Then
+		If Not objLookUp.EOF Then
 			Response.Write(objLookUp(0))
+		End If
+
+	Case "Backup"
+		strSerialNumber = Request.QueryString("Serial")
+
+		strSQL = "SELECT LGTag FROM Devices WHERE SerialNumber='" & strSerialNumber & "'"
+		Set objLookUp = Application("Connection").Execute(strSQL)
+		
+		If Not objLookUp.EOF Then
+
+			strLGTag = objLookUp(0)
+
+			strSQL = "Select ID FROM Tags WHERE Tag='Backup' AND LGTag='" & strLGTag & "'"
+			Set objLookUp = Application("Connection").Execute(strSQL)
+
+			If Not objLookUp.EOF Then
+				Response.Write("Backup")
+			Else
+
+				strSQL = "Select ID FROM Tags WHERE Tag='NoBackup' AND LGTag='" & strLGTag & "'"
+				Set objLookUp = Application("Connection").Execute(strSQL)
+
+				If Not objLookUp.EOF Then
+					Response.Write("NoBackup")
+				End If
+
+			End If
+
 		End If
 
 End Select
