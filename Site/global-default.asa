@@ -12,7 +12,7 @@ Sub Application_OnStart
    Application("ForceSSL") = True
    Application("PhotoLocation") = "C:\Shared Data\Photo Import\Site"
    Application("Version") = "0.061"
-   Application("Copyright") = "Copyright &copy; 2014-2019 Matt Hull<br />All Rights Reserved"
+   Application("Copyright") = "Copyright &copy; 2014-2020 Matt Hull<br />All Rights Reserved"
    Application("HelpDeskURL") = "https://helpdesk.yourdomain.com"
    Application("ShowPasswords") = True
    Application("MultiColumn") = False

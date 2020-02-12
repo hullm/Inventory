@@ -709,4 +709,5 @@ Change Log - Inventory Site
 	- Changed the log on the user and device page to show both old and new values by default.
 	- Modified the tag list on the search page to only include active devices.
 	- Added the LibreNMS graph to a device's pages if the device type is Access Point.
-	- Changed the visable columns when viewing inside/outside access.  A previous update messed them up.
+	- Changed the visible columns when viewing inside/outside access.  A previous update messed them up.
+	- Updated LibreNMS URL to work after update.

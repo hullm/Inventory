@@ -313,7 +313,7 @@ End Sub%>
 	<div class="Card NormalCard">
 		<div class="CardTitle">24 Hour Internet Usage</div>
 		<a href="<%=Application("LibreNMSServer")%>/graphs/id=<%=Application("BandwidthPort")%>/type=port_bits" target="_blank">
-			<img src="<%=Application("LibreNMSServer")%>/graph.php?id=<%=Application("BandwidthPort")%>&type=port_bits&width=300&height=150&from=end-24h">
+			<img src="<%=Application("LibreNMSServer")%>/graph.php?id=<%=Application("BandwidthPort")%>&type=port_bits&width=300&height=150&from=-24h">
 		</a>
 	</div>
 
@@ -324,7 +324,7 @@ End Sub%>
 	<div class="Col3Card NormalCard">
 		<div class="Col3CardTitle">24 Hour Internet Usage</div>
 		<a href="<%=Application("LibreNMSServer")%>/graphs/id=<%=Application("BandwidthPort")%>/type=port_bits" target="_blank">
-			<img src="<%=Application("LibreNMSServer")%>/graph.php?id=<%=Application("BandwidthPort")%>&type=port_bits&width=650&height=150&from=end-24h">
+			<img src="<%=Application("LibreNMSServer")%>/graph.php?id=<%=Application("BandwidthPort")%>&type=port_bits&width=650&height=150&from=-24h">
 		</a>
 	</div>
 	<br />
