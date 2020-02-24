@@ -833,12 +833,12 @@ End Sub%>
 				If Not IsMobile Then %>
 					<div class="Col3Card NormalCard">
 						<div class="Col3CardTitle">24 Hour AP Usage</div>
-						<img src="<%=Application("LibreNMSServer")%>/graph.php?id=<%=objChartList(0)%>&type=port_bits&width=650&height=150&from=end-24h" title="<%=objChartList(0)%>">
+						<img src="<%=Application("LibreNMSServer")%>/graph.php?id=<%=objChartList(0)%>&type=port_bits&width=650&height=150&from=-24h" title="<%=objChartList(0)%>">
 					</div>
 			<%	Else %>
 				<div class="Card NormalCard">
 					<div class="CardTitle">24 Hour AP Usage</div>
-					<img src="<%=Application("LibreNMSServer")%>/graph.php?id=<%=objChartList(0)%>&type=port_bits&width=300&height=150&from=end-24h" title="<%=objChartList(0)%>">
+					<img src="<%=Application("LibreNMSServer")%>/graph.php?id=<%=objChartList(0)%>&type=port_bits&width=300&height=150&from=24h" title="<%=objChartList(0)%>">
 				</div>
 			<%	End If 
 				objChartList.MoveNext
