@@ -713,3 +713,4 @@ Change Log - Inventory Site
 	- Updated LibreNMS URL to work after update.
 	- Added Chromebooks and Laptops by year to the stats page, they can be turned on and off in the code.
 	- Added support for PreSchool
+	- Fixed a bug in the student edit mode when not showing the password.  It wouldn't exit exit mode.
