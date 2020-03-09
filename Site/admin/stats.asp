@@ -107,6 +107,8 @@ End Sub%>
 			DeviceYearJavaScript
 			MacBookYearJavaScript
 			iPadsYearJavaScript
+			'ChromebookYearJavaScript
+			'LaptopYearJavaScript
 			%>
 			
 			</script>
@@ -137,6 +139,8 @@ End Sub%>
 			DeviceYearCard
 			MacBookYearCard
 			iPadYearCard
+			'ChromebookYearCard
+			'LaptopYearCard
 			GradeLevelStats
 			GraduationYearToGradeCard
 			PersonTypeStats
@@ -195,6 +199,20 @@ End Sub%>
 	<div class="Card NormalCard"> 
 		<div class="CardTitle">iPads By Year</div>
 		<div id="ipadYear"></div>
+	</div>
+<%End Sub%>
+
+<%Sub ChromebookYearCard%>
+	<div class="Card NormalCard"> 
+		<div class="CardTitle">Chromebooks By Year</div>
+		<div id="chromebookYear"></div>
+	</div>
+<%End Sub%>
+
+<%Sub LaptopYearCard%>
+	<div class="Card NormalCard"> 
+		<div class="CardTitle">Laptops By Year</div>
+		<div id="laptopYear"></div>
 	</div>
 <%End Sub%>
 
@@ -1142,6 +1160,134 @@ Dim strSQL, datStartDate, datEndDate, objEvents, strURL
 		
 		function selectHandler(e) {
 			window.open('devices.asp?Year=' + data.getValue(chart.getSelection()[0].row, 2) + '&Model=iPad&View=Table','_self');
+		}
+	
+	}
+	
+<%End Sub %>
+
+<%Sub ChromebookYearJavaScript 
+
+	Dim strSQL, objOldestDevice, datOldestDevice, intYears, intIndex, objDeviceCount, intDeviceCount, strChromebookData
+
+	'Get the oldest device from the inventory
+	strSQL = "SELECT DatePurchased FROM Devices WHERE DatePurchased Is Not Null AND Active=True AND DeviceType LIKE '%Chromebook%' ORDER BY DatePurchased"
+	Set objOldestDevice = Application("Connection").Execute(strSQL)
+	If Not objOldestDevice.EOF Then
+		datOldestDevice = objOldestDevice(0)
+		intYears = DatePart("yyyy",Date) - DatePart("yyyy",datOldestDevice) 
+	End If
+
+	strChromebookData = "['Year','Count',{ role: 'annotation' } ],"
+
+	For intIndex = 1 to intYears + 1
+
+		intDeviceCount = 0
+		
+		strSQL = "SELECT Active, Count(ID) AS CountofID FROM Devices "
+		strSQL = strSQL & "WHERE Active=True AND DeviceType LIKE '%Chromebook%' AND ("
+		strSQL = strSQL & "DatePurchased>=#" & DateAdd("yyyy",intIndex * -1,Date) & "# AND "
+		strSQL = strSQL & "DatePurchased<=#" & DateAdd("yyyy",(intIndex -1) * -1,Date) & "#) "	
+		strSQL = strSQL & "GROUP BY Active"
+		Set objDeviceCount = Application("Connection").Execute(strSQL)
+
+		If Not objDeviceCount.EOF Then
+			intDeviceCount = objDeviceCount(1)
+		End If
+		
+		strChromebookData = strChromebookData & "['Year " & intIndex & "', " & intDeviceCount & ",'" & intIndex & "'],"
+		
+	Next%>
+	
+	google.setOnLoadCallback(drawChromebookYear);
+	
+	function drawChromebookYear() {
+		
+		var data = google.visualization.arrayToDataTable([
+			<%=strChromebookData%>
+		]);
+		
+		var options = {
+			titlePosition: 'none',
+			chartArea:{width:'90%', height:'85%'},
+			animation: {startup: 'true', duration: 1000, easing: 'out'},
+			is3D: 'true',
+			pieSliceText: 'value',
+			hAxis: {title: '', minValue: 0},
+			vAxis: {title: ''}
+		};
+	
+		var chart = new google.visualization.PieChart(document.getElementById('chromebookYear'));
+		chart.draw(data, options);
+	
+		google.visualization.events.addListener(chart, 'select', selectHandler);
+		
+		function selectHandler(e) {
+			window.open('devices.asp?Year=' + data.getValue(chart.getSelection()[0].row, 2) + '&DeviceType=Chromebook&View=Table','_self');
+		}
+	
+	}
+	
+<%End Sub %>
+
+<%Sub LaptopYearJavaScript 
+
+	Dim strSQL, objOldestDevice, datOldestDevice, intYears, intIndex, objDeviceCount, intDeviceCount, strLaptopData
+
+	'Get the oldest device from the inventory
+	strSQL = "SELECT DatePurchased FROM Devices WHERE DatePurchased Is Not Null AND Active=True AND DeviceType LIKE '%Laptop%' ORDER BY DatePurchased"
+	Set objOldestDevice = Application("Connection").Execute(strSQL)
+	If Not objOldestDevice.EOF Then
+		datOldestDevice = objOldestDevice(0)
+		intYears = DatePart("yyyy",Date) - DatePart("yyyy",datOldestDevice) 
+	End If
+
+	strLaptopData = "['Year','Count',{ role: 'annotation' } ],"
+
+	For intIndex = 1 to intYears + 1
+
+		intDeviceCount = 0
+		
+		strSQL = "SELECT Active, Count(ID) AS CountofID FROM Devices "
+		strSQL = strSQL & "WHERE Active=True AND DeviceType LIKE '%Laptop%' AND ("
+		strSQL = strSQL & "DatePurchased>=#" & DateAdd("yyyy",intIndex * -1,Date) & "# AND "
+		strSQL = strSQL & "DatePurchased<=#" & DateAdd("yyyy",(intIndex -1) * -1,Date) & "#) "	
+		strSQL = strSQL & "GROUP BY Active"
+		Set objDeviceCount = Application("Connection").Execute(strSQL)
+
+		If Not objDeviceCount.EOF Then
+			intDeviceCount = objDeviceCount(1)
+		End If
+		
+		strLaptopData = strLaptopData & "['Year " & intIndex & "', " & intDeviceCount & ",'" & intIndex & "'],"
+		
+	Next%>
+	
+	google.setOnLoadCallback(drawiPadYear);
+	
+	function drawiPadYear() {
+		
+		var data = google.visualization.arrayToDataTable([
+			<%=strLaptopData%>
+		]);
+		
+		var options = {
+			titlePosition: 'none',
+			chartArea:{width:'90%', height:'85%'},
+			animation: {startup: 'true', duration: 1000, easing: 'out'},
+			is3D: 'true',
+			pieSliceText: 'value',
+			hAxis: {title: '', minValue: 0},
+			vAxis: {title: ''}
+		};
+	
+		var chart = new google.visualization.PieChart(document.getElementById('laptopYear'));
+		chart.draw(data, options);
+	
+		google.visualization.events.addListener(chart, 'select', selectHandler);
+		
+		function selectHandler(e) {
+			window.open('devices.asp?Year=' + data.getValue(chart.getSelection()[0].row, 2) + '&DeviceType=Laptop&View=Table','_self');
 		}
 	
 	}
