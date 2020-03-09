@@ -549,7 +549,7 @@ End Sub%>
 		<%	If IsMobile Then %>
 				logTable.columns([0,1,3,4,6,7]).visible(false);
 		<%	Else %>
-				logTable.columns([4]).visible(false);
+				logTable.columns([4,7]).visible(false);
 		<%	End If %>
 
 			} );
@@ -825,9 +825,9 @@ End Sub%>
 				<div Class="ImageSectionInCard" id="card">
 					<div class="front">
 					<%	If objFSO.FileExists(Application("PhotoLocation") & "\" & objUser(7) & "s\" & objUser(4) & ".jpg") Then %>
-							<img class="PhotoCard" src="/photos/<%=objUser(7)%>s/<%=objUser(4)%>.jpg" title="<%=objUser(4)%>" width="96" />
+							<img class="PhotoCard" src="/williamson/images/<%=objUser(7)%>s/<%=objUser(4)%>.jpg" title="<%=objUser(4)%>" width="96" />
 					<%	Else %>
-							<img class="PhotoCard" src="/photos/<%=objUser(7)%>s/missing.png" title="<%=objUser(4)%>" width="96" />
+							<img class="PhotoCard" src="/williamson/images/<%=objUser(7)%>s/missing.png" title="<%=objUser(4)%>" width="96" />
 					<%	End If %>
 					</div>
 <!--					<div class="back">
@@ -3541,6 +3541,8 @@ End Sub%>
 
 		'Change the grade number into text
 		Select Case intGrade
+			Case -1
+				GetRole = "PreSchool Student"
 			Case 0
 				GetRole = "Kindergarten Student"
 			Case 1
