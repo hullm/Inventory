@@ -406,7 +406,7 @@ End Sub%>
 				});
 
 				$("#editStudentToggle").click(function(){
-					if ($(passwordEdit).is(":visible")) {
+					if ($(internetEdit).is(":visible")) {
 						$(passwordEdit).hide();
 						$(internetEdit).hide();
 
@@ -567,10 +567,12 @@ End Sub%>
 				var adminPassword = document.getElementById("AdminPassword");
 				var requireChange = document.getElementById("RequireChange");
 
+		<%  If objUser(7) = "Teacher" Then %>
 				changePassword.onclick = function() {
 					overlay.style.display = "block";
 					return false;
 				}
+		<%	End If %>
 
 				span.onclick = function() {
 					overlay.style.display = "none";
