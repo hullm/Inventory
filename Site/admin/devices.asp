@@ -720,11 +720,11 @@ End Sub%>
 				<div Class="ImageSectionInCard">
 				<%	If objFSO.FileExists(Application("PhotoLocation") & "\" & objUserList(7) & "s\" & objUserList(4) & ".jpg") Then %>   
 						<a href="user.asp?UserName=<%=objUserList(3)%><%=strBackLink%>">   
-							<img class="PhotoCard" src="/williamson/images/<%=objUserList(7)%>s/<%=objUserList(4)%>.jpg" title="<%=objUserList(4)%>" width="96" />
+							<img class="PhotoCard" src="/photos/<%=objUserList(7)%>s/<%=objUserList(4)%>.jpg" title="<%=objUserList(4)%>" width="96" />
 						</a>
 				<%	Else %>
 						<a href="user.asp?UserName=<%=objUserList(3)%><%=strBackLink%>">
-							<img class="PhotoCard" src="/williamson/images/<%=objUserList(7)%>s/missing.png" title="<%=objUserList(4)%>" width="96" />
+							<img class="PhotoCard" src="/photos/<%=objUserList(7)%>s/missing.png" title="<%=objUserList(4)%>" width="96" />
 						</a>
 				<%	End If %>
 			
@@ -833,12 +833,12 @@ End Sub%>
 				If Not IsMobile Then %>
 					<div class="Col3Card NormalCard">
 						<div class="Col3CardTitle">24 Hour AP Usage</div>
-						<img src="<%=Application("LibreNMSServer")%>/graph.php?id=<%=objChartList(0)%>&type=port_bits&width=650&height=150&from=end-24h" title="<%=objChartList(0)%>">
+						<img src="<%=Application("LibreNMSServer")%>/graph.php?id=<%=objChartList(0)%>&type=port_bits&width=650&height=150&from=-24h" title="<%=objChartList(0)%>">
 					</div>
 			<%	Else %>
 				<div class="Card NormalCard">
 					<div class="CardTitle">24 Hour AP Usage</div>
-					<img src="<%=Application("LibreNMSServer")%>/graph.php?id=<%=objChartList(0)%>&type=port_bits&width=300&height=150&from=end-24h" title="<%=objChartList(0)%>">
+					<img src="<%=Application("LibreNMSServer")%>/graph.php?id=<%=objChartList(0)%>&type=port_bits&width=300&height=150&from=24h" title="<%=objChartList(0)%>">
 				</div>
 			<%	End If 
 				objChartList.MoveNext

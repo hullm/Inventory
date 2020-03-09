@@ -610,7 +610,7 @@ End Sub%>
 		<%	If IsMobile Then %>
 				logTable.columns([0,1,3,4,6,7]).visible(false);
 		<%	Else %>
-				logTable.columns([4,7]).visible(false);
+				logTable.columns([4]).visible(false);
 		<%	End If %>
 
 			} );
@@ -720,6 +720,7 @@ End Sub%>
 			OldAssignmentsTable
 			OldEventsTable
 			ShowLog
+			ShowChart
 
 			%>
 		</div>
@@ -1109,11 +1110,11 @@ End Sub%>
 				<div Class="ImageSectionInCard">
 			<%	If objFSO.FileExists(Application("PhotoLocation") & "\" & objAssignment(7) & "s\" & objAssignment(5) & ".jpg") Then %>
 					<a href="user.asp?UserName=<%=objAssignment(6)%><%=strBackLink%>">
-						<img class="PhotoCard" src="/williamson/images/<%=objAssignment(7)%>s/<%=objAssignment(5)%>.jpg" title="<%=objAssignment(5)%>" width="96" />
+						<img class="PhotoCard" src="/photos/<%=objAssignment(7)%>s/<%=objAssignment(5)%>.jpg" title="<%=objAssignment(5)%>" width="96" />
 					</a>
 			<%	Else %>
 					<a href="user.asp?UserName=<%=objAssignment(6)%><%=strBackLink%>">
-						<img class="PhotoCard" src="/williamson/images/<%=objAssignment(7)%>s/missing.png" title="<%=objAssignment(5)%>" width="96" />
+						<img class="PhotoCard" src="/photos/<%=objAssignment(7)%>s/missing.png" title="<%=objAssignment(5)%>" width="96" />
 					</a>
 			<%	End If %>
 				</div>
@@ -1269,11 +1270,11 @@ End Sub%>
 				<div>
 			<%	If objFSO.FileExists(Application("PhotoLocation") & "\" & objOldAssignments(8) & "s\" & objOldAssignments(6) & ".jpg") Then %>
 					<a href="user.asp?UserName=<%=objOldAssignments(7)%><%=strBackLink%>">
-						<img class="PhotoCard" src="/williamson/images/<%=objOldAssignments(8)%>s/<%=objOldAssignments(6)%>.jpg" title="<%=objOldAssignments(6)%>" width="96" />
+						<img class="PhotoCard" src="/photos/<%=objOldAssignments(8)%>s/<%=objOldAssignments(6)%>.jpg" title="<%=objOldAssignments(6)%>" width="96" />
 					</a>
 			<%	Else %>
 					<a href="user.asp?UserName=<%=objOldAssignments(7)%><%=strBackLink%>">
-						<img class="PhotoCard" src="/williamson/images/<%=objOldAssignments(8)%>s/missing.png" title="<%=objOldAssignments(6)%>" width="96" />
+						<img class="PhotoCard" src="/photos/<%=objOldAssignments(8)%>s/missing.png" title="<%=objOldAssignments(6)%>" width="96" />
 					</a>
 			<%	End If %>
 				</div>
@@ -1366,18 +1367,18 @@ End Sub%>
 					<td <%=strRowClass%> width="1px">
 				<%	If objOldAssignments(15) Then %>
 					<%	If objFSO.FileExists(Application("PhotoLocation") & "\" & objOldAssignments(8) & "s\" & objOldAssignments(6) & ".jpg") Then %>
-							<img src="/williamson/images/<%=objOldAssignments(8)%>s/<%=objOldAssignments(6)%>.jpg" title="<%=objOldAssignments(6)%>" width="96" />
+							<img src="/photos/<%=objOldAssignments(8)%>s/<%=objOldAssignments(6)%>.jpg" title="<%=objOldAssignments(6)%>" width="96" />
 					<%	Else %>
-							<img src="/williamson/images/<%=objOldAssignments(8)%>s/missing.png" title="<%=objOldAssignments(6)%>" width="96" />
+							<img src="/photos/<%=objOldAssignments(8)%>s/missing.png" title="<%=objOldAssignments(6)%>" width="96" />
 					<%	End If %>
 				<%	Else %>
 					<%	If objFSO.FileExists(Application("PhotoLocation") & "\" & objOldAssignments(8) & "s\" & objOldAssignments(6) & ".jpg") Then %>
 							<a href="user.asp?UserName=<%=objOldAssignments(7)%><%=strBackLink%>">
-								<img src="/williamson/images/<%=objOldAssignments(8)%>s/<%=objOldAssignments(6)%>.jpg" title="<%=objOldAssignments(6)%>" width="96" />
+								<img src="/photos/<%=objOldAssignments(8)%>s/<%=objOldAssignments(6)%>.jpg" title="<%=objOldAssignments(6)%>" width="96" />
 							</a>
 					<%	Else %>
 							<a href="user.asp?UserName=<%=objOldAssignments(7)%><%=strBackLink%>">
-								<img src="/williamson/images/<%=objOldAssignments(8)%>s/missing.png" title="<%=objOldAssignments(6)%>" width="96" />
+								<img src="/photos/<%=objOldAssignments(8)%>s/missing.png" title="<%=objOldAssignments(6)%>" width="96" />
 							</a>
 					<%	End If %>
 				<%	End If %>
@@ -1826,6 +1827,47 @@ End Sub%>
 		</table>
 	</div>
 <%	End If
+
+End Sub%>
+
+<%Sub ShowChart
+
+	If Application("LibreNMSServer") <> "" Then
+
+		Dim strSQL, objChartList, strRoom, strSite, strDeviceType
+
+		strRoom = objDevice(3)
+		strSite = objDevice(1)
+		strDeviceType = objDevice(13)
+
+		If strDeviceType = "Access Point" Then
+	
+			strSQL = "SELECT PortID FROM LibreNMS WHERE Room='" & Replace(strRoom,"'","''") & "'"
+			If strSite <> "" Then
+				strSQL = strSQL & " AND Site='" & Replace(strSite,"'","''") & "'"
+			End If
+			
+			Set objChartList = Application("Connection").Execute(strSQL)
+			If Not objChartList.EOF Then
+				Do Until objChartList.EOF
+					If Not IsMobile Then %>
+						<div class="Col3Card NormalCard">
+							<div class="Col3CardTitle">24 Hour AP Usage</div>
+							<img src="<%=Application("LibreNMSServer")%>/graph.php?id=<%=objChartList(0)%>&type=port_bits&width=650&height=150&from=-24h" title="<%=objChartList(0)%>">
+						</div>
+				<%	Else %>
+					<div class="Card NormalCard">
+						<div class="CardTitle">24 Hour AP Usage</div>
+						<img src="<%=Application("LibreNMSServer")%>/graph.php?id=<%=objChartList(0)%>&type=port_bits&width=300&height=150&from=-24h" title="<%=objChartList(0)%>">
+					</div>
+				<%	End If 
+					objChartList.MoveNext
+				Loop
+			End If
+
+		End If
+	
+	End If
 
 End Sub%>
 

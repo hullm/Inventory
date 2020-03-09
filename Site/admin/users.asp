@@ -309,14 +309,14 @@ End If %>
 			Case "CheckIn"
 				If IsMobile Then
 					If Application("ShowPasswords") Then
-						strDisplayColumns = "0,1,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25"  
+						strDisplayColumns = "0,1,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,27"  
 						If Request.QueryString("Internal") = "True" Then
 							intOrderColumn = 24
 						Else
 							intOrderColumn = 23
 						End If
 					Else
-						strDisplayColumns = "0,1,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23"  
+						strDisplayColumns = "0,1,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,25"  
 						If Request.QueryString("Internal") = "True" Then
 							intOrderColumn = 22
 						Else
@@ -325,14 +325,14 @@ End If %>
 					End If
 				Else
 					If Application("ShowPasswords") Then
-						strDisplayColumns = "0,1,3,4,6,7,9,10,11,13,14,16,17,19,21,22,23,24,25"  
+						strDisplayColumns = "0,1,3,4,6,7,9,10,11,13,14,16,17,19,21,22,23,24,27"  
 						If Request.QueryString("Internal") = "True" Then
 							intOrderColumn = 24
 						Else
 							intOrderColumn = 23
 						End If
 					Else
-						strDisplayColumns = "0,1,3,4,6,7,8,9,10,11,12,14,17,19,20,21,22"  
+						strDisplayColumns = "0,1,3,4,6,7,8,9,10,11,12,14,17,19,20,21,22,25"  
 						If Request.QueryString("Internal") = "True" Then
 							intOrderColumn = 22
 						Else
@@ -546,11 +546,11 @@ End Sub%>
 				<div Class="ImageSectionInCard">
 				<%	If objFSO.FileExists(Application("PhotoLocation") & "\" & objUserList(7) & "s\" & objUserList(4) & ".jpg") Then %>   
 						<a href="user.asp?UserName=<%=objUserList(3)%><%=strBackLink%>">   
-							<img class="PhotoCard" src="/williamson/images/<%=objUserList(7)%>s/<%=objUserList(4)%>.jpg" title="<%=objUserList(4)%>" width="96" />
+							<img class="PhotoCard" src="/photos/<%=objUserList(7)%>s/<%=objUserList(4)%>.jpg" title="<%=objUserList(4)%>" width="96" />
 						</a>
 				<%	Else %>
 						<a href="user.asp?UserName=<%=objUserList(3)%><%=strBackLink%>">
-							<img class="PhotoCard" src="/williamson/images/<%=objUserList(7)%>s/missing.png" title="<%=objUserList(4)%>" width="96" />
+							<img class="PhotoCard" src="/photos/<%=objUserList(7)%>s/missing.png" title="<%=objUserList(4)%>" width="96" />
 						</a>
 				<%	End If %>
 			
@@ -729,13 +729,13 @@ End Sub%>
 			<%	If objFSO.FileExists(Application("PhotoLocation") & "\" & objUserList(7) & "s\" & objUserList(4) & ".jpg") Then %>   
 					<td <%=strRowClass%> width="1px">
 						<a href="user.asp?UserName=<%=objUserList(3)%><%=strBackLink%>">   
-							<img src="/williamson/images/<%=objUserList(7)%>s/<%=objUserList(4)%>.jpg" title="<%=objUserList(4)%>" width="72" />
+							<img src="/photos/<%=objUserList(7)%>s/<%=objUserList(4)%>.jpg" title="<%=objUserList(4)%>" width="72" />
 						</a>
 					</td>
 			<%	Else %>
 					<td <%=strRowClass%> width="1px">
 						<a href="user.asp?UserName=<%=objUserList(3)%><%=strBackLink%>">
-							<img src="/williamson/images/<%=objUserList(7)%>s/missing.png" title="<%=objUserList(4)%>" width="72" />
+							<img src="/photos/<%=objUserList(7)%>s/missing.png" title="<%=objUserList(4)%>" width="72" />
 						</a>
 					</td>
 			<%	End If %>
