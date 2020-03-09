@@ -575,7 +575,7 @@ End Sub%>
 
 			intGrade = GetGrade(objStudentsPerGrade(0))
 
-			If intGrade = "K" Then
+			If intGrade = "K" Or intGrade = "P" Then
 				intGrade = 0
 			End If
 
@@ -688,6 +688,10 @@ End Sub%>
 				x = 0;
 			}
 
+			if (x == 'P') {
+				x = -1;
+			}
+
 			var d = new Date();
 			var currentYear = d.getFullYear()
 			var currentMonth = d.getMonth()
@@ -770,8 +774,8 @@ End Sub%>
 					End If
 					objStudentsWithDevices.MoveNext
 				Loop
-			End If
-			objStudentsWithDevices.MoveFirst
+				objStudentsWithDevices.MoveFirst
+			End If                   
 
 			If intStudentsWithDevices = 0 Then
 				intStudentsWithDevices = ""
@@ -2441,9 +2445,15 @@ End Function %>
 
 	GetGrade = 12 - (intYear - intCurrentYear)
 
-	If GetGrade = 0 Then
-		GetGrade = "K"
-	End If
+	Select Case GetGrade
+		
+		Case 0
+			GetGrade = "K"
+
+		Case -1 
+			GetGrade = "P"
+	
+	End Select
 
 End Function%>
 

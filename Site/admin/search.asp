@@ -1927,6 +1927,8 @@ End Function%>
 
 		'Change the grade number into text
 		Select Case intGrade
+			Case -1
+				GetRole = "PreSchool Student"
 			Case 0
 				GetRole = "Kindergarten Student"
 			Case 1
