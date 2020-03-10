@@ -108,7 +108,7 @@ End If %>
 	intUserID = objUser(0)
 
 	'Get the list of devices assigned to the user
-	strSQL = "SELECT Assignments.LGTag,DateIssued,DateReturned,Assignments.Active,Assignments.Notes,Model,Devices.Active,IssuedBy,ReturnedBy,Devices.Deleted,Devices.HasInsurance,Devices.DatePurchased,SerialNumber,Manufacturer,InternalIP,LastUser,ComputerName,OSVersion,LastCheckInDate,LastCheckInTime,Assigned" & vbCRLF
+	strSQL = "SELECT Assignments.LGTag,DateIssued,DateReturned,Assignments.Active,Assignments.Notes,Model,Devices.Active,IssuedBy,ReturnedBy,Devices.Deleted,Devices.HasInsurance,Devices.DatePurchased,SerialNumber,Manufacturer,InternalIP,LastUser,ComputerName,OSVersion,LastCheckInDate,LastCheckInTime,Assigned,DeviceType" & vbCRLF
 	strSQL = strSQL & "FROM Devices INNER JOIN (People INNER JOIN Assignments ON People.ID = Assignments.AssignedTo) ON Devices.LGTag = Assignments.LGTag" & vbCRLF
 	strSQL = strSQL & "WHERE People.UserName='" & Replace(strUserName,"'","''") & "'" & vbCRLF
 	strSQL = strSQL & "ORDER BY DateIssued"
@@ -1151,13 +1151,15 @@ End Sub%>
 								<img class="PhotoCard" src="../images/devices/<%=Replace(objDeviceList(5)," ","")%>.png" width="96" />
 						<%	End If %>
 					</a>
+			<%	ElseIf objFSO.FileExists(Request.ServerVariables("APPL_PHYSICAL_PATH") & "images\devices\types\" & Replace(objDeviceList(21)," ","") & ".png") Then %>
+					<a href="device.asp?Tag=<%=objDeviceList(0)%><%=strBackLink%>">
+						<img class="PhotoCard" src="../images/devices/types/<%=Replace(objDeviceList(21)," ","")%>.png" width="96" />
+					</a>
 			<%	Else %>
 					<a href="device.asp?Tag=<%=objDeviceList(0)%><%=strBackLink%>">
 						<img class="PhotoCard" src="../images/devices/missing.png" width="96" />
 					</a>
 			<%	End If %>
-
-
 					<div>
 						<div Class="PhotoCardColumn1">Tag </div>
 						<div Class="PhotoCardColumn2">
@@ -1186,6 +1188,10 @@ End Sub%>
 						<%	Else %>
 								<img class="PhotoCard" src="../images/devices/<%=Replace(objDeviceList(5)," ","")%>.png" width="96" />
 						<%	End If %>
+					</a>
+			<%	ElseIf objFSO.FileExists(Request.ServerVariables("APPL_PHYSICAL_PATH") & "images\devices\types\" & Replace(objDeviceList(21)," ","") & ".png") Then %>
+					<a href="device.asp?Tag=<%=objDeviceList(0)%><%=strBackLink%>">
+						<img class="PhotoCard" src="../images/devices/types/<%=Replace(objDeviceList(21)," ","")%>.png" width="96" />
 					</a>
 			<%	Else %>
 					<a href="device.asp?Tag=<%=objDeviceList(0)%><%=strBackLink%>">
@@ -1282,6 +1288,10 @@ End Sub%>
 				<%	If objFSO.FileExists(Request.ServerVariables("APPL_PHYSICAL_PATH") & "images\devices\" & Replace(objDeviceList(5)," ","") & ".png") Then %>
 						<a href="device.asp?Tag=<%=objDeviceList(0)%><%=strBackLink%>">
 							<img class="PhotoCard" src="../images/devices/<%=Replace(objDeviceList(5)," ","")%>.png" width="96" />
+						</a>
+				<%	ElseIf objFSO.FileExists(Request.ServerVariables("APPL_PHYSICAL_PATH") & "images\devices\types\" & Replace(objDeviceList(21)," ","") & ".png") Then %>
+						<a href="device.asp?Tag=<%=objDeviceList(0)%><%=strBackLink%>">
+							<img class="PhotoCard" src="../images/devices/types/<%=Replace(objDeviceList(21)," ","")%>.png" width="96" />
 						</a>
 				<%	Else %>
 						<a href="device.asp?Tag=<%=objDeviceList(0)%><%=strBackLink%>">
@@ -1431,13 +1441,19 @@ End Sub%>
 							<td <%=strRowClass%> width="1px">
 						<%	If objDeviceList(9) Then %>
 							<%	If objFSO.FileExists(Request.ServerVariables("APPL_PHYSICAL_PATH") & "images\devices\" & Replace(objDeviceList(5)," ","") & ".png") Then %>
-										<%	If InStr(LCase(objDeviceList(5)),"ipad") Then %>
-												<img class="PhotoCard" src="../images/devices/<%=Replace(objDeviceList(5)," ","")%>.png" width="70" />
-										<%	Else %>
-												<img class="PhotoCard" src="../images/devices/<%=Replace(objDeviceList(5)," ","")%>.png" width="96" />
-										<%	End If %>
+									<%	If InStr(LCase(objDeviceList(5)),"ipad") Then %>
+											<img class="PhotoCard" src="../images/devices/<%=Replace(objDeviceList(5)," ","")%>.png" width="70" />
+									<%	Else %>
+											<img class="PhotoCard" src="../images/devices/<%=Replace(objDeviceList(5)," ","")%>.png" width="96" />
+									<%	End If %>
+							<%	ElseIf objFSO.FileExists(Request.ServerVariables("APPL_PHYSICAL_PATH") & "images\devices\types\" & Replace(objDeviceList(21)," ","") & ".png") Then %>
+									<a href="device.asp?Tag=<%=objDeviceList(0)%><%=strBackLink%>">
+										<img class="PhotoCard" src="../images/devices/types/<%=Replace(objDeviceList(21)," ","")%>.png" width="96" />
+									</a>
 							<%	Else %>
+									<a href="device.asp?Tag=<%=objDeviceList(0)%><%=strBackLink%>">
 										<img class="PhotoCard" src="../images/devices/missing.png" width="96" />
+									</a>
 							<%	End If %>
 						<%	Else %>
 							<%	If objFSO.FileExists(Request.ServerVariables("APPL_PHYSICAL_PATH") & "images\devices\" & Replace(objDeviceList(5)," ","") & ".png") Then %>
@@ -1447,6 +1463,10 @@ End Sub%>
 										<%	Else %>
 												<img class="PhotoCard" src="../images/devices/<%=Replace(objDeviceList(5)," ","")%>.png" width="96" />
 										<%	End If %>
+									</a>
+							<%	ElseIf objFSO.FileExists(Request.ServerVariables("APPL_PHYSICAL_PATH") & "images\devices\types\" & Replace(objDeviceList(21)," ","") & ".png") Then %>
+									<a href="device.asp?Tag=<%=objDeviceList(0)%><%=strBackLink%>">
+										<img class="PhotoCard" src="../images/devices/types/<%=Replace(objDeviceList(21)," ","")%>.png" width="96" />
 									</a>
 							<%	Else %>
 									<a href="device.asp?Tag=<%=objDeviceList(0)%><%=strBackLink%>">

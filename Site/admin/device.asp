@@ -792,7 +792,9 @@ End Sub%>
 		<div Class="ImageSectionInCard">
 			<%	If objFSO.FileExists(Request.ServerVariables("APPL_PHYSICAL_PATH") & "images\devices\" & Replace(objDevice(2)," ","") & ".png") Then %>
 					<img class="PhotoCard" src="../images/devices/<%=Replace(objDevice(2)," ","")%>.png" width="96" />
-			<%	Else %>
+			<%	ElseIf objFSO.FileExists(Request.ServerVariables("APPL_PHYSICAL_PATH") & "images\devices\types\" & Replace(objDevice(13)," ","") & ".png") Then%>
+					<img class="PhotoCard" src="../images/devices/types/<%=Replace(objDevice(13)," ","")%>.png" width="96" />
+			<%  Else %>
 					<img class="PhotoCard" src="../images/devices/missing.png" width="96" />
 			<%	End If %>
 		</div>
