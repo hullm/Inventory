@@ -414,13 +414,13 @@ End Sub%>
 			<a href="device.asp?Tag=<%=objDeviceList(1)%><%=strBackLink%>">Asset Tag <%=objDeviceList(1)%></a>
 		</div>
 		<div Class="ImageSectionInCard">		
-		<%	If objFSO.FileExists(Request.ServerVariables("APPL_PHYSICAL_PATH") & "images\devices\" & Replace(objDeviceList(3)," ","") & ".png") Then %>      
+		<%	If objFSO.FileExists(Request.ServerVariables("APPL_PHYSICAL_PATH") & "images\devices\" & FixFileName(objDeviceList(3)) & ".png") Then %>      
 				<a href="device.asp?Tag=<%=objDeviceList(1)%><%=strBackLink%>"> 
-					<img class="PhotoCard" src="../images/devices/<%=Replace(objDeviceList(3)," ","")%>.png" width="96" />
+					<img class="PhotoCard" src="../images/devices/<%=FixFileName(objDeviceList(3))%>.png" width="96" />
 				</a>
-		<%	ElseIf objFSO.FileExists(Request.ServerVariables("APPL_PHYSICAL_PATH") & "images\devices\types\" & Replace(objDeviceList(17)," ","") & ".png") Then %>
+		<%	ElseIf objFSO.FileExists(Request.ServerVariables("APPL_PHYSICAL_PATH") & "images\devices\types\" & FixFileName(objDeviceList(17)) & ".png") Then %>
 				<a href="device.asp?Tag=<%=objDeviceList(1)%><%=strBackLink%>"> 
-					<img class="PhotoCard" src="../images/devices/types/<%=Replace(objDeviceList(17)," ","")%>.png" width="96" />
+					<img class="PhotoCard" src="../images/devices/types/<%=FixFileName(objDeviceList(17))%>.png" width="96" />
 				</a>
 		<%	Else %>
 				<a href="device.asp?Tag=<%=objDeviceList(1)%><%=strBackLink%>"> 
@@ -600,20 +600,20 @@ End Sub%>
 	
 	<tr<%=strRowClass%>>
 	
-	<%	If objFSO.FileExists(Request.ServerVariables("APPL_PHYSICAL_PATH") & "images\devices\" & Replace(objDeviceList(3)," ","") & ".png") Then %>      
+	<%	If objFSO.FileExists(Request.ServerVariables("APPL_PHYSICAL_PATH") & "images\devices\" & FixFileName(objDeviceList(3)) & ".png") Then %>      
 			<td <%=strRowClass%> id="center" width="1px">
 				<a href="device.asp?Tag=<%=objDeviceList(1)%><%=strBackLink%>"> 
 			<%	If InStr(LCase(objDeviceList(3)),"ipad") Then %>
-					<img src="../images/devices/<%=Replace(objDeviceList(3)," ","")%>.png" width="52" />
+					<img src="../images/devices/<%=FixFileName(objDeviceList(3))%>.png" width="52" />
 			<%	Else %>
-					<img src="../images/devices/<%=Replace(objDeviceList(3)," ","")%>.png" width="72" />
+					<img src="../images/devices/<%=FixFileName(objDeviceList(3))%>.png" width="72" />
 			<%	End If %>
 				</a>
 			</td>
-	<%	ElseIf objFSO.FileExists(Request.ServerVariables("APPL_PHYSICAL_PATH") & "images\devices\types\" & Replace(objDeviceList(17)," ","") & ".png") Then %>
+	<%	ElseIf objFSO.FileExists(Request.ServerVariables("APPL_PHYSICAL_PATH") & "images\devices\types\" & FixFileName(objDeviceList(17)) & ".png") Then %>
 			<td <%=strRowClass%> id="center" width="1px">
 				<a href="device.asp?Tag=<%=objDeviceList(1)%><%=strBackLink%>"> 
-					<img src="../images/devices/types/<%=Replace(objDeviceList(17)," ","")%>.png" width="72" />
+					<img src="../images/devices/types/<%=FixFileName(objDeviceList(17))%>.png" width="72" />
 				</a>
 			</td>
 	<%	Else %>
@@ -1003,7 +1003,7 @@ End Sub %>
 			<div class="CardTitle">Save Search</div>
 		<div Class="CardColumn1">Search Name:</div>
 		<div Class="CardColumn2">
-			<input class="Card InputWidthLarge" type="text" name="SearchName""/>
+			<input class="Card InputWidthLarge" type="text" name="SearchName"/>
 			</div>
 		<div>
 			<div class="Button"><input type="submit" value="Save" name="Submit" /></div>
@@ -1060,6 +1060,21 @@ End Sub%>
 	End If
 		
 End Function%>
+
+<%Function FixFileName(strDevice)
+
+	FixFileName = Replace(strDevice," ","")
+	FixFileName = Replace(FixFileName,"<","")
+	FixFileName = Replace(FixFileName,">","")
+	FixFileName = Replace(FixFileName,":","")
+	FixFileName = Replace(FixFileName,"""","")
+	FixFileName = Replace(FixFileName,"/","")
+	FixFileName = Replace(FixFileName,"\","")
+	FixFileName = Replace(FixFileName,"|","")
+	FixFileName = Replace(FixFileName,"?","")
+	FixFileName = Replace(FixFileName,"*","")
+
+End Function %>
 
 <%Function GetRole(intYear)
 

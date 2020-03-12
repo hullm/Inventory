@@ -790,10 +790,10 @@ End Sub%>
 			Asset Tag <input Class="Card InputWidthSmall" type="text" name="AssetTag" value="<%=intTag%>">
 		</div>
 		<div Class="ImageSectionInCard">
-			<%	If objFSO.FileExists(Request.ServerVariables("APPL_PHYSICAL_PATH") & "images\devices\" & Replace(objDevice(2)," ","") & ".png") Then %>
-					<img class="PhotoCard" src="../images/devices/<%=Replace(objDevice(2)," ","")%>.png" width="96" />
-			<%	ElseIf objFSO.FileExists(Request.ServerVariables("APPL_PHYSICAL_PATH") & "images\devices\types\" & Replace(objDevice(13)," ","") & ".png") Then%>
-					<img class="PhotoCard" src="../images/devices/types/<%=Replace(objDevice(13)," ","")%>.png" width="96" />
+			<%	If objFSO.FileExists(Request.ServerVariables("APPL_PHYSICAL_PATH") & "images\devices\" & FixFileName(objDevice(2)) & ".png") Then %>
+					<img class="PhotoCard" src="../images/devices/<%=FixFileName(objDevice(2))%>.png" width="96" />
+			<%	ElseIf objFSO.FileExists(Request.ServerVariables("APPL_PHYSICAL_PATH") & "images\devices\types\" & FixFileName(objDevice(13)) & ".png") Then%>
+					<img class="PhotoCard" src="../images/devices/types/<%=FixFileName(objDevice(13))%>.png" width="96" />
 			<%  Else %>
 					<img class="PhotoCard" src="../images/devices/missing.png" width="96" />
 			<%	End If %>
@@ -955,12 +955,14 @@ End Sub%>
 		<%	End If %>
 			Asset Tag <%=intTag%>
 		</div>
-	<%	If objFSO.FileExists(Request.ServerVariables("APPL_PHYSICAL_PATH") & "images\devices\" & Replace(objDevice(2)," ","") & ".png") Then %>
+	<%	If objFSO.FileExists(Request.ServerVariables("APPL_PHYSICAL_PATH") & "images\devices\" & FixFileName(objDevice(2)) & ".png") Then %>
 			<%	If InStr(LCase(objDevice(2)),"ipad") Then %>
-					<img class="PhotoCard" src="../images/devices/<%=Replace(objDevice(2)," ","")%>.png" width="70" />
+					<img class="PhotoCard" src="../images/devices/<%=FixFileName(objDevice(2))%>.png" width="70" />
 			<%	Else %>
-					<img class="PhotoCard" src="../images/devices/<%=Replace(objDevice(2)," ","")%>.png" width="96" />
+					<img class="PhotoCard" src="../images/devices/<%=FixFileName(objDevice(2))%>.png" width="96" />
 			<%	End If %>
+	<%	ElseIf objFSO.FileExists(Request.ServerVariables("APPL_PHYSICAL_PATH") & "images\devices\types\" & FixFileName(objDevice(13)) & ".png") Then%>
+			<img class="PhotoCard" src="../images/devices/types/<%=FixFileName(objDevice(13))%>.png" width="96" />
 	<%	Else %>
 			<img class="PhotoCard" src="../images/devices/missing.png" width="96" />
 	<%	End If %>
@@ -3473,6 +3475,21 @@ End Function%>
 	Application("Connection").Execute(strSQL)
 
 End Sub%>
+
+<%Function FixFileName(strDevice)
+
+	FixFileName = Replace(strDevice," ","")
+	FixFileName = Replace(FixFileName,"<","")
+	FixFileName = Replace(FixFileName,">","")
+	FixFileName = Replace(FixFileName,":","")
+	FixFileName = Replace(FixFileName,"""","")
+	FixFileName = Replace(FixFileName,"/","")
+	FixFileName = Replace(FixFileName,"\","")
+	FixFileName = Replace(FixFileName,"|","")
+	FixFileName = Replace(FixFileName,"?","")
+	FixFileName = Replace(FixFileName,"*","")
+
+End Function %>
 
 <%Function GetRole(intYear)
 
