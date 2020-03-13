@@ -152,6 +152,9 @@ End Sub%>
 						'SpareiPadsByTypeJavaScript
 						SpareMacBooksByGradeJavaScript
 
+					Case "SpareChromebooks"
+						SpareChromebooksByGradeJavaScript
+
 					Case "AccessHistory"
 						StudentsPerGradeWithOutsideAccess
 						StudentsPerGradeWithInsideAccess
@@ -256,6 +259,9 @@ End Sub%>
 
 				Case "SpareiPadsFlipMacBooks"
 					SpareiPadsFlipMacBooks
+
+				Case "SpareChromebooks"
+					SpareChromebooksCard
 
 				Case "AccessHistory"
 					AccessHistory
@@ -516,6 +522,13 @@ End Sub%>
 				<a href="" class="FlipCard"><image src="../images/swap.png" width="20" height="20" title="View Spare MacBooks"/></a>
 			</div>
 		</div>
+	</div>
+<%End Sub%>
+
+<%Sub SpareChromebooksCard%>
+	<div class="Card NormalCard">
+		<div class="CardTitle">Spare Chromebooks</div>
+		<div id="spareChromebooks" Class="Chart"></div>
 	</div>
 <%End Sub%>
 
@@ -2156,6 +2169,162 @@ End Sub%>
 			var deviceModel = dataFromChart[0].trim();
 
 			window.open('devices.asp?Model=' + deviceModel + '&Tags=Spare&View=Table','_self');
+		}
+
+	}
+
+<%End Sub %>
+
+<%Sub SpareChromebooksByGradeJavaScript
+
+	Dim strSQL, objSpareDevices, strSpareDevicesData, intDeviceYear, strDeviceName, strDeviceSite, intYears, objOldestDevice, datOldestDevice
+	Dim intIndex, objSpares, intHighestValue, strModel, objLoanedSpares, intAvailableSpares, intLoanedSpares, objAvailableSpares
+	Dim strAvailableSparesLabel, strLoanedSpareLabel, objReplacements, intReplacements, intReplacementLabel, strYear
+
+	'Get the current seniors graduating year
+	strYear = GetGraduationYear(12)
+
+	strSpareDevicesData = "['Device','Available',{ role: 'annotation' },'Loaned Out',{ role: 'annotation' },'Issued as Replacements',{ role: 'annotation' }],"
+	intHighestValue = 0
+
+	For intIndex = strYear to strYear + 5
+
+		'Get the number of spares
+		strSQL = "SELECT Count(TagCount) AS CountofCount" & vbCRLF
+		strSQL = strSQL & "FROM" & vbCRLF
+		strSQL = strSQL & "(SELECT Count(Tags.Tag) AS TagCount,Devices.LGTag" & vbCRLF
+		strSQL = strSQL & "FROM(" & vbCRLF
+		strSQL = strSQL & "SELECT Devices.ID, Devices.LGTag, Tags.Tag" & vbCRLF
+		strSQL = strSQL & "FROM Devices INNER JOIN Tags ON Devices.LGTag = Tags.LGTag" & vbCRLF
+		strSQL = strSQL & "WHERE Devices.Active=True AND Devices.Deleted=False AND DeviceType Like '%Chromebook%')" & vbCRLF
+		strSQL = strSQL & "WHERE (Tags.Tag='" & intIndex & "' OR Tags.Tag='Spare')" & vbCRLF
+		strSQL = strSQL & "GROUP BY Devices.LGTag)" & vbCRLF
+		strSQL = strSQL & "WHERE TagCount=2"
+		Set objSpares = Application("Connection").Execute(strSQL)
+
+		If Not IsEmpty(objSpares) Then
+
+			'Get the number of available spares
+			strSQL = "SELECT Count(TagCount) AS CountofCount" & vbCRLF
+			strSQL = strSQL & "FROM" & vbCRLF
+			strSQL = strSQL & "(SELECT Count(Tags.Tag) AS TagCount,Devices.LGTag" & vbCRLF
+			strSQL = strSQL & "FROM(" & vbCRLF
+			strSQL = strSQL & "SELECT Devices.ID, Devices.LGTag, Tags.Tag" & vbCRLF
+			strSQL = strSQL & "FROM Devices INNER JOIN Tags ON Devices.LGTag = Tags.LGTag" & vbCRLF
+			strSQL = strSQL & "WHERE Devices.Active=True AND Devices.Deleted=False AND Assigned=False AND DeviceType Like '%Chromebook%')" & vbCRLF
+			strSQL = strSQL & "WHERE (Tags.Tag='" & intIndex & "' OR Tags.Tag='Spare')" & vbCRLF
+			strSQL = strSQL & "GROUP BY Devices.LGTag)" & vbCRLF
+			strSQL = strSQL & "WHERE TagCount=2"
+			Set objAvailableSpares = Application("Connection").Execute(strSQL)
+
+			'Get the number of loaned spares
+			strSQL = "SELECT Count(TagCount) AS CountofCount" & vbCRLF
+			strSQL = strSQL & "FROM" & vbCRLF
+			strSQL = strSQL & "(SELECT Count(Tags.Tag) AS TagCount,Devices.LGTag" & vbCRLF
+			strSQL = strSQL & "FROM(" & vbCRLF
+			strSQL = strSQL & "SELECT Devices.ID, Devices.LGTag, Tags.Tag" & vbCRLF
+			strSQL = strSQL & "FROM Devices INNER JOIN Tags ON Devices.LGTag = Tags.LGTag" & vbCRLF
+			strSQL = strSQL & "WHERE Devices.Active=True AND Devices.Deleted=False AND Assigned=True AND DeviceType Like '%Chromebook%')" & vbCRLF
+			strSQL = strSQL & "WHERE (Tags.Tag='" & intIndex & "' OR Tags.Tag='Spare')" & vbCRLF
+			strSQL = strSQL & "GROUP BY Devices.LGTag)" & vbCRLF
+			strSQL = strSQL & "WHERE TagCount=2"
+			Set objLoanedSpares = Application("Connection").Execute(strSQL)
+
+			'Get the number of devices issued as replacement
+			strSQL = "SELECT Count(TagCount) AS CountofCount" & vbCRLF
+			strSQL = strSQL & "FROM" & vbCRLF
+			strSQL = strSQL & "(SELECT Count(Tags.Tag) AS TagCount,Devices.LGTag" & vbCRLF
+			strSQL = strSQL & "FROM(" & vbCRLF
+			strSQL = strSQL & "SELECT Devices.ID, Devices.LGTag, Tags.Tag" & vbCRLF
+			strSQL = strSQL & "FROM Devices INNER JOIN Tags ON Devices.LGTag = Tags.LGTag" & vbCRLF
+			strSQL = strSQL & "WHERE Devices.Active=True AND Devices.Deleted=False AND Assigned=True AND DeviceType Like '%Chromebook%')" & vbCRLF
+			strSQL = strSQL & "WHERE (Tags.Tag='" & intIndex & "' OR Tags.Tag='Spare' OR Tags.Tag='Replacement')" & vbCRLF
+			strSQL = strSQL & "GROUP BY Devices.LGTag)" & vbCRLF
+			strSQL = strSQL & "WHERE TagCount=3"
+			Set objReplacements = Application("Connection").Execute(strSQL)
+
+			If objAvailableSpares.EOF Then
+				intAvailableSpares = 0
+			Else
+				intAvailableSpares = objAvailableSpares(0)
+			End If
+
+			If Not objLoanedSpares.EOF Then
+				intLoanedSpares = objLoanedSpares(0)
+			Else
+				intLoanedSpares = 0
+			End If
+
+			If Not objReplacements.EOF Then
+				intReplacements = objReplacements(0)
+			Else
+				intReplacements = 0
+			End If
+
+			If intAvailableSpares <= 1 Then
+				strAvailableSparesLabel = ""
+			Else
+				strAvailableSparesLabel = intAvailableSpares
+			End If
+
+			If intReplacements = 0 Then
+				intReplacementLabel = ""
+			ElseIf intReplacements = 1 Then
+				intReplacementLabel = ""
+				intLoanedSpares = intLoanedSpares - intReplacements
+				strLoanedSpareLabel = intLoanedSpares
+			Else
+				intReplacementLabel = intReplacements
+				intLoanedSpares = intLoanedSpares - intReplacements
+				strLoanedSpareLabel = intLoanedSpares
+			End If
+
+			If intLoanedSpares <= 1 Then
+				strLoanedSpareLabel = ""
+			Else
+				strLoanedSpareLabel = intLoanedSpares
+			End If
+
+			If (intAvailableSpares + intLoanedSpares + intReplacements) > intHighestValue Then
+			intHighestValue = (intAvailableSpares + intLoanedSpares + intReplacements)
+		End If
+
+			strSpareDevicesData = strSpareDevicesData & "['" & intIndex & "'," & intAvailableSpares & _
+			",'" & strAvailableSparesLabel & "'," & intLoanedSpares & _
+			",'" & strLoanedSpareLabel & "'," & intReplacements & ",'" & intReplacementLabel & "'],"
+
+		End If
+
+	Next
+	strSpareDevicesData = Left(strSpareDevicesData,Len(strSpareDevicesData) - 1)%>
+
+	google.setOnLoadCallback(drawSpareChromebooks);
+
+	function drawSpareChromebooks() {
+
+		var data = google.visualization.arrayToDataTable([
+			<%=strSpareDevicesData%>
+		]);
+
+		var options = {
+			titlePosition: 'none',
+			chartArea:{left:40, width:'90%', height:'85%'},
+			legend: 'none',
+			isStacked: true,
+			//animation: {startup: 'true', duration: 1000, easing: 'out'},
+			hAxis: {viewWindow: {max : <%=intHighestValue*1.1%>},minValue: 0},
+			vAxis: {title: ''}
+
+		};
+
+		var chart = new google.visualization.BarChart(document.getElementById('spareChromebooks'));
+		chart.draw(data, options);
+
+		google.visualization.events.addListener(chart, 'select', selectHandler);
+
+		function selectHandler(e) {
+			var deviceYear = data.getValue(chart.getSelection()[0].row, 0)
+			window.open('devices.asp?DeviceType=Chromebook&Tags=Spare,' + deviceYear + '&View=Table','_self');
 		}
 
 	}
