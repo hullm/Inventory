@@ -715,4 +715,5 @@ Change Log - Inventory Site
 	- Added support for PreSchool
 	- Fixed a bug in the student edit mode when not showing the password.  It wouldn't exit exit mode.
 	- Added the ability to set generic images based on device type.  If a device's model image is missing 
-	- then device type image will be used if present.  Otherwise the generic image is used.
+	  then device type image will be used if present.  Otherwise the generic image is used.
+	- Fixed a bug that would prevent you from disabling or enabling a device from a mobile device.

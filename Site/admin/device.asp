@@ -783,7 +783,7 @@ End Sub%>
 		Asset Tag <%=intTag%>
 		</div>
 		<div class="CardTitle" id="assetTagEdit">
-		<input type="image" src="../images/disable.png" value="Disable Device" name="Submit" width="15" height="15" title="Decommissioned Device" onmouseover="setSubmitValue('Disable Device')"/>
+		<input type="image" src="../images/disable.png" name="Submit" width="15" height="15" title="Decommissioned Device" onmouseover="setSubmitValue('Disable Device')"/>
 		<%	If objDevice(7) Then %>
 				<image src="../images/yes.png" width="15" height="15" title="Insured" />
 		<%	End If %>
@@ -897,7 +897,7 @@ End Sub%>
 			</a>
 	<%	Else %>
 			<div>
-				<div class="Button"><input type="image" src="../images/restore.png" value="Restore Device" name="Submit" width="20" height="20" title="Restore Device" onmouseover="setSubmitValue('Restore Device')" /></div>
+				<div class="Button"><input type="image" src="../images/restore.png" name="Submit" width="20" height="20" title="Restore Device" onmouseover="setSubmitValue('Restore Device')" /></div>
 			</div>
 	<%	End If %>
 
