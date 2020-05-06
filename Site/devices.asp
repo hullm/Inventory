@@ -93,11 +93,11 @@ End If %>
 	
 	intTagCount = 0
 	If strTags = "" Then
-		strSQL = "SELECT ID,LGTag,Manufacturer,Model,SerialNumber,Room,DatePurchased,Site,Active,FirstName,LastName,UserName FROM Devices "
+		strSQL = "SELECT ID,LGTag,Manufacturer,Model,SerialNumber,Room,DatePurchased,Site,Active,FirstName,LastName,UserName,ComputerName FROM Devices "
 			strSQL = strSQL & strSQLWhere & " ORDER BY Devices.LGTag"
 	Else
 		strSQL = "SELECT Devices.ID,Devices.LGTag,Devices.Manufacturer,Devices.Model,Devices.SerialNumber,Devices.Room," & _
-			"Devices.DatePurchased,Devices.Site,Devices.Active,Tags.Tag,FirstName,LastName,UserName FROM Tags INNER JOIN " & _
+			"Devices.DatePurchased,Devices.Site,Devices.Active,Tags.Tag,FirstName,LastName,UserName,ComputerName FROM Tags INNER JOIN " & _
 			"Devices ON Tags.LGTag = Devices.LGTag "
 	
 		arrTags = Split(strTags,",")

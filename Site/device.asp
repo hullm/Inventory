@@ -61,7 +61,7 @@ End If %>
 	End If
 
 	'Get the information about the device
-	strSQL = "SELECT Manufacturer,Site,Model,Room,SerialNumber,Cart,BOCESTag,HasInsurance,DatePurchased,Active,AppleID,MACAddress,Notes" & vbCRLF
+	strSQL = "SELECT Manufacturer,Site,Model,Room,SerialNumber,Cart,ComputerName,HasInsurance,DatePurchased,Active,AppleID,MACAddress,Notes" & vbCRLF
 	strSQL = strSQL & "FROM Devices" & vbCRLF
 	strSQL = strSQL & "WHERE LGTag='" & intTag & "'"
 	Set objDevice = Application("Connection").Execute(strSQL)
@@ -208,15 +208,16 @@ End Sub%>
 			<div Class="PhotoCardColumn1">Model: </div>
 			<div Class="PhotoCardColumn2"><%=objDevice(2)%></div>
 		</div>
+		<%	If objDevice(6) <> "" Then %>
+			<div>
+				<div Class="PhotoCardColumn1">Name: </div>
+				<div Class="PhotoCardColumn2"><%=objDevice(6)%></div>
+			</div>
+		<%	End If %>
 		<div>
 			<div Class="PhotoCardColumn1">Serial: </div>
 			<div Class="PhotoCardColumn2"><%=objDevice(4)%></div>
 		</div>
-		<%	If objDevice(6) <> "" Then %>
-			<div>
-				<div Class="CardMerged">BOCES Tag: <%=objDevice(6)%></div>
-			</div>
-		<%	End If %>
 		<div>
 			<div Class="CardMerged">Site: <%=objDevice(1)%></div>
 		</div>

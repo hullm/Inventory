@@ -127,15 +127,15 @@ End If %>
 	'Set the visible columns
 	If IsMobile Then
 		If Application("ShowPasswords") Then
-			strDisplayColumns = "0,2,3,4,5,7,8,9,10,11,12,13"
+			strDisplayColumns = "0,2,3,4,5,7,8,9,10,11,12,13,14"
 		Else
-			strDisplayColumns = "0,2,3,5,6,7,8,9,10,11"
+			strDisplayColumns = "0,2,3,5,6,7,8,9,10,11,13"
 		End If
 	Else
 		If Application("ShowPasswords") Then
-			strDisplayColumns = "0,2,3,5,10,12"
+			strDisplayColumns = "0,2,3,5,10,12,14"
 		Else
-			strDisplayColumns = "0,2,3,5,11"
+			strDisplayColumns = "0,2,3,5,11,13"
 		End If
 	End If
 	
@@ -333,6 +333,7 @@ End Sub%>
 <%Sub ShowUserTable 
 
 	Dim strSQL, objDeviceList, strDeviceAssetTagList, strDeviceList, strRowClass, objFSO, intDaysRemaining, arrPWordLastSet
+	Dim strDeviceNameList
 	
 	Set objFSO = CreateObject("Scripting.FileSystemObject") %>
 	
@@ -359,6 +360,7 @@ End Sub%>
 			<th>Grade</th>
 			<th>Assigned Device</th>
 			<th>Assigned Tag</th>
+			<th>Computer Name</th>
 			</thead>
 			<tbody>
 	<%	Do Until objUserList.EOF 
@@ -412,26 +414,29 @@ End Sub%>
 				
 			<%	strDeviceList = ""
 				strDeviceAssetTagList = ""
+				strDeviceNameList = ""
 				If objUserList(8) > 0 Then
 			
-					strSQL = "SELECT Assignments.LGTag,Devices.Model" & vbCRLF
+					strSQL = "SELECT Assignments.LGTag,Devices.Model,ComputerName" & vbCRLF
 					strSQL = strSQL & "FROM Devices INNER JOIN Assignments ON Devices.LGTag = Assignments.LGTag" & vbCRLF
 					strSQL = strSQL & "WHERE Assignments.AssignedTo=" & objUserList(0) & " AND Assignments.Active=True"
 					Set objDeviceList = Application("Connection").Execute(strSQL)
-					
 			
 					If Not objDeviceList.EOF Then 
 						Do Until objDeviceList.EOF
 							strDeviceList = strDeviceList & "<a href=""device.asp?Tag=" & objDeviceList(0) & """>" & objDeviceList(1) & "</a>, "
 							strDeviceAssetTagList = strDeviceAssetTagList & "<a href=""device.asp?Tag=" & objDeviceList(0) & """>" & objDeviceList(0) & "</a>, "
+							strDeviceNameList = strDeviceNameList & "<a href=""device.asp?Tag=" & objDeviceList(0) & """>" & objDeviceList(2) & "</a>, "
 							objDeviceList.MoveNext
 						Loop 
 						strDeviceList = Left(strDeviceList,Len(strDeviceList) - 2)
 						strDeviceAssetTagList = Left(strDeviceAssetTagList,Len(strDeviceAssetTagList) - 2)
+						strDeviceNameList = Left(strDeviceNameList,Len(strDeviceNameList) - 2)
 					End If
 				End If %>
 				<td <%=strRowClass%>><%=strDeviceList%></td>
 				<td <%=strRowClass%>><%=strDeviceAssetTagList%></td>
+				<td <%=strRowClass%>><%=strDeviceNameList%></td>
 			</tr>
 		<%	objUserList.MoveNext
 		Loop %>

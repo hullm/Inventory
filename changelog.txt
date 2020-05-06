@@ -717,3 +717,4 @@ Change Log - Inventory Site
 	- Added the ability to set generic images based on device type.  If a device's model image is missing 
 	  then device type image will be used if present.  Otherwise the generic image is used.
 	- Fixed a bug that would prevent you from disabling or enabling a device from a mobile device.
+	- Added the computer name to the user's section of the website.

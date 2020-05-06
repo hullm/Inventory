@@ -53,7 +53,7 @@ End If %>
 	intUserID = objUser(0)
 	
 	'Get the list of devices assigned to the user
-	strSQL = "SELECT Assignments.LGTag,DateIssued,DateReturned,Assignments.Active,Assignments.Notes,Model" & vbCRLF
+	strSQL = "SELECT Assignments.LGTag,DateIssued,DateReturned,Assignments.Active,Assignments.Notes,Model,ComputerName" & vbCRLF
 	strSQL = strSQL & "FROM Devices INNER JOIN (People INNER JOIN Assignments ON People.ID = Assignments.AssignedTo) ON Devices.LGTag = Assignments.LGTag" & vbCRLF
 	strSQL = strSQL & "WHERE People.UserName='" & strUserName & "' AND Assignments.Active=True" & vbCRLF
 	strSQL = strSQL & "ORDER BY DateIssued DESC"
@@ -270,8 +270,14 @@ End Sub%>
 									<div Class="PhotoCardColumn2"><%=objModel(0)%></div>
 								</div>
 						<%	End If %>
+						<%	If objDeviceList(6) <> "" Then %>
+								<div>
+									<div Class="PhotoCardColumn1">Name: </div>
+									<div Class="PhotoCardColumn2"><%=(objDeviceList(6))%></div>
+								</div>
+						<%	End If %>
 							<div>
-								<div Class="PhotoCardColumn1">Date: </div>
+								<div Class="PhotoCardColumn1">Issued: </div>
 								<div Class="PhotoCardColumn2"><%=ShortenDate(objDeviceList(1))%></div>
 							</div>
 						</div>
