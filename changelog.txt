@@ -718,3 +718,5 @@ Change Log - Inventory Site
 	  then device type image will be used if present.  Otherwise the generic image is used.
 	- Fixed a bug that would prevent you from disabling or enabling a device from a mobile device.
 	- Added the computer name to the user's section of the website.
+	- Added Titan support to inventory update script.
+	- Added the ability to disable remote DNS filtering using a tag.
