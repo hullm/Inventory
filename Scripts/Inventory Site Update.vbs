@@ -12,6 +12,7 @@ Dim intHSBegins, strHomeDrive, strScript, strGroupRoot, objPerms, strFromEMail, 
 Dim intPasswordLife, strFromEMailAdmin, bolEnableEmail, datStartPasswordNag, datEndPasswordNag
 Dim strEMailOverride, bolSummerMode, strDestinyExport, datTime, strHour, strMinute, objKeepEnabledInAD
 Dim objKeepEnabledInDB, strOUBase, strPaperCut, strIReadyOriginal, strIReadyConverted, strIReadyClientID
+Dim strTitanExportCSV, strTitanConverted
 
 Set objKeepEnabledInAD = CreateObject("Scripting.Dictionary")
 Set objKeepEnabledInDB = CreateObject("Scripting.Dictionary")
@@ -35,13 +36,15 @@ strDestinyExport = "\\10.15.79.28\c$\Follett\FSC-Patron\StudentData.csv"
 strIReadyClientID = "ny-lakeg97869"
 strIReadyOriginal = "C:\Shared Data\Inventory\Scripts\CSV\IReady\"
 strIReadyConverted = "\\Lgdb01\c$\IReady\"
+strTitanExportCSV = "C:\Shared Data\Inventory\Scripts\CSV\Titan.csv"
+strTitanConverted = "C:\Shared Data\Titan\Titan.csv"
 datStartPasswordNag = "6/10/18"
 datEndPasswordNag = "6/22/18" 
 intPasswordLife = 90 'Days
 bolSummerMode = False
 bolEnableEmail = True 'Use this to turn off all email messages.
 strEMailOverride = "" '"hullm@lkgeorge.org" 'Use this to redirect all mail to one address for testing.
-objKeepEnabledInAD.Add "17powellc", "9/15/18"
+objKeepEnabledInAD.Add "20maltbiem", "8/15/20"
 
 CONST FIRSTNAME = 0
 CONST LASTNAME = 1
@@ -89,9 +92,9 @@ If strHour = 5 And strMinute = 30 Then
 	UpdateParentData
 
 'Normal daily run
-ElseIf strHour = 8 And strMinute = 0 Then
-	RunPendingTasks
-	UpdatePasswordExpirationDate True
+' ElseIf strHour = 8 And strMinute = 0 Then
+' 	RunPendingTasks
+' 	UpdatePasswordExpirationDate True
 
 'Hourly run
 ElseIf strMinute = 0 Then
@@ -103,6 +106,14 @@ ElseIf strMinute Mod 5 = 0 Then
 	RunPendingTasks
 End If
 
+'10:05 AM and PM to fix the Titan Export
+If strHour = 10 And strMinute = 05 Then
+	FixTitanExport
+End If
+If strHour = 22 And strMinute = 05 Then
+	FixTitanExport
+End If
+
 'Uncomment if you need to run out of cycle
 RunAll
 
@@ -111,12 +122,13 @@ Set objADCommand = Nothing
 Set objArguments = Nothing
 
 Sub RunAll
-	RunPendingTasks
+	'RunPendingTasks
 	'ScanImportFileForChanges True
 	'UpdatePasswordExpirationDate False
 	'ValidateADAccounts strStudentOU
 	'FixDestinyExport
-	FixIReadyExport
+	'FixIReadyExport
+	'FixTitanExport
 	'UpdateStudentCountHistory
 	'VerifyADandDBMatch
 	'UpdateParentData
@@ -2308,16 +2320,20 @@ Sub FixIReadyExport
 									strOutput = strOutput & strItem & ""","
 								Case 4
 									If InStr(LCase(strItem),"english") Then
-										strOutput = strOutput &  "English-"
+										strOutput = strOutput & "English-"
 									ElseIf InStr(LCase(strItem),"math") Then
-										strOutput = strOutput &  "Math-"
+										strOutput = strOutput & "Math-"
+									ElseIf InStr(LCase(strItem),"algebra") Then
+										strOutput = strOutput & "Math-"
 									Else
-										strOutput = strOutput &  "-"
+										strOutput = strOutput &  "UNKNOWN-"
 									End If
 									If IsNumeric(Mid(strItem,7,1)) Then
 										strGrade = Mid(strItem,7,1)
 									ElseIf IsNumeric(Right(strItem,1)) Then
 										strGrade = Right(strItem,1)
+									ElseIf InStr(LCase(strItem),"kindergarten") Then
+										strGrade = "0"
 									Else
 										strGrade = Mid(strItem,Len(strItem)-1,1)
 									End If
@@ -2326,6 +2342,10 @@ Sub FixIReadyExport
 										strOutput = strOutput &  """" & strItem & """,""" & "English"","""","""","""","""","""","""","""","""","
 									ElseIf InStr(LCase(strItem),"math") Then
 										strOutput = strOutput &  """" & strItem & """,""" & "Math"","""","""","""","""","""","""","""","""","
+									ElseIf InStr(LCase(strItem),"algebra") Then
+										strOutput = strOutput &  """" & strItem & """,""" & "Math"","""","""","""","""","""","""","""","""","
+									Else
+										strOutput = strOutput &  """" & strItem & """,""" & "UNKNOWN"","""","""","""","""","""","""","""","""","
 									End If
 							End Select
 
@@ -2521,6 +2541,93 @@ Sub FixIReadyExport
 
 	'Close objects
 	Set objFSO = Nothing
+
+End Sub
+
+Sub FixTitanExport
+
+	Dim objFSO, txtSourceCSV, txtDestCSV, strOutPut, strImportedData, arrData, intCounter, strItem
+
+	'Open the source and destination files
+	Set objFSO = CreateObject("Scripting.FileSystemObject")
+	Set txtSourceCSV = objFSO.OpenTextFile(strTitanExportCSV)
+	Set txtDestCSV = objFSO.CreateTextFile(strTitanConverted)
+
+	strOutPut = "Person Identifier,First Name,Middle Name,Last Name,Email,Date of Birth,Gender,Cell Phone,Race,Ethnicity,Academic Year,School,Grade,Homeroom,Home Language,Home Address,Home Address,City,State,Zip,Mailing Address,Mailing Address,Mailing City,Mailing State,Mailing Zip,Head of Household First Name,Head of Household Last Name,Head of Household Phone,Head of Household Email,Head of Household Relationship"
+	txtDestCSV.Writeline strOutput
+
+	'Grab the existing header so we can skip over it and get to data
+	strImportedData = txtSourceCSV.ReadLine
+
+	'Loop through each line 
+	While txtSourceCSV.AtEndOfLine = False
+
+		'Split the line into an array using the comma
+		strImportedData = txtSourceCSV.ReadLine
+		arrData = Split(strImportedData,",")
+
+		'Initalize variables
+		strOutput = ""
+		intCounter = 0
+
+		'Loop through each column 
+		For Each strItem in arrData
+
+			Select Case intCounter
+				Case 5
+					strOutput = strOutput & CDate(strItem) & ","
+				Case 15
+					If UBound(arrData) = 31 Then
+						strOutput = strOutput & strItem & " " & arrData(16) & ","
+					Else
+						strOutput = strOutput & strItem & ","
+					End If
+				Case 16
+					If UBound(arrData) = 32 Then
+						strOutput = strOutput & strItem & " " & arrData(17) & ","
+					End If
+				Case 17 
+					If UBound(arrData) = 31 Then
+						strOutput = strOutput & strItem & ","
+					End If
+				Case 21
+					If UBound(arrData) = 31 Then
+						If strItem = "" Then
+							strOutput = strOutput & arrData(22) & ","
+						Else
+							strOutput = strOutput & strItem & " " & arrData(22) & ","
+						End If
+					Else
+						strOutput = strOutput & strItem & ","
+					End If
+				Case 22
+					If UBound(arrData) = 32 Then
+						If strItem = "" Then
+							strOutput = strOutput & arrData(23) & ","
+						Else
+							strOutput = strOutput & strItem & " " & arrData(23) & ","
+						End If
+					End If
+				Case 23 
+					If UBound(arrData) = 31 Then
+						strOutput = strOutput & strItem & ","
+					End If
+				Case Else
+					strOutput = strOutput & strItem & ","
+			End Select
+
+			'Increase the counter by 1
+			intCounter = intCounter + 1
+
+		Next
+
+		'Remove the end comma
+		strOutput = Left(strOutPut,Len(strOutPut) - 1)
+	
+		'Write the output to a file
+		txtDestCSV.Writeline strOutput
+
+	Wend
 
 End Sub
 

@@ -181,6 +181,7 @@ End If %>
 			strAvailableTags = strAvailableTags & "See Me - Notifies User" & " &#013 "
 			strAvailableTags = strAvailableTags & "Backup - Backs up user's data" & " &#013 "
 			strAvailableTags = strAvailableTags & "NoBackup - Prevents backup" & " &#013 "
+			strAvailableTags = strAvailableTags & "Disable DNS - No Remote DNS Filter" & " &#013 "
 
 		Case "Schuylerville Inventory"
 
@@ -1927,8 +1928,6 @@ End Function%>
 
 		'Change the grade number into text
 		Select Case intGrade
-			Case -1
-				GetRole = "PreSchool Student"
 			Case 0
 				GetRole = "Kindergarten Student"
 			Case 1
