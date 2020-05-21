@@ -361,12 +361,20 @@ div.CardTitle {
 }
 input.Card {
 	background-color : #E8E8E8;
+	border-radius: 5px;
+	border: 2px solid #999;
+	max-width: 195px;
 }
 textarea.Card {
 	background-color : #E8E8E8;
+	border-radius: 5px;
+	border: 2px solid #999;
 }
 select.Card {
 	background-color : #E8E8E8;
+	border-radius: 5px;
+	border: 2px solid #999;
+	max-width: 195px;
 }
 /* End Generic card properties */
 
