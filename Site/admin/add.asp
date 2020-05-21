@@ -557,7 +557,7 @@ End Sub%>
 
 <%Function AddDevice(bolAddToInventory)
 
-	Dim strSQL, objDeviceCheck, arrTags, objTagCheck
+	Dim strSQL, objDeviceCheck, arrTags, objTagCheck, strComputerName
 
 	'See if the needed values are present
 	If intTag = "" Then
@@ -680,6 +680,30 @@ End Sub%>
 
 				End If
 
+				'Attempt to generate a computer name and add it to the database
+				If Left(strTag,2) = 20 Then
+					If Len(strTag) = 4 Then
+						If InStr(strModel,"MacBook") Then
+							Select Case Len(intTag)
+								Case 1
+									strComputerName = strTag & "-0000" & intTag
+								Case 2
+									strComputerName = strTag & "-000" & intTag
+								Case 3
+									strComputerName = strTag & "-00" & intTag
+								Case 4
+									strComputerName = strTag & "-0" & intTag
+								Case 5
+									strComputerName = strTag & "-" & intTag
+								Case Else
+							End Select
+						End If
+
+						strSQL = "UPDATE Devices SET ComputerName='" & strComputerName & "' WHERE LGTag='" & intTag & "'"
+						Application("Connection").Execute(strSQL)
+					End If
+				End If
+			
 			End If
 
 			Set objTagCheck = Nothing
