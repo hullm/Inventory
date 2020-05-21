@@ -721,3 +721,5 @@ Change Log - Inventory Site
 	- Added Titan support to inventory update script.
 	- Added the ability to disable remote DNS filtering using a tag.
 	- Added auto computer name for MacBooks with a class of tag in the format 20xx.
+	- Fixed the way buttons, text boxes, and dropdowns appear after Chrome 83.
+	- Fixed Inside and Outside access over the past week cards if the values are 0 for an entry.

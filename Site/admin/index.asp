@@ -962,9 +962,9 @@ End Sub%>
 	Dim intHSCount, intESCount, intMSCount, intHSMSCount, intNewComputerCount, intGrade, bolShowTotalCount
 	Dim objStudentsWithoutDevices, objStudentsWithAccess, intStudentsWithAccess, intStudentsWithoutAccess
 	Dim intTotalWithAccess, intTotalWithoutAccess, intTotalPercentWithAccess, strHSStudents
-	Dim strToolTip, objInternetTypes, intUnknownInternetCount
+	Dim strToolTip, objInternetTypes, intUnknownInternetCount, strStudentsWithAccess, strStudentsWithoutAccess
 
-	strHSStudents = GetGraduationYear(7)
+	strHSStudents = GetGraduationYear(5)
 
 	strSQL = "SELECT ClassOf, Count(People.ID) AS CountOfID" & vbCRLF
 	strSQL = strSQL & "FROM People" & vbCRLF
@@ -996,7 +996,6 @@ End Sub%>
 			intStudentsWithoutAccess = 0
 			bolShowTotalCount = False
 
-
 			If Not objStudentsWithAccess.EOF Then
 				Do Until objStudentsWithAccess.EOF
 					If objStudentsWithAccess(0) = objStudentsPerGrade(0) Then
@@ -1008,16 +1007,21 @@ End Sub%>
 				objStudentsWithAccess.MoveFirst
 			End If
 
-
 			intStudentsWithoutAccess = objStudentsPerGrade(1) - intStudentsWithAccess
 
 			If intStudentsWithAccess = 0 Then
-				intStudentsWithAccess = ""
+				intStudentsWithAccess = 0
+				strStudentsWithAccess = ""
 				bolShowTotalCount = True
+			Else
+				strStudentsWithAccess = intStudentsWithAccess
 			End If
 			If intStudentsWithoutAccess = 0 Then
-				intStudentsWithoutAccess = ""
+				intStudentsWithoutAccess = 0
+				strStudentsWithoutAccess = ""
 				bolShowTotalCount = True
+			Else
+				strStudentsWithoutAccess = intStudentsWithoutAccess
 			End If
 
 			If bolShowTotalCount Then
@@ -1028,17 +1032,16 @@ End Sub%>
 
 			strStudentsPerGradeData = strStudentsPerGradeData & "['" & GetGrade(Replace(objStudentsPerGrade(0),"'","\'")) & _
 			"', " & intStudentsWithAccess & _
-			",'" & intStudentsWithAccess & _
+			",'" & strStudentsWithAccess & _
 			"','Have Accessed'" & _
 			"," & intStudentsWithoutAccess & _
-			",'" & intStudentsWithoutAccess & _
+			",'" & strStudentsWithoutAccess & _
 			"','Have Not Accessed'],"
 			intTotalStudentCount = intTotalStudentCount + objStudentsPerGrade(1)
 
 			If objStudentsPerGrade(1) > intHighestValue Then
 			intHighestValue = objStudentsPerGrade(1)
 		 End If
-
 
 			objStudentsPerGrade.MoveNext
 		Loop
@@ -1122,7 +1125,7 @@ End Sub%>
 	Dim intHSCount, intESCount, intMSCount, intHSMSCount, intNewComputerCount, intGrade, bolShowTotalCount
 	Dim objStudentsWithoutDevices, objStudentsWithAccess, intStudentsWithAccess, intStudentsWithoutAccess
 	Dim intTotalWithAccess, intTotalWithoutAccess, intTotalPercentWithAccess, strHSStudents
-	Dim strToolTip
+	Dim strToolTip, strStudentsWithAccess, strStudentsWithoutAccess
 
 	strHSStudents = GetGraduationYear(5)
 
@@ -1156,7 +1159,6 @@ End Sub%>
 			intStudentsWithoutAccess = 0
 			bolShowTotalCount = False
 
-
 			If Not objStudentsWithAccess.EOF Then
 				Do Until objStudentsWithAccess.EOF
 					If objStudentsWithAccess(0) = objStudentsPerGrade(0) Then
@@ -1171,12 +1173,18 @@ End Sub%>
 			intStudentsWithoutAccess = objStudentsPerGrade(1) - intStudentsWithAccess
 
 			If intStudentsWithAccess = 0 Then
-				intStudentsWithAccess = ""
+				intStudentsWithAccess = 0
+				strStudentsWithAccess = ""
 				bolShowTotalCount = True
+			Else
+				strStudentsWithAccess = intStudentsWithAccess
 			End If
 			If intStudentsWithoutAccess = 0 Then
-				intStudentsWithoutAccess = ""
+				intStudentsWithoutAccess = 0
+				strStudentsWithoutAccess = ""
 				bolShowTotalCount = True
+			Else
+				strStudentsWithoutAccess = intStudentsWithoutAccess
 			End If
 
 			If bolShowTotalCount Then
@@ -1187,10 +1195,10 @@ End Sub%>
 
 			strStudentsPerGradeData = strStudentsPerGradeData & "['" & GetGrade(Replace(objStudentsPerGrade(0),"'","\'")) & _
 			"', " & intStudentsWithAccess & _
-			",'" & intStudentsWithAccess & _
+			",'" & strStudentsWithAccess & _
 			"','Have Accessed'" & _
 			"," & intStudentsWithoutAccess & _
-			",'" & intStudentsWithoutAccess & _
+			",'" & strStudentsWithoutAccess & _
 			"','Have Not Accessed'],"
 			intTotalStudentCount = intTotalStudentCount + objStudentsPerGrade(1)
 

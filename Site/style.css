@@ -83,6 +83,13 @@ a:link, a:visited {
 .Center {
 	text-align: center;
 }
+
+input[type=submit] {
+	border-radius: 5px;
+	border: 2px solid #999;
+	box-shadow: 1px 1px 2px 0 #999;
+}
+
 .Button {
 	float: right;
 	margin-left:5px;
@@ -376,6 +383,7 @@ select.Card {
 	border: 2px solid #999;
 	max-width: 195px;
 }
+
 /* End Generic card properties */
 
 .Chart {
