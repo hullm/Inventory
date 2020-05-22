@@ -115,23 +115,23 @@ If strHour = 22 And strMinute = 05 Then
 End If
 
 'Uncomment if you need to run out of cycle
-RunAll
+'RunAll
 
 Set objDBConnection = Nothing
 Set objADCommand = Nothing
 Set objArguments = Nothing
 
 Sub RunAll
-	'RunPendingTasks
-	'ScanImportFileForChanges True
-	'UpdatePasswordExpirationDate False
-	'ValidateADAccounts strStudentOU
-	'FixDestinyExport
-	'FixIReadyExport
-	'FixTitanExport
-	'UpdateStudentCountHistory
-	'VerifyADandDBMatch
-	'UpdateParentData
+	RunPendingTasks
+	ScanImportFileForChanges True
+	UpdatePasswordExpirationDate False
+	ValidateADAccounts strStudentOU
+	FixDestinyExport
+	FixIReadyExport
+	FixTitanExport
+	UpdateStudentCountHistory
+	VerifyADandDBMatch
+	UpdateParentData
 	'MsgBox "Done"
 End Sub
 
@@ -183,6 +183,9 @@ Sub ScanImportFileForChanges(bolResetPasswords)
 			'Find the first available UserName
 			arrUserData(USERNAME) = CreateUsername(arrUserData(FIRSTNAME),arrUserData(LASTNAME),arrUserData(CLASSOF))
 		
+			'Get an available password
+			arrUserData(PASSWORD) = GeneratePassword
+
 			'Create the account in Active Directory
 			CreateStudentADAccount arrUserData
 
@@ -191,15 +194,14 @@ Sub ScanImportFileForChanges(bolResetPasswords)
 		
 			'Add the user to the inventory database
 			AddUserToDatabase arrUserData
-		
-			'Update the log
-			UpdateLog "NewStudentDetected","",arrUserData(USERNAME),"",arrUserData(LASTNAME) & ", " & arrUserData(FIRSTNAME),""
 
-			'Send email about the new student found.
-			SendEmail "Natalie","fullenn@lkgeorge.org", "NewStudentFound", arrUserData
-			SendEmail "Rene","palmerr@lkgeorge.org", "NewStudentFound", arrUserData
-			SendEmail "Matt","hullm@lkgeorge.org", "NewStudentFound", arrUserData
-			SendEmail "Janine","wayj@lkgeorge.org", "NewStudentFound", arrUserData
+			'Update the log and send notifications
+			UpdateLog "NewStudentReady","",arrUserData(USERNAME),"","",""
+			SendEmail "Natalie", "fullenn@lkgeorge.org", "NewStudentReadyAdmin", arrUserData
+			SendEmail "Matt", "hullm@lkgeorge.org", "NewStudentReadyAdmin", arrUserData
+			SendEmail "Rene","palmerr@lkgeorge.org", "NewStudentReady", arrUserData
+			SendEmail "Janine","wayj@lkgeorge.org", "NewStudentReady", arrUserData
+			SendEMailToTeachers "NewStudentReady", arrUserData
 
 		Else
 			
@@ -431,10 +433,10 @@ Function GetUserDataFromImportedData(strImportedData)
 		'End If
 	End If
 	
-	'If Err Then
-	'	MsgBox strFirstName & " " & strLastName
-	'	Wscript.Quit
-	'End If
+	If Err Then
+		MsgBox strFirstName & " " & strLastName
+		Wscript.Quit
+	End If
 
 	'Fix the last name
 	If InStr(strLastName," ") <> 0 Then
@@ -535,11 +537,11 @@ Sub CreateStudentADAccount(arrUserData)
 	objUser.Put "ScriptPath", strScript
 	'objUser.Put "HomeDirectory", strStudentShare & arrUserData(USERNAME)
 	'objUser.Put "HomeDrive", strHomeDrive
-	objUser.Put "Description", "Class of " & arrUserData(CLASSOF) & " - Pending Account"
+	objUser.Put "Description", "Class of " & arrUserData(CLASSOF)
 	'MsgBox arrUserData(USERNAME)
 	objUser.SetInfo
-	objUser.Setpassword("P@ssw0rd")
-	objUser.Put "UserAccountControl", 66050 'Account Disabled
+	objUser.Setpassword(arrUserData(PASSWORD))
+	objUser.Put "UserAccountControl", 66048 'Account Enabled
 	objUser.SetInfo
 	objGroup.Add(objUser.ADSPath)
 	
@@ -720,9 +722,9 @@ Sub AddUserToDatabase(arrUserData)
 	strSQL = strSQL & Replace(arrUserData(HOMEROOMEMAIL),"'","''") & "','"
 	strSQL = strSQL & Replace(arrUserData(SEX),"'","''") & "','"
 	strSQL = strSQL & Replace(arrUserData(BIRTHDAY),"'","''") & "','"
-	strSQL = strSQL & "NewAccount',"
-	strSQL = strSQL & arrUserData(STUDENTID) & ",False,True,"
-	strSQL = strSQL & "False,True,#" & arrUserData(DATECREATED) & "#)"
+	strSQL = strSQL & Replace(arrUserData(PASSWORD),"'","''") & "',"
+	strSQL = strSQL & arrUserData(STUDENTID) & ",True,False,"
+	strSQL = strSQL & "True,False,#" & arrUserData(DATECREATED) & "#)"
 	objDBConnection.Execute(strSQL)
 	
 End Sub
@@ -1545,7 +1547,7 @@ Sub DisableInActiveDirectory(strUserName, strReason)
 	
 	Else
 	
-		'Remove the user to the groups
+		'Remove the user from the groups
 		strSQL = "SELECT DN FROM GroupMappings WHERE RoleID=" & arrUserData(CLASSOF) & " AND Site='" & arrUserData(SITE) & "'"
 		Set objGroups = objDBConnection.Execute(strSQL)
 		If Not objGroups.EOF Then
@@ -2546,14 +2548,18 @@ End Sub
 
 Sub FixTitanExport
 
-	Dim objFSO, txtSourceCSV, txtDestCSV, strOutPut, strImportedData, arrData, intCounter, strItem
+	Dim objFSO, txtSourceCSV, txtDestCSV, strOutPut, strImportedData, arrData, intCounter, strItem, strSQL, objStudentPINs, strEMail, intPIN
 
 	'Open the source and destination files
 	Set objFSO = CreateObject("Scripting.FileSystemObject")
 	Set txtSourceCSV = objFSO.OpenTextFile(strTitanExportCSV)
 	Set txtDestCSV = objFSO.CreateTextFile(strTitanConverted)
 
-	strOutPut = "Person Identifier,First Name,Middle Name,Last Name,Email,Date of Birth,Gender,Cell Phone,Race,Ethnicity,Academic Year,School,Grade,Homeroom,Home Language,Home Address,Home Address,City,State,Zip,Mailing Address,Mailing Address,Mailing City,Mailing State,Mailing Zip,Head of Household First Name,Head of Household Last Name,Head of Household Phone,Head of Household Email,Head of Household Relationship"
+	'Get the student's lunch PINs from the database.
+	strSQL = "SELECT UserName, PWord FROM People WHERE Active=True"
+	Set objStudentPINs = objDBConnection.Execute(strSQL) 
+
+	strOutPut = "Person Identifier,First Name,Middle Name,Last Name,Email,Date of Birth,Gender,Cell Phone,Race,Ethnicity,Academic Year,School,Grade,Homeroom,Home Language,Home Address,Home Address,City,State,Zip,Mailing Address,Mailing Address,Mailing City,Mailing State,Mailing Zip,Head of Household First Name,Head of Household Last Name,Head of Household Phone,Head of Household Email,Head of Household Relationship,Alternate ID/Student Lunch Pins"
 	txtDestCSV.Writeline strOutput
 
 	'Grab the existing header so we can skip over it and get to data
@@ -2574,6 +2580,9 @@ Sub FixTitanExport
 		For Each strItem in arrData
 
 			Select Case intCounter
+				Case 4
+					strEMail = strItem
+					strOutput = strOutput & strItem & ","
 				Case 5
 					strOutput = strOutput & CDate(strItem) & ","
 				Case 15
@@ -2621,8 +2630,18 @@ Sub FixTitanExport
 
 		Next
 
-		'Remove the end comma
-		strOutput = Left(strOutPut,Len(strOutPut) - 1)
+		'Add the students PIN to the end.
+		intPIN = 0
+		If Not objStudentPINs.EOF Then
+			Do Until objStudentPINs.EOF
+				If LCase(strEMail) = LCase(objStudentPINs(0)) & "@lkgeorge.org" Then
+					intPIN = Right(objStudentPINs(1),Len(objStudentPINs(1))-4)
+				End If
+				objStudentPINs.MoveNext
+			Loop
+		End If
+		objStudentPINs.MoveFirst
+		strOutput = strOutPut & intPIN
 	
 		'Write the output to a file
 		txtDestCSV.Writeline strOutput
@@ -3673,6 +3692,32 @@ Function CreateUsername(strFirst,strLast,intClassOf)
 	
 	Set objRootDSE = Nothing
 	
+End Function
+
+Function GeneratePassword()
+
+	'This function will generate a password that's a 5 digit unique number with 4 leading zeros
+
+	Dim bolUniquePasswordFound, intRandomNumber, intMax, intMin, strSQL, objPasswordLookup
+
+	bolUniquePasswordFound = False
+	intMax=99999
+	intMin=10000
+	
+	Do Until bolUniquePasswordFound
+		Randomize	
+		intRandomNumber = Int((intMax-intMin+1)*Rnd+intMin)
+
+		strSQL = "SELECT ID FROM People WHERE PWord='0000" & intRandomNumber & "'"
+		Set objPasswordLookup = objDBConnection.Execute(strSQL)
+
+		If Not objPasswordLookup.EOF Then
+			bolUniquePasswordFound = True
+		End If
+	Loop
+
+	GeneratePassword = "0000" & intRandomNumber
+
 End Function
 
 Function GetGrade(intGraduatingYear)

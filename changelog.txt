@@ -723,3 +723,4 @@ Change Log - Inventory Site
 	- Added auto computer name for MacBooks with a class of tag in the format 20xx.
 	- Fixed the way buttons, text boxes, and dropdowns appear after Chrome 83.
 	- Fixed Inside and Outside access over the past week cards if the values are 0 for an entry.
+	- Changed the flow when creating new student accounts.  Now it's fully automated.
