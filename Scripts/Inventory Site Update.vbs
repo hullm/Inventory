@@ -3711,7 +3711,7 @@ Function GeneratePassword()
 		strSQL = "SELECT ID FROM People WHERE PWord='0000" & intRandomNumber & "'"
 		Set objPasswordLookup = objDBConnection.Execute(strSQL)
 
-		If Not objPasswordLookup.EOF Then
+		If objPasswordLookup.EOF Then
 			bolUniquePasswordFound = True
 		End If
 	Loop
