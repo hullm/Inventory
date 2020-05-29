@@ -52,7 +52,7 @@ End If %>
 	
 	'Get the list of models with events from the database
 	If Request.QueryString("Model") = "" Then
-		strSQL = "SELECT DISTINCT Model FROM Events WHERE EventDate>=#" & datStartDate & "# AND EventDate<=#" & datEndDate & "# ORDER BY Model" 
+		strSQL = "SELECT DISTINCT Model FROM Events WHERE Deleted=False AND EventDate>=#" & datStartDate & "# AND EventDate<=#" & datEndDate & "# ORDER BY Model" 
 	Else   	
 		
 		'Get the oldest device
@@ -572,7 +572,7 @@ End Sub%>
 
 	strSQL = "SELECT Category, Count(ID) AS CountOfID" & vbCRLF
 	strSQL = strSQL & "FROM Events" & vbCRLF
-	strSQL = strSQL & "WHERE EventDate>=#" & datStartDate & "# AND EventDate<=#" & datEndDate & "#" & vbCRLF
+	strSQL = strSQL & "WHERE Deleted=False AND EventDate>=#" & datStartDate & "# AND EventDate<=#" & datEndDate & "#" & vbCRLF
 	strSQL = strSQL & "GROUP BY Category" & vbCRLF
 	Set objEvents = Application("Connection").Execute(strSQL)
 	
@@ -625,7 +625,7 @@ End Sub%>
 
 	strSQL = "SELECT Type, Count(ID) AS CountOfID" & vbCRLF
 	strSQL = strSQL & "FROM Events" & vbCRLF
-	strSQL = strSQL & "WHERE EventDate>=#" & datStartDate & "# AND EventDate<=#" & datEndDate & "#" & vbCRLF
+	strSQL = strSQL & "WHERE Deleted=False AND EventDate>=#" & datStartDate & "# AND EventDate<=#" & datEndDate & "#" & vbCRLF
 	strSQL = strSQL & "GROUP BY Type" & vbCRLF
 	Set objEvents = Application("Connection").Execute(strSQL)
 	
@@ -678,7 +678,7 @@ End Sub%>
 
 	strSQL = "SELECT Category, Count(ID) AS CountOfID" & vbCRLF
 	strSQL = strSQL & "FROM Events" & vbCRLF
-	strSQL = strSQL & "WHERE EventDate>=#" & datStartDate & "# AND EventDate<=#" & datEndDate & "# AND Model='" & Replace(Request.QueryString("Model"),"'","''") & "'" & vbCRLF
+	strSQL = strSQL & "WHERE Deleted=False AND EventDate>=#" & datStartDate & "# AND EventDate<=#" & datEndDate & "# AND Model='" & Replace(Request.QueryString("Model"),"'","''") & "'" & vbCRLF
 	strSQL = strSQL & "GROUP BY Category" & vbCRLF
 	Set objEvents = Application("Connection").Execute(strSQL)
 	
@@ -731,7 +731,7 @@ End Sub%>
 
 	strSQL = "SELECT Type, Count(ID) AS CountOfID" & vbCRLF
 	strSQL = strSQL & "FROM Events" & vbCRLF
-	strSQL = strSQL & "WHERE EventDate>=#" & datStartDate & "# AND EventDate<=#" & datEndDate & "# AND Model='" & Replace(Request.QueryString("Model"),"'","''") & "'" & vbCRLF
+	strSQL = strSQL & "WHERE Deleted=False AND EventDate>=#" & datStartDate & "# AND EventDate<=#" & datEndDate & "# AND Model='" & Replace(Request.QueryString("Model"),"'","''") & "'" & vbCRLF
 	strSQL = strSQL & "GROUP BY Type" & vbCRLF
 	Set objEvents = Application("Connection").Execute(strSQL)
 	
@@ -787,7 +787,7 @@ End Sub%>
 
 			strSQL = "SELECT Category, Count(ID) AS CountOfID" & vbCRLF
 			strSQL = strSQL & "FROM Events" & vbCRLF
-			strSQL = strSQL & "WHERE EventDate>=#" & datStartDate & "# AND EventDate<=#" & datEndDate & "# AND Model='" & objEventData(0) & "'" & vbCRLF
+			strSQL = strSQL & "WHERE Deleted=False AND EventDate>=#" & datStartDate & "# AND EventDate<=#" & datEndDate & "# AND Model='" & objEventData(0) & "'" & vbCRLF
 			strSQL = strSQL & "GROUP BY Category" & vbCRLF
 			Set objEvents = Application("Connection").Execute(strSQL)
 	
@@ -855,7 +855,7 @@ End Sub %>
 
 			strSQL = "SELECT Type, Count(ID) AS CountOfID" & vbCRLF
 			strSQL = strSQL & "FROM Events" & vbCRLF
-			strSQL = strSQL & "WHERE EventDate>=#" & datStartDate & "# AND EventDate<=#" & datEndDate & "# AND Model='" & objEventData(0) & "'" & vbCRLF
+			strSQL = strSQL & "WHERE Deleted=False AND EventDate>=#" & datStartDate & "# AND EventDate<=#" & datEndDate & "# AND Model='" & objEventData(0) & "'" & vbCRLF
 			strSQL = strSQL & "GROUP BY Type" & vbCRLF
 			Set objEvents = Application("Connection").Execute(strSQL)
 	

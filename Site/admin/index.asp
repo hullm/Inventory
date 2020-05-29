@@ -1272,7 +1272,7 @@ End Sub%>
 
 	strSQL = "SELECT Type, Count(ID) AS CountOfID" & vbCRLF
 	strSQL = strSQL & "FROM Events" & vbCRLF
-	strSQL = strSQL & "WHERE Resolved=False" & vbCRLF
+	strSQL = strSQL & "WHERE Deleted=False AND Resolved=False" & vbCRLF
 	strSQL = strSQL & "GROUP BY Type"
 	Set objOpenEventCounts = Application("Connection").Execute(strSQL)
 
@@ -2349,7 +2349,7 @@ End Sub%>
 
 	strSQL = "SELECT Category, Count(ID) AS CountOfID" & vbCRLF
 	strSQL = strSQL & "FROM Events" & vbCRLF
-	strSQL = strSQL & "WHERE EventDate>=#" & datStartDate & "# AND EventDate<=#" & datEndDate & "#" & vbCRLF
+	strSQL = strSQL & "WHERE Deleted=False AND EventDate>=#" & datStartDate & "# AND EventDate<=#" & datEndDate & "#" & vbCRLF
 	strSQL = strSQL & "GROUP BY Category" & vbCRLF 'ORDER BY Count(ID) DESC
 	Set objEvents = Application("Connection").Execute(strSQL)
 
@@ -2404,12 +2404,11 @@ End Sub%>
 
 	strSQL = "SELECT Type, Count(ID) AS CountOfID" & vbCRLF
 	strSQL = strSQL & "FROM Events" & vbCRLF
-	strSQL = strSQL & "WHERE EventDate>=#" & datStartDate & "# AND EventDate<=#" & datEndDate & "#" & vbCRLF
+	strSQL = strSQL & "WHERE Deleted=False AND EventDate>=#" & datStartDate & "# AND EventDate<=#" & datEndDate & "#" & vbCRLF
 	strSQL = strSQL & "GROUP BY Type" & vbCRLF 'ORDER BY Count(ID) DESC
 	Set objEvents = Application("Connection").Execute(strSQL)
 
 	strEventData = "['Category','Count',{ role: 'annotation' } ],"
-
 
 	If Not objEvents.EOF Then
 		Do Until objEvents.EOF
@@ -2564,7 +2563,7 @@ End Sub%>
 
 	Else
 
-		strSQL = "SELECT ID, LGTag FROM Events WHERE ID=" & intEventNumber
+		strSQL = "SELECT ID, LGTag FROM Events WHERE Deleted=False AND ID=" & intEventNumber
 		Set objEventLookup = Application("Connection").Execute(strSQL)
 
 		If Not objEventLookup.EOF Then

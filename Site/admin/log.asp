@@ -279,6 +279,8 @@ End Sub%>
 			LogEntryType = "Event Added"
 		Case "EventClosed"
 			LogEntryType = "Event Closed"
+		Case "EventDeleted"
+			LogEntryType = "Event Deleted"
 		Case "EventUpdatedCategory"
 			LogEntryType = "Event Category Updated"
 		Case "EventUpdatedNotes"

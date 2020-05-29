@@ -160,7 +160,7 @@ Sub UpdateInventory
 		strSQL = "UPDATE Devices SET LastCheckInDate=#" & datDate & "#,LastCheckInTime=#" & datTime & "# WHERE SerialNumber='" & strSerialNumber & "'"
 		Application("Connection").Execute(strSQL)
 
-		strSQL = "SELECT ID FROM Events WHERE Resolved=False AND Type='Lost Device' AND LGTag='" & objDevice(0) & "'"
+		strSQL = "SELECT ID FROM Events WHERE Deleted=False AND Resolved=False AND Type='Lost Device' AND LGTag='" & objDevice(0) & "'"
 		Set objLostDeviceCheck = Application("Connection").Execute(strSQL)
 	
 		bolProblemFound = False

@@ -131,7 +131,7 @@ End If %>
 
 	'Get the list of events associated with the user
 	strSQL = "SELECT ID,Type,Notes,EventDate,EventTime,Resolved,ResolvedDate,ResolvedTime,Category,Warranty,LGTag,UserID,Site,Model,EnteredBy,CompletedBy " &_
-		"FROM Events WHERE UserID=" & intUserID & " ORDER BY ID DESC"
+		"FROM Events WHERE Deleted=False AND UserID=" & intUserID & " ORDER BY ID DESC"
 	Set objEvents = Application("Connection").Execute(strSQL)
 
 	'Count the number of active and old assignments
@@ -1267,7 +1267,7 @@ End Sub%>
 					strSQL = "SELECT Model, Active FROM Devices WHERE LGTag='" & objDeviceList(0) & "'"
 					Set objModel = Application("Connection").Execute(strSQL)
 					
-					strSQL = "SELECT ID FROM Events WHERE Resolved=False AND LGTag='" & objDeviceList(0) & "'"
+					strSQL = "SELECT ID FROM Events WHERE Deleted=False AND Resolved=False AND LGTag='" & objDeviceList(0) & "'"
 					Set objEventLookup = Application("Connection").Execute(strSQL)
 					
 					If objEventLookup.EOF Then
@@ -1959,6 +1959,8 @@ End Sub%>
 			LogEntryType = "Event Added"
 		Case "EventClosed"
 			LogEntryType = "Event Closed"
+		Case "EventDeleted"
+			LogEntryType = "Event Deleted"
 		Case "EventUpdatedCategory"
 			LogEntryType = "Event Category Updated"
 		Case "EventUpdatedNotes"
@@ -2294,7 +2296,7 @@ End Sub %>
 				If objAssignmentCheck.EOF Then
 
 					'Check and see if the device has an open event
-					strSQL = "SELECT ID FROM Events WHERE LGTag='" & intTag & "' AND Resolved=False"
+					strSQL = "SELECT ID FROM Events WHERE Deleted=False AND LGTag='" & intTag & "' AND Resolved=False"
 					Set objOpenEvents = Application("Connection").Execute(strSQL)
 
 					If objOpenEvents.EOF Then

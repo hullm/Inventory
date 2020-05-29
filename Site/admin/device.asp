@@ -16,7 +16,7 @@ Dim bolAdapterReturned, bolCaseReturned, strInsuredChecked, strLocationMessage, 
 Dim strAddEventMessage, strOldAssignmentMessage, intEventID, objTags, strTags, strBackLink, bolClosedEvents
 Dim objMissingStuff, objLoanedOut, strMissingStuff, strLoanedOut, strCardType, strColumns, bolOpenEvent
 Dim objIssuedBy, objRooms, strMACAddress, strAppleID, objLog, intClosedEventsCount, intOldAssignmentCount
-Dim strViewAllToggle, objLastNames, objMakes, objModels
+Dim strViewAllToggle, objLastNames, objMakes, objModels, strEventUpdatedMessage, strEventUpdateType
 Dim deviceOn, WshShell, PINGFlag, ipAddress, status
 
 'See if the user has the rights to visit this page
@@ -88,7 +88,7 @@ End If %>
 			AssignDevice
 		Case "Return"
 			ReturnDevice
-		Case "Update Event"
+		Case "Update Event", "Update Event, "
 			UpdateEvent
 		Case "Update Device", "Update Device, "
 			UpdateDevice
@@ -98,6 +98,8 @@ End If %>
 			RestoreDevice
 		Case "Disable Device"
 			DisableDevice
+		Case "Delete Event"
+			DeleteEvent
 	End Select
 
 	'Setup the assign a device form
@@ -182,7 +184,7 @@ End If %>
 	Set objRooms = Application("Connection").Execute(strSQL)
 
 	'Get the list of events for this device
-	strSQL = "SELECT ID,Type,Notes,EventDate,EventTime,Resolved,ResolvedDate,ResolvedTime,Category,Warranty,UserID,Site,Model,EnteredBy,CompletedBy FROM Events WHERE LGTag='" & intTag & "'"
+	strSQL = "SELECT ID,Type,Notes,EventDate,EventTime,Resolved,ResolvedDate,ResolvedTime,Category,Warranty,UserID,Site,Model,EnteredBy,CompletedBy FROM Events WHERE Deleted=False AND LGTag='" & intTag & "'"
 	Set objEvents = Application("Connection").Execute(strSQL)
 
 	'Get the list of lastnames for the auto complete
@@ -329,6 +331,7 @@ End Sub%>
 				var assetTagView = document.getElementById("assetTagView");
 				var purchasedView = document.getElementById("purchasedView");
 				var purchasedEdit = document.getElementById("purchasedEdit");
+				var deleteEvent = document.getElementById("deleteEvent");
 				$('#body').show();
 		<%	If objDevice(3) = "" Or IsNull(objDevice(3)) Then %>
 				$(roomView).hide();
@@ -349,6 +352,7 @@ End Sub%>
 				$(modelEdit).hide();
 				$(makeEdit).hide();
 				$(assetTagEdit).hide();
+				$(deleteEvent).hide();
 
 				$("#assignmentsToggle").click(function(){
 					if ($(oldAssignments).is(":visible")) {
@@ -397,6 +401,15 @@ End Sub%>
 						return false;
 					});
 			<%	End If %>
+
+				$("#editToggleEvent").click(function(){
+					if ($(deleteEvent).is(":visible")) {
+						$(deleteEvent).hide();
+					} else {
+						$(deleteEvent).show();
+					}
+					return false;
+				})
 
 				$("#editToggle").click(function(){
 					if ($(purchasedView).is(":visible")) {
@@ -620,8 +633,12 @@ End Sub%>
 		<script type="text/javascript">
 
 			function setSubmitValue(value) {
-					jQuery('#mouseOnValue').val(value);
-				}
+				jQuery('#mouseOnValue').val(value);
+			}
+
+			function setSubmitValueEvent(value) {
+				jQuery('#mouseOnValueEvent').val(value);
+			}
 		</script>
 
 <%	If objAssignment.EOF Then %>
@@ -783,7 +800,7 @@ End Sub%>
 		Asset Tag <%=intTag%>
 		</div>
 		<div class="CardTitle" id="assetTagEdit">
-		<input type="image" src="../images/disable.png" name="Submit" width="15" height="15" title="Decommissioned Device" onmouseover="setSubmitValue('Disable Device')"/>
+		<input type="image" src="../images/disable.png" name="Submit" width="15" height="15" title="Decommission Device" onmouseover="setSubmitValue('Disable Device')"/>
 		<%	If objDevice(7) Then %>
 				<image src="../images/yes.png" width="15" height="15" title="Insured" />
 		<%	End If %>
@@ -1483,7 +1500,10 @@ End Sub%>
 				<div class="Card NormalCard">
 					<form method="POST" action="<%=strSubmitTo%>">
 					<input type="hidden" name="EventID" value="<%=objEvents(0)%>" />
-					<div class="CardTitle">Event <%=objEvents(0)%></div>
+					<div class="CardTitle">
+						<input type="image" src="../images/disable.png" name="Submit" width="15" height="15" title="Delete Event" id="deleteEvent" onmouseover="setSubmitValueEvent('Delete Event')"/>
+						Event <%=objEvents(0)%>
+					</div>
 					<div>
 						<div Class="CardColumn1">Event Type: </div>
 						<div Class="CardColumn2">
@@ -1540,10 +1560,15 @@ End Sub%>
 						<textarea Class="Card" rows="5" name="Notes" cols="90" style="width: 99%;"><%=objEvents(2)%></textarea>
 					</div>
 					<div>&nbsp;</div>
-					<div Class="Button"><input type="submit" value="Update Event" name="Submit" /></div>
+					
+					<div class="Button"><input type="image" src="../images/save.png" width="20" height="20" title="Update Event" onmouseover="setSubmitValueEvent('Update Event')" onmouseout="setSubmitValueEvent('')" /></div>
+					<input type="hidden" name="Submit" value="" id="mouseOnValueEvent" />
+					<a href="" class="Button" id="editToggleEvent">
+						<image src="../images/edit.png" height="20" width="20" title="Toggle Edit Mode">
+					</a>
 			<%	If CInt(intEventID) = CInt(objEvents(0)) Then %>
 					<div>
-						<div class="Information">Updated</div>
+						<div class="<%=strEventUpdateType%>"><%=strEventUpdatedMessage%></div>
 					</div>
 			<%	End If %>
 					</form>
@@ -1956,6 +1981,8 @@ End Sub%>
 			LogEntryType = "Event Added"
 		Case "EventClosed"
 			LogEntryType = "Event Closed"
+		Case "EventDeleted"
+			LogEntryType = "Event Deleted"
 		Case "EventUpdatedCategory"
 			LogEntryType = "Event Category Updated"
 		Case "EventUpdatedNotes"
@@ -2231,7 +2258,7 @@ End Sub %>
 	Dim datDate, datTime, objEventLookup, strUserName, bolResolved
 
 	'Check and see if the device already has an event.
-	strSQL = "SELECT ID FROM Events WHERE Resolved=False AND LGTag='" & intTag & "'"
+	strSQL = "SELECT ID FROM Events WHERE Deleted=False AND Resolved=False AND LGTag='" & intTag & "'"
 	Set objEventLookup = Application("Connection").Execute(strSQL)
 	If Not objEventLookup.EOF Then
 		Exit Sub
@@ -2298,7 +2325,7 @@ End Sub %>
 				strSQL = "UPDATE Devices SET Active=False,DateDisabled=#" & Date() & "# WHERE LGTag='" & intTag & "'"
 				Application("Connection").Execute(strSQL)
 
-				strSQL = "SELECT ID FROM Events WHERE LGTag='" & intTag & "' AND "
+				strSQL = "SELECT ID FROM Events WHERE Deleted=False AND LGTag='" & intTag & "' AND "
 				strSQL = strSQL & "Type='" & Replace(strEventType,"'","''") & "' AND "
 				strSQL = strSQL & "Category='" & Replace(strCategory,"'","''") & "' AND "
 				strSQL = strSQL & "EventDate=#" & datDate & "# AND "
@@ -2325,7 +2352,7 @@ End Sub %>
 
 				strAddEventMessage = "<div Class=""Information"">Event Added</div>"
 
-				strSQL = "SELECT ID FROM Events WHERE LGTag='" & intTag & "' AND "
+				strSQL = "SELECT ID FROM Events WHERE Deleted=False AND LGTag='" & intTag & "' AND "
 				strSQL = strSQL & "Type='" & Replace(strEventType,"'","''") & "' AND "
 				strSQL = strSQL & "Category='" & Replace(strCategory,"'","''") & "' AND "
 				strSQL = strSQL & "EventDate=#" & datDate & "# AND "
@@ -2396,66 +2423,105 @@ End Sub%>
 	bolResolved = Request.Form("Resolved")
 	strEventType = Request.Form("EventType")
 
-	If Request.Form("Warranty") = "True" Then
-		bolWarranty = True
-	Else
-		bolWarranty = False
-	End If
-
-	datDate = Date()
-	datTime = Time()
-
-	'Get the current values from the database
-	strSQL = "SELECT Notes,Category,Type,Warranty FROM Events WHERE ID=" & intEventID
-	Set objOldValues = Application("Connection").Execute(strSQL)
-
-	'Record the old values before they change
-	strOldNotes = objOldValues(0)
-	strOldCategory = objOldValues(1)
-	strOldEventType = objOldValues(2)
-	bolOldWarranty = objOldValues(3)
-
-	strSQL = "UPDATE Events" & vbCRLF
-	strSQL = strSQL & "SET Notes='" & Replace(strNotes,"'","''") & "',"
-	strSQL = strSQL & "Category='" & Replace(strCategory,"'","''") & "',"
-	strSQL = strSQL & "Type='" & Replace(strEventType,"'","''") & "',"
-	strSQL = strSQL & "Warranty=" & bolWarranty
-
-	If bolResolved Then
-		strSQL = strSQL & ",Resolved=True,ResolvedDate=#" & datDate & "#,ResolvedTime=#" & datTime & "#," & _
-			"CompletedBy='" & strUser & "'"
-	
-		Application("Connection").Execute("UPDATE Devices SET HasEvent=False WHERE LGTag='" & intTag & "'")
+	If strEventType = "" Then
 		
-	End If
+		strEventUpdatedMessage = "Event Type Cannot be Empty"
+		strEventUpdateType = "Error"
 
-	strSQL = strSQL & vbCRLF & "WHERE ID=" & intEventID
-	Application("Connection").Execute(strSQL)
+	ElseIf strCategory = "" Then
 
-	'Log the updated values
-	If intUserID > 0 Then
-		strUserName = GetUserName(intUserID)
+		strEventUpdatedMessage = "Category Cannot be Empty"
+		strEventUpdateType = "Error"
+	
 	Else
-		strUserName = ""
-	End If
 
-	If strNotes <> strOldNotes Then
-		UpdateLog "EventUpdatedNotes",intTag,strUserName,strOldNotes,strNotes,intEventID
-	End If
-	If strCategory <> strOldCategory Then
-		UpdateLog "EventUpdatedCategory",intTag,strUserName,strOldCategory,strCategory,intEventID
-	End If
-	If strEventType <> strOldEventType Then
-		UpdateLog "EventUpdatedType",intTag,strUserName,strOldEventType,strEventType,intEventID
-	End If
-	If bolWarranty <> bolOldWarranty Then
-		UpdateLog "EventUpdatedWarranty",intTag,strUserName,bolOldWarranty,bolWarranty,intEventID
-	End If
-	If bolResolved Then
-		UpdateLog "EventClosed",intTag,strUserName,"","",intEventID
+		If Request.Form("Warranty") = "True" Then
+			bolWarranty = True
+		Else
+			bolWarranty = False
+		End If
+
+		datDate = Date()
+		datTime = Time()
+
+		'Get the current values from the database
+		strSQL = "SELECT Notes,Category,Type,Warranty FROM Events WHERE Deleted=False AND ID=" & intEventID
+		Set objOldValues = Application("Connection").Execute(strSQL)
+
+		'Record the old values before they change
+		strOldNotes = objOldValues(0)
+		strOldCategory = objOldValues(1)
+		strOldEventType = objOldValues(2)
+		bolOldWarranty = objOldValues(3)
+
+		strSQL = "UPDATE Events" & vbCRLF
+		strSQL = strSQL & "SET Notes='" & Replace(strNotes,"'","''") & "',"
+		strSQL = strSQL & "Category='" & Replace(strCategory,"'","''") & "',"
+		strSQL = strSQL & "Type='" & Replace(strEventType,"'","''") & "',"
+		strSQL = strSQL & "Warranty=" & bolWarranty
+
+		If bolResolved Then
+			strSQL = strSQL & ",Resolved=True,ResolvedDate=#" & datDate & "#,ResolvedTime=#" & datTime & "#," & _
+				"CompletedBy='" & strUser & "'"
+		
+			Application("Connection").Execute("UPDATE Devices SET HasEvent=False WHERE LGTag='" & intTag & "'")
+			
+		End If
+
+		strSQL = strSQL & vbCRLF & "WHERE ID=" & intEventID
+		Application("Connection").Execute(strSQL)
+
+		'Log the updated values
+		If intUserID > 0 Then
+			strUserName = GetUserName(intUserID)
+		Else
+			strUserName = ""
+		End If
+
+		If strNotes <> strOldNotes Then
+			UpdateLog "EventUpdatedNotes",intTag,strUserName,strOldNotes,strNotes,intEventID
+		End If
+		If strCategory <> strOldCategory Then
+			UpdateLog "EventUpdatedCategory",intTag,strUserName,strOldCategory,strCategory,intEventID
+		End If
+		If strEventType <> strOldEventType Then
+			UpdateLog "EventUpdatedType",intTag,strUserName,strOldEventType,strEventType,intEventID
+		End If
+		If bolWarranty <> bolOldWarranty Then
+			UpdateLog "EventUpdatedWarranty",intTag,strUserName,bolOldWarranty,bolWarranty,intEventID
+		End If
+		If bolResolved Then
+			UpdateLog "EventClosed",intTag,strUserName,"","",intEventID
+		End If
+
+		strEventUpdatedMessage = "Updated"
+		strEventUpdateType = "Information"
+
 	End If
 
 End Sub %>
+
+<%Sub DeleteEvent
+
+	Dim intEventID, strSQL, datDate, datTime
+
+	'Get the variables from the form
+	intEventID = Request.Form("EventID")
+
+	'Delete the event
+	datDate = Date()
+	datTime = Time()
+	strSQL = "UPDATE Events SET Deleted=True,Resolved=True,ResolvedDate=#" & datDate & "#,ResolvedTime=#" & datTime & "# WHERE ID=" & intEventID
+	Application("Connection").Execute(strSQL)
+
+	'Turn off the event on the device
+	strSQL = "UPDATE Devices SET HasEvent=False WHERE LGTag='" & intTag & "'"
+	Application("Connection").Execute(strSQL)
+
+	'Update the log
+	UpdateLog "EventDeleted",intTag,"","","",intEventID
+
+End Sub%>
 
 <%Sub UpdateDevice
 

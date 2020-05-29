@@ -459,7 +459,7 @@ End Sub%>
 	strSQL = "UPDATE EventTypes SET Active=False WHERE EventType='Notes'"
 	Application("Connection").Execute(strSQL)
 	
-	strUpgradeMessage = "Database Upgraded"
+	strUpgradeMessage = "Upgrade Complete"
 
 	'***********************************************************************************
 
@@ -468,6 +468,7 @@ End Sub%>
 	bolSiteFound = False
 	bolModelFound = False
 	bolCompletedBy = False
+	bolDeleted = False
 	Set objDevicesTable = objCatalog.Tables("Events")
 	For Each Column in objDevicesTable.Columns
 		Select Case LCase(Column.Name)
@@ -479,6 +480,8 @@ End Sub%>
 				bolModelFound = True
 			Case "completedby"
 				bolCompletedBy = True
+			Case "deleted"
+				bolDeleted = True
 		End Select
 	Next
 	
@@ -501,6 +504,11 @@ End Sub%>
 	If NOT bolCompletedBy Then
 		strSQL = "ALTER TABLE Events" & vbCRLF
 		strSQL = strSQL & "Add CompletedBy TEXT(255) WITH COMPRESSION"
+		Application("Connection").Execute(strSQL)
+	End If
+	If NOT bolDeleted Then
+		strSQL = "ALTER TABLE Events" & vbCRLF
+		strSQL = strSQL & "Add Deleted BIT"
 		Application("Connection").Execute(strSQL)
 	End If
 	

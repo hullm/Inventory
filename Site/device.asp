@@ -103,7 +103,7 @@ End If %>
 	Set objClasses = Application("Connection").Execute(strSQL)
 	
 	'Get the list of events for this device
-	strSQL = "SELECT ID,Type,Notes,EventDate,EventTime,Resolved,ResolvedDate,ResolvedTime FROM Events WHERE LGTag='" & intTag & "'"
+	strSQL = "SELECT ID,Type,Notes,EventDate,EventTime,Resolved,ResolvedDate,ResolvedTime FROM Events WHERE Deleted=False AND LGTag='" & intTag & "'"
 	Set objEvents = Application("Connection").Execute(strSQL)
 	
 	'Get the list of sites for the site drop down menu

@@ -13,7 +13,7 @@ Dim strSiteVersion, bolShowLogout, strUser
 Dim objEvents, strEventType, strCategory, strView, strWarranty, strComplete, objEventTypes
 Dim intEventCount, strNotes, strSubmitTo, objCategories, intEventID
 Dim datStartDate, datEndDate, strSearchMessage, strBackLink, strColumns, intEventNumber
-Dim strModel, strSite, intDeviceYear, objLastNames
+Dim strModel, strSite, intDeviceYear, objLastNames, strEventUpdatedMessage, strEventUpdateType
 
 'See if the user has the rights to visit this page
 If AccessGranted Then
@@ -253,6 +253,15 @@ End Sub%>
 
 			} );
 		</script>
+
+		<script type="text/javascript">
+
+			function setSubmitValueEvent(value) {
+				jQuery('#mouseOnValueEvent').val(value);
+			}
+		</script>
+
+
 	</head>
 
 	<body class="<%=strSiteVersion%>">
@@ -439,10 +448,11 @@ End Sub%>
 						<textarea Class="Card" rows="5" name="Notes" cols="90" style="width: 99%;"><%=objEvents(2)%></textarea>
 					</div>
 					<div>&nbsp;</div>
-					<div Class="Button"><input type="submit" value="Update Event" name="Submit" /></div>
+					<div class="Button"><input type="image" src="../images/save.png" width="20" height="20" title="Update Event" onmouseover="setSubmitValueEvent('Update Event')" onmouseout="setSubmitValueEvent('')" /></div>
+					<input type="hidden" name="Submit" value="" id="mouseOnValueEvent" />
 			<%	If CInt(intEventID) = CInt(objEvents(0)) Then %>
 					<div>
-						<div class="Information">Updated</div>
+						<div class="<%=strEventUpdateType%>"><%=strEventUpdatedMessage%></div>
 					</div>
 			<%	End If %>
 					</form>
@@ -589,7 +599,7 @@ End Sub%>
 	datTime = Time()
 	
 	'Get the device's tag
-	strSQL = "SELECT LGTag FROM Events WHERE ID=" & intEventID
+	strSQL = "SELECT LGTag FROM Events WHERE Deleted=False AND ID=" & intEventID
 	Set objDeviceLookup = Application("Connection").Execute(strSQL)
 	intTag = objDeviceLookup(0)
 	
@@ -603,7 +613,7 @@ End Sub%>
 	End If
 	
 	'Get the current values from the database
-	strSQL = "SELECT Notes,Category,Type,Warranty FROM Events WHERE ID=" & intEventID
+	strSQL = "SELECT Notes,Category,Type,Warranty FROM Events Deleted=False AND WHERE ID=" & intEventID
 	Set objOldValues = Application("Connection").Execute(strSQL)
 	
 	'Record the old values before they change
@@ -618,36 +628,53 @@ End Sub%>
 	strSQL = strSQL & "Type='" & Replace(strEventType,"'","''") & "',"
 	strSQL = strSQL & "Warranty=" & bolWarranty
 	
-	If bolResolved Then
-		strSQL = strSQL & ",Resolved=True,ResolvedDate=#" & datDate & "#,ResolvedTime=#" & datTime & "#," & _
-			"CompletedBy='" & strUser & "'"
-		Application("Connection").Execute("UPDATE Devices SET HasEvent=False WHERE LGTag='" & intTag & "'")
-	End If
+	If strEventType = "" Then
+		
+		strEventUpdatedMessage = "Event Type Cannot be Empty"
+		strEventUpdateType = "Error"
+
+	ElseIf strCategory = "" Then
+
+		strEventUpdatedMessage = "Category Cannot be Empty"
+		strEventUpdateType = "Error"
 	
-	strSQL = strSQL & vbCRLF & "WHERE ID=" & intEventID
-	Application("Connection").Execute(strSQL)
-	
-	'Log the updated values
-	If intUserID > 0 Then 
-		strUserName = GetUserName(intUserID)
 	Else
-		strUserName = ""
-	End If
 	
-	If strNotes <> strOldNotes Then
-		UpdateLog "EventUpdatedNotes",intTag,strUserName,strOldNotes,strNotes,intEventID
-	End If
-	If strCategory <> strOldCategory Then
-		UpdateLog "EventUpdatedCategory",intTag,strUserName,strOldCategory,strCategory,intEventID
-	End If
-	If strEventType <> strOldEventType Then
-		UpdateLog "EventUpdatedType",intTag,strUserName,strOldEventType,strEventType,intEventID
-	End If
-	If bolWarranty <> bolOldWarranty Then
-		UpdateLog "EventUpdatedWarranty",intTag,strUserName,bolOldWarranty,bolWarranty,intEventID
-	End If
-	If bolResolved Then
-		UpdateLog "EventClosed",intTag,strUserName,"","",intEventID
+		If bolResolved Then
+			strSQL = strSQL & ",Resolved=True,ResolvedDate=#" & datDate & "#,ResolvedTime=#" & datTime & "#," & _
+				"CompletedBy='" & strUser & "'"
+			Application("Connection").Execute("UPDATE Devices SET HasEvent=False WHERE LGTag='" & intTag & "'")
+		End If
+		
+		strSQL = strSQL & vbCRLF & "WHERE ID=" & intEventID
+		Application("Connection").Execute(strSQL)
+		
+		'Log the updated values
+		If intUserID > 0 Then 
+			strUserName = GetUserName(intUserID)
+		Else
+			strUserName = ""
+		End If
+		
+		If strNotes <> strOldNotes Then
+			UpdateLog "EventUpdatedNotes",intTag,strUserName,strOldNotes,strNotes,intEventID
+		End If
+		If strCategory <> strOldCategory Then
+			UpdateLog "EventUpdatedCategory",intTag,strUserName,strOldCategory,strCategory,intEventID
+		End If
+		If strEventType <> strOldEventType Then
+			UpdateLog "EventUpdatedType",intTag,strUserName,strOldEventType,strEventType,intEventID
+		End If
+		If bolWarranty <> bolOldWarranty Then
+			UpdateLog "EventUpdatedWarranty",intTag,strUserName,bolOldWarranty,bolWarranty,intEventID
+		End If
+		If bolResolved Then
+			UpdateLog "EventClosed",intTag,strUserName,"","",intEventID
+		End If
+
+		strEventUpdatedMessage = "Updated"
+		strEventUpdateType = "Information"
+
 	End If
 	
 End Sub %>

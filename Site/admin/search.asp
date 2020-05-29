@@ -1567,7 +1567,7 @@ End Sub%>
 
 	intEventCount = 0
 
-	strSQLWhere = "WHERE "
+	strSQLWhere = "WHERE Deleted=False AND  "
 	If intEventNumber <> "" Then
 		If IsNumeric(intEventNumber) Then
 			strSQLWhere = strSQLWhere & "Events.ID=" & intEventNumber & " AND "
