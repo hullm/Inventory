@@ -33,22 +33,22 @@ MsgBox "Done"
 
 Sub ImportNewStudents
 
-    Dim objFSO, strCurrentFolder, strCSV, strSQL, txtSourceCSV,arrUserData
+	Dim objFSO, strCurrentFolder, strCSV, strSQL, txtSourceCSV,arrUserData
 
-    'This will import new students into the database and disable the ones who are gone
+	'This will import new students into the database and disable the ones who are gone
 
-    'Get the CSV path
-    Set objFSO = CreateObject("Scripting.FileSystemObject")
-    strCurrentFolder = objFSO.GetAbsolutePathName(".")
-    strCurrentFolder = strCurrentFolder & "\CSV\"
-    strCSV = strCurrentFolder & "Import.csv"
+	'Get the CSV path
+	Set objFSO = CreateObject("Scripting.FileSystemObject")
+	strCurrentFolder = objFSO.GetAbsolutePathName(".")
+	strCurrentFolder = strCurrentFolder & "\CSV\"
+	strCSV = strCurrentFolder & "Import.csv"
 
-    'Disable all the student accounts in the database, only the active ones will be
-    'enabled later.
-    strSQL = "UPDATE People SET Active=False WHERE ClassOf > 2000"
-    objDBConnection.Execute(strSQL)
+	'Disable all the student accounts in the database, only the active ones will be
+	'enabled later.
+	strSQL = "UPDATE People SET Active=False WHERE ClassOf > 2000"
+	objDBConnection.Execute(strSQL)
 
-    'Open the source CSV
+	'Open the source CSV
 	Set txtSourceCSV = objFSO.OpenTextFile(strCSV)
 	
 	'Discard the header row
@@ -56,33 +56,32 @@ Sub ImportNewStudents
 	
 	'Loop through each line 
 	While txtSourceCSV.AtEndOfLine = False
-				
+
 		'Get the data from the row and add it to an array
 		arrUserData = GetUserDataFromImportedData(txtSourceCSV.ReadLine)
 		
 		'If they aren't in the database then add them
 		If Not ExistsInDatabase(arrUserData(STUDENTID),arrUserData(CLASSOF)) Then
 
-            'Add the user to the inventory database
+			'Add the user to the inventory database
 			AddUserToDatabase arrUserData
-		
+
 			'Update the log
 			UpdateLog "NewStudentDetected","",arrUserData(USERNAME),"",arrUserData(LASTNAME) & ", " & arrUserData(FIRSTNAME),""
 
+		Else
 
-        Else
-
-            'The user already exists, but we will update a few values in the database, 
+			'The user already exists, but we will update a few values in the database, 
 			'this is where the account is enabled in the database
 			ModifyUserInDatabase arrUserData
 
-        End If
+		End If
 
-    Wend
+	Wend
 
-    'Close Objects
-    Set objFSO = Nothing
-    Set objDBConnection = Nothing
+	'Close Objects
+	Set objFSO = Nothing
+	Set objDBConnection = Nothing
 
 End Sub
 
@@ -110,24 +109,24 @@ Function GetUserDataFromImportedData(strImportedData)
 	If InStr(arrRow(6),"/") <> 0 Then
 		strHomeRoomEmail = Replace(Trim(arrRow(6))," / ",";")
 		strHomeRoom = Replace(Trim(arrRow(7)),"""","")
-        strUserName = Trim(arrRow(10))
-        strSite = Trim(arrRow(11))
-        intClassOf = Right(Trim(arrRow(12)),4)
+		strUserName = Trim(arrRow(10))
+		strSite = Trim(arrRow(11))
+		intClassOf = Right(Trim(arrRow(12)),4)
 	Else
 
-        If Trim(arrRow(6)) = "" Then
-            strHomeRoomEmail = ""
-            strHomeRoom = ""
-            strUserName = Trim(arrRow(10))
-            strSite = Trim(arrRow(11))
-            intClassOf = Right(Trim(arrRow(12)),4)
-        Else
-            strHomeRoomEmail = Trim(arrRow(6))
-            strHomeRoom = Replace(Trim(arrRow(7)) & ", " & Trim(arrRow(8)),"""","")
-            strUserName = Trim(arrRow(11))
-            strSite = Trim(arrRow(12))
-            intClassOf = Right(Trim(arrRow(13)),4)
-        End If
+		If Trim(arrRow(6)) = "" Then
+			strHomeRoomEmail = ""
+			strHomeRoom = ""
+			strUserName = Trim(arrRow(10))
+			strSite = Trim(arrRow(11))
+			intClassOf = Right(Trim(arrRow(12)),4)
+		Else
+			strHomeRoomEmail = Trim(arrRow(6))
+			strHomeRoom = Replace(Trim(arrRow(7)) & ", " & Trim(arrRow(8)),"""","")
+			strUserName = Trim(arrRow(11))
+			strSite = Trim(arrRow(12))
+			intClassOf = Right(Trim(arrRow(13)),4)
+		End If
 
 	End If
 
@@ -202,13 +201,13 @@ Sub CleanExportFile
 	'Replace the unwanted characters 
 	While txtSourceCSV.AtEndOfLine = False
 		strImportedData = txtSourceCSV.ReadLine
-        strImportedData = Replace(strImportedData,", Jr"," Jr")
-        strImportedData = Replace(strImportedData,", III"," III")
-        strImportedData = Replace(strImportedData,", IV"," IV")
+		strImportedData = Replace(strImportedData,", Jr"," Jr")
+		strImportedData = Replace(strImportedData,", III"," III")
+		strImportedData = Replace(strImportedData,", IV"," IV")
 		strImportedData = Replace(strImportedData,"´","")
 		strImportedData = Replace(strImportedData,"  "," ")
 		strImportedData = Replace(strImportedData,"!","")
-        strImportedData = Replace(strImportedData,"""","")
+		strImportedData = Replace(strImportedData,"""","")
 		strImportedData = Replace(strImportedData,"#","")
 		strImportedData = Replace(strImportedData,"$","")
 		strImportedData = Replace(strImportedData,"%","")
@@ -234,14 +233,14 @@ Sub CleanExportFile
 	Set txtSourceCSV = Nothing
 	Set txtDestinationCSV = Nothing
 
-End Sub 
+End Sub
 
 Function ExistsInDatabase(intStudentID,intClassOf)
 
 	'This will check and see if a user exists in the database, it will also correct a students 
 	'class off setting if their grade has changed.  The function will return a true or false.
 
-    'On Error Resume Next
+	'On Error Resume Next
 
 	Dim strSQL, objStudent
 
@@ -265,7 +264,7 @@ Sub AddUserToDatabase(arrUserData)
 	'This will add the new user to the database with a password of NewAccount.  The
 	'user will be flagged as deleted in the database.
 
-    On Error Resume Next
+	On Error Resume Next
 
 	Dim strSQL
 
@@ -284,12 +283,12 @@ Sub AddUserToDatabase(arrUserData)
 	strSQL = strSQL & "',"
 	strSQL = strSQL & arrUserData(STUDENTID) & ",True,False,"
 	strSQL = strSQL & "False,False,#" & arrUserData(DATECREATED) & "#)"
-    objDBConnection.Execute(strSQL)
+	objDBConnection.Execute(strSQL)
 
-    If Err Then
-        InputBox strSQL, strSQL, strSQL
-        Err.Clear
-    End If
+	If Err Then
+		InputBox strSQL, strSQL, strSQL
+		Err.Clear
+	End If
 	
 End Sub
 
