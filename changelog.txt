@@ -703,7 +703,7 @@ Change Log - Inventory Site
 	- Added a Missing Case column to the Users page to show who didn't turn in a case.
 	- Modified the Equipment card to use images instead of buttons so we could fit a forgive debt buttton.
 
-0.062
+0.062 - 5/31/20
 	- Fixed a bug that casued an error if you typed in a string instead of a number when searching for a tag.
 	- Added support for asset tags with non numeric characters.
 	- Changed the log on the user and device page to show both old and new values by default.
@@ -715,7 +715,7 @@ Change Log - Inventory Site
 	- Added support for PreSchool
 	- Fixed a bug in the student edit mode when not showing the password.  It wouldn't exit exit mode.
 	- Added the ability to set generic images based on device type.  If a device's model image is missing 
-	  then device type image will be used if present.  Otherwise the generic image is used.
+		then device type image will be used if present.  Otherwise the generic image is used.
 	- Fixed a bug that would prevent you from disabling or enabling a device from a mobile device.
 	- Added the computer name to the user's section of the website.
 	- Added Titan support to inventory update script.
@@ -727,3 +727,4 @@ Change Log - Inventory Site
 	- Changed Events so you can't set Event Type or Category to nothing after opening an event.
 	- Change the Update Event button to a save icon on the device and events pages.
 	- Added the ability to delete an open event from the device page.
+	- Added a password generator page that will genearate a unique password. /admin/generatepw.asp
