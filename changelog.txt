@@ -728,3 +728,6 @@ Change Log - Inventory Site
 	- Change the Update Event button to a save icon on the device and events pages.
 	- Added the ability to delete an open event from the device page.
 	- Added a password generator page that will genearate a unique password. /admin/generatepw.asp
+
+0.063
+	- 
