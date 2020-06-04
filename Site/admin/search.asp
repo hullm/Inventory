@@ -182,6 +182,7 @@ End If %>
 			strAvailableTags = strAvailableTags & "Backup - Backs up user's data" & " &#013 "
 			strAvailableTags = strAvailableTags & "NoBackup - Prevents backup" & " &#013 "
 			strAvailableTags = strAvailableTags & "Disable DNS - No Remote DNS Filter" & " &#013 "
+			strAvailableTags = strAvailableTags & "Disable Proxy - No Remote Proxy" & " &#013 "
 
 		Case "Schuylerville Inventory"
 

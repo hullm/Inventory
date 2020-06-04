@@ -704,7 +704,7 @@ Change Log - Inventory Site
 	- Modified the Equipment card to use images instead of buttons so we could fit a forgive debt buttton.
 
 0.062 - 5/31/20
-	- Fixed a bug that casued an error if you typed in a string instead of a number when searching for a tag.
+	- Fixed a bug that caused an error if you typed in a string instead of a number when searching for a tag.
 	- Added support for asset tags with non numeric characters.
 	- Changed the log on the user and device page to show both old and new values by default.
 	- Modified the tag list on the search page to only include active devices.
@@ -727,7 +727,7 @@ Change Log - Inventory Site
 	- Changed Events so you can't set Event Type or Category to nothing after opening an event.
 	- Change the Update Event button to a save icon on the device and events pages.
 	- Added the ability to delete an open event from the device page.
-	- Added a password generator page that will genearate a unique password. /admin/generatepw.asp
+	- Added a password generator page that will generate a unique password. /admin/generatepw.asp
 
 0.063
-	- 
+	- Added the ability to disable remote proxy filtering using a tag.

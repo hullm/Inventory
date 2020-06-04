@@ -34,6 +34,25 @@ Select Case strLookupType
 
 		End If
 
+	Case "ProxyLookup"
+
+		strSerialNumber = Request.QueryString("Serial")
+
+		strSQL = "SELECT LGTag FROM Devices WHERE SerialNumber='" & strSerialNumber & "'"
+		Set objLookUp = Application("Connection").Execute(strSQL)
+		
+		If Not objLookup.EOF Then
+			strSQL = "SELECT ID FROM Tags WHERE Tag='Disable Proxy' AND LGTag='" & objLookUp(0) & "'"
+			Set objLookUp = Application("Connection").Execute(strSQL)
+
+			If Not objLookup.EOF Then
+				Response.Write("true")
+			Else
+				Response.Write("false")
+			End If
+
+		End If
+
 	
 	Case "StudentID"
 	
