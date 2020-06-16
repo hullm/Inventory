@@ -816,7 +816,7 @@ End Sub%>
 
 			intGrade = GetGrade(objStudentsPerGrade(0))
 
-			If intGrade = "K" Then
+			If intGrade = "K" Or intGrade = "P" Then
 				intGrade = 0
 			End If
 
