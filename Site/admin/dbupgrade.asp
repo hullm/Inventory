@@ -25,7 +25,7 @@ End If %>
 	Select Case Request.Form("Submit")
 		Case "Upgrade Database"
 			UpgradeDatabase
-			UpdateLog "DatabaseUpgraded","","","","0.063",""
+			UpdateLog "DatabaseUpgraded","","","","0.062",""
 	End Select
 	
 	'Get the URL used to submit forms
