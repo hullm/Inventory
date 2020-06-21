@@ -674,7 +674,7 @@ End Function%>
 	If InStr(strUserAgent,"iPhone") Then
 		IsMobile = True
 	ElseIf InStr(strUserAgent,"iPad") Then
-		IsMobile = False
+		IsMobile = True
 	ElseIf InStr(strUserAgent,"Android") Then
 		IsMobile = True
 	ElseIf InStr(strUserAgent,"Windows Phone") Then

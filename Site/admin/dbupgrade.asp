@@ -25,7 +25,7 @@ End If %>
 	Select Case Request.Form("Submit")
 		Case "Upgrade Database"
 			UpgradeDatabase
-			UpdateLog "DatabaseUpgraded","","","","0.062",""
+			UpdateLog "DatabaseUpgraded","","","","0.063",""
 	End Select
 	
 	'Get the URL used to submit forms
@@ -1112,7 +1112,7 @@ End Function%>
 	If InStr(strUserAgent,"iPhone") Then
 		IsMobile = True
 	ElseIf InStr(strUserAgent,"iPad") Then
-		IsMobile = False
+		IsMobile = True
 	ElseIf InStr(strUserAgent,"Android") Then
 		IsMobile = True
 	ElseIf InStr(strUserAgent,"Windows Phone") Then
