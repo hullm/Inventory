@@ -54,6 +54,17 @@ End If %>
 	strSQL = strSQL & "WHERE LGTag='" & intTag & "' AND Deleted=False"
 	Set objDevice = Application("Connection").Execute(strSQL)
 
+	'Send them to the search or index page if the device isn't found
+	If objDevice.EOF Then
+		If InStr(LCase(Request.ServerVariables("HTTP_REFERER")),"index.asp") Then
+			Response.Redirect("index.asp?Error=DeviceNotFound&Tag=" & intTag)
+		ElseIf InStr(LCase(Request.ServerVariables("HTTP_REFERER")),"search.asp") Then
+			Response.Redirect("search.asp?Error=DeviceNotFound&Tag=" & intTag) 
+		Else
+			Response.Redirect("search.asp?Error=DeviceNotFound&Tag=" & intTag)
+		End If
+	End If
+
 	'Ping device to see if it is currently on
 	ipAddress = objDevice(14)
 	Set WshShell = CreateObject("WScript.Shell")
@@ -112,10 +123,7 @@ End If %>
 		intStudent = 0
 	End If
 
-	'If the device isn't found send them back to the index page.
-	If objDevice.EOF Then
-		Response.Redirect("index.asp?Error=DeviceNotFound")
-	End If
+
 
 	'Set the status of the insured checkbox
 	If objDevice(7) Then
@@ -899,7 +907,7 @@ End Sub%>
 	<%	End If %> -->
 	<div>Device Notes: </div>
 		<div>
-			<textarea class="Card" rows="5" name="Notes" cols="90" style="width: 99%;"><%=objDevice(12)%></textarea>
+			<textarea class="TextBox" rows="5" name="Notes" cols="90" ><%=objDevice(12)%></textarea>
 		</div>
 		<div>&nbsp;</div>
 	<input type="hidden" name="Insured" value="<%=objDevice(7)%>" />
@@ -1209,7 +1217,7 @@ End Sub%>
 
 				<div>Assignment Notes: </div>
 				<div>
-					<textarea class="Card" rows="5" name="Notes" cols="90" style="width: 99%;"></textarea>
+					<textarea class="TextBox" rows="5" name="Notes" cols="90" ></textarea>
 				</div>
 				<div>&nbsp;</div>
 				<div class="Button"><input type="submit" value="Return" name="Submit" /></div>
@@ -1557,7 +1565,7 @@ End Sub%>
 					</div>
 					<div>Event Notes: </div>
 					<div>
-						<textarea Class="Card" rows="5" name="Notes" cols="90" style="width: 99%;"><%=objEvents(2)%></textarea>
+						<textarea Class="TextBox" rows="5" name="Notes" cols="90" ><%=objEvents(2)%></textarea>
 					</div>
 					<div>&nbsp;</div>
 					
@@ -1780,7 +1788,7 @@ End Sub%>
 					</div>
 					<div>Event Notes: </div>
 					<div>
-						<textarea Class="Card" rows="5" name="Notes" cols="90" style="width: 99%;"><%=objEvents(2)%></textarea>
+						<textarea Class="TextBox" rows="5" name="Notes" cols="90"><%=objEvents(2)%></textarea>
 					</div>
 					<div>&nbsp;</div>
 					<div Class="Button"><input type="submit" value="Update Event" name="Submit" /></div>
@@ -2171,7 +2179,7 @@ End Function%>
 			</div>
 		</div>
 		<div>Event Notes:</div>
-		<div><textarea Class="Card" rows="5" name="Notes" cols="90" style="width: 99%;"></textarea></div>
+		<div><textarea Class="TextBox" rows="5" name="Notes" cols="90"></textarea></div>
 		<div>&nbsp;</div>
 		<div Class="Button"><input type="submit" value="Add Event" name="Submit" /></div>
 	<%	If strAddEventMessage <> "" Then %>

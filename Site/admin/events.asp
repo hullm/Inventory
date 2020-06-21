@@ -445,7 +445,7 @@ End Sub%>
 					</div>
 					<div>Notes: </div>
 					<div>
-						<textarea Class="Card" rows="5" name="Notes" cols="90" style="width: 99%;"><%=objEvents(2)%></textarea>
+						<textarea Class="TextBox" rows="5" name="Notes" cols="90"><%=objEvents(2)%></textarea>
 					</div>
 					<div>&nbsp;</div>
 					<div class="Button"><input type="image" src="../images/save.png" width="20" height="20" title="Update Event" onmouseover="setSubmitValueEvent('Update Event')" onmouseout="setSubmitValueEvent('')" /></div>

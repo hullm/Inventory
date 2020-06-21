@@ -731,3 +731,6 @@ Change Log - Inventory Site
 
 0.063
 	- Added the ability to disable remote proxy filtering using a tag.
+	- Fixed the code that would send you back to the index or search page if the device page was loaded
+	  with an invalid asset tag.
+	- Fixed formatting issues after an iPad update.

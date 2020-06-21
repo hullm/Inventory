@@ -1,5 +1,6 @@
 /* Get the bourbon mixin from http://bourbon.io */
 /* Reset */
+
 .flip-clock-wrapper * {
     -webkit-box-sizing: border-box;
     -moz-box-sizing: border-box;
@@ -429,3 +430,11 @@
 
   100% {
     opacity: 0; } }
+
+/* Add fixes for iPads here */
+@media only screen and (min-device-width: 768px) and (max-device-width: 1366px) {
+  .flip-clock-meridium {font-size: 18px !important;}
+  .flip-clock-wrapper ul {font-size: 40px;}
+  .flip-clock-wrapper ul li a div {font-size: 40px;}
+  .flip-clock-wrapper ul li a div div.inn {font-size: 35px; }
+}

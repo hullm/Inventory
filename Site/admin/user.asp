@@ -1044,7 +1044,7 @@ End Sub%>
 				</div>
 			<div>User Notes: </div>
 			<div>
-				<textarea class="Card" rows="5" name="Notes" cols="90" style="width: 99%;"><%=objUser(12)%></textarea>
+				<textarea class="TextBox" rows="5" name="Notes" cols="90" ><%=objUser(12)%></textarea>
 			</div>
 			<br />
 				<input type="hidden" name="Submit" value="" id="mouseOnValue" >
