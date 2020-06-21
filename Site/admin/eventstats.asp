@@ -7,7 +7,7 @@
 
 Option Explicit
 
-'On Error Resume Next
+On Error Resume Next
 
 Dim strSiteVersion, bolShowLogout, strUser
 Dim intTag, strFirstName, strLastName, strRole, strDeviceMessage, strUserMessage, strEventMessage

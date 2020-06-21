@@ -7,7 +7,7 @@
 
 'Option Explicit
 
-'On Error Resume Next
+On Error Resume Next
 
 Dim strSiteVersion, bolShowLogout, strUser, objReports, strReport, strSubmitTo, strColumns
 Dim strUpgradeMessage
@@ -25,7 +25,7 @@ End If %>
 	Select Case Request.Form("Submit")
 		Case "Upgrade Database"
 			UpgradeDatabase
-			UpdateLog "DatabaseUpgraded","","","","0.062",""
+			UpdateLog "DatabaseUpgraded","","","","0.063",""
 	End Select
 	
 	'Get the URL used to submit forms

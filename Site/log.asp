@@ -5,9 +5,9 @@
 
 'This page displays the sites log
 
-'Option Explicit
+Option Explicit
 
-'On Error Resume Next
+On Error Resume Next
 
 Dim strSiteVersion, bolShowLogout, strUser, objReports, strReport, strSubmitTo, strColumns
 Dim objLog
@@ -204,6 +204,10 @@ End Sub%>
 			LogEntryType = "AUP Turned In"
 		Case "AutoLogOut"
 			LogEntryType = "Logout"
+		Case "CaseFound"
+			LogEntryType = "Case Found"
+		Case "CasePurchased"
+			LogEntryType = "Case Purchased"
 		Case "DatabaseUpgraded"
 			LogEntryType = "Database Upgraded"
 		Case "DeviceAssigned"

@@ -7,7 +7,7 @@
 
 Option Explicit
 
-'On Error Resume Next
+On Error Resume Next
 
 Dim strLookupType, strUserName, strSQL, objLookUp, strSerialNumber, strLGTag, objDevice, strAssetTag, strOutput
 

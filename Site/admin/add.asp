@@ -7,7 +7,7 @@
 
 'Option Explicit
 
-'On Error Resume Next
+On Error Resume Next
 
 Dim strSiteVersion, bolShowLogout, strUser, objReports, strReport, strSubmitTo, strColumns
 Dim objSites, objMakes, objModels, objRooms

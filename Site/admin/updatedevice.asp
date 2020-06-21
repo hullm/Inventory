@@ -7,7 +7,7 @@
 
 'Option Explicit
 
-'On Error Resume Next
+On Error Resume Next
 
 CONST LGTAG = 0
 CONST EXTERNALIP = 1

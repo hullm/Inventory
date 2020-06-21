@@ -7,7 +7,7 @@
 
 Option Explicit
 
-'On Error Resume Next
+On Error Resume Next
 
 Dim strSiteVersion, bolShowLogout, strUser
 Dim objDeviceList, strSite, intDeviceCount, strView, intDeviceYear, strModel, strTags, strRoom

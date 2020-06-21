@@ -1,6 +1,6 @@
 <%@LANGUAGE="VBSCRIPT" CODEPAGE="1252"%>
 <%
-'On Error Resume Next
+On Error Resume Next
 
 Dim strRole, strSiteVersion, strSourcePage, strReturnLink
 
