@@ -106,9 +106,9 @@ End Sub%>
 			<%
 			DeviceYearJavaScript
 			'MacBookYearJavaScript
-			'iPadsYearJavaScript
+			iPadsYearJavaScript
 			ChromebookYearJavaScript
-			LaptopYearJavaScript
+			'LaptopYearJavaScript
 			%>
 			
 			</script>
@@ -133,14 +133,15 @@ End Sub%>
 		Case Else
 			'ChooseReport
 			DatabaseStats
-			DeviceSiteStats
+			'DeviceSiteStats
+			DeviceSiteStatsCustom
 			EventTypeStats
 			'DeviceAgeStats
 			DeviceYearCard
 			'MacBookYearCard
-			'iPadYearCard
+			iPadYearCard
 			ChromebookYearCard
-			LaptopYearCard
+			'LaptopYearCard
 			GradeLevelStats
 			GraduationYearToGradeCard
 			PersonTypeStats
@@ -507,6 +508,75 @@ End Sub%>
 								0
 							<%	Else %>
 								<a href="devices.asp?Model=MacBook&DeviceSite=<%=objSiteCount(0)%>&View=Table"><%=intDeviceCount%></a>
+							<%	End If %>
+							</td>
+							<%	intDeviceCount = 0
+							strSQL = "SELECT Active, Count(ID) AS CountofID FROM Devices "
+							strSQL = strSQL & "WHERE Active=True AND Model LIKE '%iPad%' AND Site='" & objSiteCount(0) & "'"
+							strSQL = strSQL & "GROUP BY Active"
+							Set objDeviceCount = Application("Connection").Execute(strSQL)
+							If Not objDeviceCount.EOF Then
+								intDeviceCount = objDeviceCount(1)
+							End If
+						%>
+							<td id="center">
+							<%	If intDeviceCount = 0 Then %>
+								0
+							<%	Else %>
+								<a href="devices.asp?Model=iPad&DeviceSite=<%=objSiteCount(0)%>&View=Table"><%=intDeviceCount%></a>
+							<%	End If %>
+							</td>
+						</tr>
+					<%	objSiteCount.MoveNext
+					Loop 
+				End If %>
+						
+				</tbody>
+			</table>
+		</div>
+	</div>
+
+<%End Sub%>
+
+<%Sub DeviceSiteStatsCustom
+
+	Dim strSQL, objSiteCount, objDeviceCount, intDeviceCount
+	
+	strSQL = "SELECT Site, Count(ID) AS CountofID FROM Devices WHERE Active=True GROUP BY Site" 
+	Set objSiteCount = Application("Connection").Execute(strSQL)%>
+	
+	<div class="Card NormalCard">
+		<div class="CardTitle">Device Site Statistics</div>
+		<div>
+			<table align="center" Class="ListView">
+				<thead>
+					<th>Site</th>
+					<th>Devices</th>
+					<th>C-Books</th>
+					<th>iPads</th>
+				</thead>
+				<tbody>
+			<%	If Not objSiteCount.EOF Then 
+					Do Until objSiteCount.EOF %>
+						<tr>
+							<td><%=objSiteCount(0)%></td>
+							<td id="center">
+								<a href="devices.asp?DeviceSite=<%=objSiteCount(0)%>&View=Table"><%=objSiteCount(1)%></a>
+							</td>
+							<%	intDeviceCount = 0
+							strSQL = "SELECT Active, Count(ID) AS CountofID FROM Devices "
+							strSQL = strSQL & "WHERE Active=True AND Model LIKE '%Chromebook%' AND Site='" & objSiteCount(0) & "'"
+							strSQL = strSQL & "GROUP BY Active"
+							Set objDeviceCount = Application("Connection").Execute(strSQL)
+							If Not objDeviceCount.EOF Then
+								intDeviceCount = objDeviceCount(1)
+							End If
+						%>
+							<td id="center">
+							<%	If intDeviceCount = 0 Then %>
+								0
+							<%	Else %>
+								<a href="devices.asp?Model=Chromebook&DeviceSite=<%=objSiteCount(0)%>&View=Table"><%=intDeviceCount%></a>
 							<%	End If %>
 							</td>
 							<%	intDeviceCount = 0
