@@ -105,10 +105,10 @@ End Sub%>
 			google.load("visualization", "1", {packages:["corechart"]});
 			<%
 			DeviceYearJavaScript
-			MacBookYearJavaScript
-			iPadsYearJavaScript
-			'ChromebookYearJavaScript
-			'LaptopYearJavaScript
+			'MacBookYearJavaScript
+			'iPadsYearJavaScript
+			ChromebookYearJavaScript
+			LaptopYearJavaScript
 			%>
 			
 			</script>
@@ -137,10 +137,10 @@ End Sub%>
 			EventTypeStats
 			'DeviceAgeStats
 			DeviceYearCard
-			MacBookYearCard
-			iPadYearCard
-			'ChromebookYearCard
-			'LaptopYearCard
+			'MacBookYearCard
+			'iPadYearCard
+			ChromebookYearCard
+			LaptopYearCard
 			GradeLevelStats
 			GraduationYearToGradeCard
 			PersonTypeStats
