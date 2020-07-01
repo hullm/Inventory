@@ -435,7 +435,8 @@ End Function %>
 			strCardName = Replace(strCardName," ","")
 			strCardName = Replace(strCardName,".","")
 			strCardName = Replace(strCardName,"'","")
-			strCardName = Replace(strCardName,"-","")	
+			strCardName = Replace(strCardName,"-","")
+			strCardName = Replace(strCardName,",","")
 
 			Select Case Request.QueryString("LookUp")
 				Case "Type", "Types"
@@ -798,6 +799,7 @@ End Sub%>
 			strFunctionName = Replace(strFunctionName,".","")
 			strFunctionName = Replace(strFunctionName,"'","")
 			strFunctionName = Replace(strFunctionName,"-","")
+			strFunctionName = Replace(strFunctionName,",","")
 			strCardName = strFunctionName
 			strFunctionName = "Categories" & strFunctionName
 	
@@ -866,6 +868,7 @@ End Sub %>
 			strFunctionName = Replace(strFunctionName,".","")
 			strFunctionName = Replace(strFunctionName,"'","")
 			strFunctionName = Replace(strFunctionName,"-","")
+			strFunctionName = Replace(strFunctionName,",","")
 			strCardName = strFunctionName
 			strFunctionName = "Types" & strFunctionName
 	
