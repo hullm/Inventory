@@ -732,7 +732,8 @@ Change Log - Inventory Site
 0.063
 	- Added the ability to disable remote proxy filtering using a tag.
 	- Fixed the code that would send you back to the index or search page if the device page was loaded
-	  with an invalid asset tag.
+		with an invalid asset tag.
 	- Fixed formatting issues after an iPad update.
 	- With iOS 13 and later the iPad advertises itself as a desktop client unless it's in a small window
-	  on the side of the iPad.  Changed it so it sees that small version as a mobile version.
+		on the side of the iPad.  Changed it so it sees that small version as a mobile version.
+	- Redesigned the stats pages so you can choose what cards you want to display and the order using global.asa.

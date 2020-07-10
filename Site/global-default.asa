@@ -32,6 +32,7 @@ Sub Application_OnStart
 	Application("LibreNMSToken") = ""
 	Application("BandwidthPort") = ""
 	Application("IndexCards") = "Warning,Search,StudentsPerGradeWithMissing,OpenEvents,SpareMacBooksFlipiPads,AccessHistory,EventStats,BandwidthWide"
+	Application("StatsCards") = "DatabaseStats,DeviceSiteStatsMBiPad,EventTypeStats,DeviceAgeChart,MacBookYearCard,iPadYearChart,GradeLevelStats,GraduationYearToGrade,PersonTypeStats,DeviceTypeStats,EventCategoryStats"
 
 	'Create the connection to the Inventory Database
 	Set Application("Connection") = CreateObject("ADODB.Connection")
@@ -59,4 +60,23 @@ End Sub
 		SpareChromebooks - Show the number of spare Chromebook sorted by graduation year.
 		Bandwidth - Shows the bandwidth for the past 24 hours if a LibreNMS server is set.
 		BandwidthWide - Shows a wide version of the bandwidth for the past 24 hours.
+
+	Available stats cards:
+		DatabaseStats - Shows total number of active people, devices, and assignments.
+		DeviceSiteStatsMBiPad - Shows the number of devices, MacBooks, and iPads per Site.
+		DeviceSiteStatsCBiPad - Shows the number of devices, Chromebooks, and iPads per Site.
+		DeviceAgeStats - Table that shows the number of devices per device year.
+		DeviceAgeChart - Pie chart that shows the number of devices per device year.
+		MacBookYearCard - Pie chart that shows the number of MacBooks per device year.
+		iPadYearChart - Pie chart that shows the number of iPads per device year.
+		ChromebookYearChart - Pie chart that shows the number of Chromebooks per device year.
+		LaptopYearChart - Pie chart that shows the number of laptops per device year.
+		GraduationYearToGrade - Table that shows the grade to graduation year.
+		GradeLevelStats - Table that shows the number of users and assigned devices per grade.
+		PersonTypeStats - Table that shows the number of users and assigned devices per role.
+		DeviceTypeStats - Table that shows the number of devices in each device type.
+		EventStats - Table that shows the number of events based on types and categories.
+		EventCategoryStats - Table that shows the number of events per type of category.
+		EventTypeStats - Table that shows the number of events per type of event.
+		DevicesPerRoomHS - Table that shows the number of devices in each classroom at the high school.
 -->

@@ -7,7 +7,7 @@
 
 Option Explicit
 
-On Error Resume Next
+'On Error Resume Next
 
 Dim strSiteVersion, bolShowLogout, strUser, objReports, strReport, strSubmitTo, strColumns
 
@@ -59,7 +59,11 @@ End If %>
 	
 End Sub%>
 
-<%Sub DisplaySite %>
+<%Sub DisplaySite 
+
+	Dim arrStatsCards, strCard
+
+	arrStatsCards = Split(Application("StatsCards"),",") %>
 
 	<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" 
 	"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
@@ -104,11 +108,26 @@ End Sub%>
 			
 			google.load("visualization", "1", {packages:["corechart"]});
 			<%
-			DeviceYearJavaScript
-			'MacBookYearJavaScript
-			iPadsYearJavaScript
-			ChromebookYearJavaScript
-			'LaptopYearJavaScript
+			For Each strCard in arrStatsCards
+				
+				Select Case strCard
+					Case "DeviceAgeChart"
+						DeviceYearJavaScript
+			
+					Case "MacBookYearCard"
+						MacBookYearJavaScript
+			
+					Case "iPadYearChart"
+						iPadsYearJavaScript
+			
+					Case "ChromebookYearChart"
+						ChromebookYearJavaScript
+			
+					Case "LaptopYearChart"
+						LaptopYearJavaScript
+
+				End Select
+			Next
 			%>
 			
 			</script>
@@ -127,31 +146,64 @@ End Sub%>
 			</ul>
 		</div>   
 		<div Class="<%=strColumns%>"> 
-<%	Select Case Request.QueryString("Report")
-		Case "MissingAdaptersAndCases"
-			MissingAdaptersAndCases
-		Case Else
-			'ChooseReport
-			DatabaseStats
-			'DeviceSiteStats
-			DeviceSiteStatsCustom
-			EventTypeStats
-			'DeviceAgeStats
-			DeviceYearCard
-			'MacBookYearCard
-			iPadYearCard
-			ChromebookYearCard
-			'LaptopYearCard
-			GradeLevelStats
-			GraduationYearToGradeCard
-			PersonTypeStats
-			DeviceTypeStats
-			EventCategoryStats
-			'EventStats
-			'EventCategoryStats
-			'DevicesPerRoomHS
-			'MissingAdaptersAndCases
-	End Select %>
+<%	For Each strCard in arrStatsCards
+
+		Select Case strCard
+			Case "DatabaseStats"
+				DatabaseStats
+			
+			Case "DeviceSiteStatsMBiPad"
+				DeviceSiteStatsMBiPad
+
+			Case "DeviceSiteStatsCBiPad"
+				DeviceSiteStatsCBiPad
+
+			Case "EventTypeStats"
+				EventTypeStats
+
+			Case "DeviceAgeStats"
+				DeviceAgeStats
+
+			Case "DeviceAgeChart"
+				DeviceAgeChart
+				
+			Case "MacBookYearCard"
+				MacBookYearCard
+
+			Case "iPadYearChart"
+				iPadYearChart
+
+			Case "ChromebookYearChart"
+				ChromebookYearChart
+
+			Case "LaptopYearChart"
+				LaptopYearChart
+
+			Case "GradeLevelStats"
+				GradeLevelStats
+
+			Case "GraduationYearToGrade"
+				GraduationYearToGradeCard
+
+			Case "PersonTypeStats"
+				PersonTypeStats
+
+			Case "DeviceTypeStats"
+				DeviceTypeStats
+
+			Case "EventCategoryStats"
+				EventCategoryStats
+
+			Case "EventStats"
+				EventStats
+
+			Case "DevicesPerRoomHS"
+				DevicesPerRoomHS
+
+		End Select
+	Next
+			
+	%>
 		</div> 
 		<div class="Version">Version <%=Application("Version")%></div>
 		<div class="CopyRight"><%=Application("Copyright")%></div>
@@ -182,7 +234,7 @@ End Sub%>
 	
 <%End Sub%>
 
-<%Sub DeviceYearCard%>
+<%Sub DeviceAgeChart%>
 	<div class="Card NormalCard"> 
 		<div class="CardTitle">Devices By Year</div>
 		<div id="deviceYear"></div>
@@ -196,21 +248,21 @@ End Sub%>
 	</div>
 <%End Sub%>
 
-<%Sub iPadYearCard%>
+<%Sub iPadYearChart%>
 	<div class="Card NormalCard"> 
 		<div class="CardTitle">iPads By Year</div>
 		<div id="ipadYear"></div>
 	</div>
 <%End Sub%>
 
-<%Sub ChromebookYearCard%>
+<%Sub ChromebookYearChart%>
 	<div class="Card NormalCard"> 
 		<div class="CardTitle">Chromebooks By Year</div>
 		<div id="chromebookYear"></div>
 	</div>
 <%End Sub%>
 
-<%Sub LaptopYearCard%>
+<%Sub LaptopYearChart%>
 	<div class="Card NormalCard"> 
 		<div class="CardTitle">Laptops By Year</div>
 		<div id="laptopYear"></div>
@@ -469,7 +521,7 @@ End Sub%>
 
 <%End Sub%>
 
-<%Sub DeviceSiteStats
+<%Sub DeviceSiteStatsMBiPad
 
 	Dim strSQL, objSiteCount, objDeviceCount, intDeviceCount
 	
@@ -538,7 +590,7 @@ End Sub%>
 
 <%End Sub%>
 
-<%Sub DeviceSiteStatsCustom
+<%Sub DeviceSiteStatsCBiPad
 
 	Dim strSQL, objSiteCount, objDeviceCount, intDeviceCount
 	
@@ -552,7 +604,7 @@ End Sub%>
 				<thead>
 					<th>Site</th>
 					<th>Devices</th>
-					<th>C-Books</th>
+					<th>CBooks</th>
 					<th>iPads</th>
 				</thead>
 				<tbody>
@@ -971,79 +1023,6 @@ Dim strSQL, datStartDate, datEndDate, objEvents, strURL
 
 <%End Sub%>
 
-<%Sub MissingAdaptersAndCases
-	
-	Dim strSQL, objReportData, objFSO, intItemCount
-	
-	Set objFSO = CreateObject("Scripting.FileSystemObject")
-	
-	strSQL = "SELECT LGTag,UserName,FirstName,LastName,AdapterReturned,CaseReturned,StudentID,Role,Assignments.ID,People.Active,Warning" & vbCRLF
-	strSQL = strSQL & "FROM People INNER JOIN Assignments ON People.ID = Assignments.AssignedTo" & vbCRLF
-	strSQL = strSQL & "WHERE (Assignments.Active=False) AND (Assignments.AdapterReturned=False OR Assignments.CaseReturned=False)"
-	Set objReportData = Application("Connection").Execute(strSQL) 
-	
-	intItemCount = 0
-	Do Until objReportData.EOF
-		intItemCount = intItemCount + 1
-		objReportData.MoveNext
-	Loop
-	objReportData.MoveFirst
-	%>
-	
-	<div align="center">Missing Adapters and Cases (<%=intItemCount%> People Found)</div>
-	
-	<%	Do Until objReportData.EOF %>
-		
-		<%	If objReportData(10) Then%>
-				<div class="Card WarningCard">
-		<%	ElseIf objReportData(9) Then %>
-				<div class="Card PhotoCard">
-		<%	Else %>
-				<div class="Card DisabledCard">
-		<%	End If %>	
-
-				<div>
-					<a href="user.asp?UserName=<%=objReportData(1)%>">
-			<%	If objFSO.FileExists(Application("PhotoLocation") & "\" & objReportData(7) & "s\" & objReportData(6) & ".jpg") Then %>      
-					<img class="PhotoCard" src="/photos/<%=objReportData(7)%>s/<%=objReportData(6)%>.jpg" width="96" />
-			<%	Else %>
-					<img class="PhotoCard" src="/photos/<%=objReportData(7)%>s/missing.jpg" width="96" />
-			<%	End If %>
-					</a>
-				</div>
-				<div class="PhotoCardTitle"><%=objReportData(2) & " " & objReportData(3)%></div>
-			
-			<%	If Not objReportData(4) Then %>
-					<form method="POST" action="<%=strSubmitTo%>">
-					<input type="hidden" name="AssignmentID" value="<%=objReportData(8)%>" />
-					<div>
-						<a href="device.asp?Tag=<%=objReportData(0)%>"><%=objReportData(0)%></a>
-						 - Adapter: <input type="checkbox" name="Adapter" value="True" />
-						<div class="Button"><input type="submit" value="Return" name="Submit" /></div>
-					</div>
-					</form>
-				<%	If Not objReportData(5) Then %>
-						<div>&nbsp;</div>
-				<%	End If %>
-			<%	End If %>
-		
-			<%	If Not objReportData(5) Then %>
-					<form method="POST" action="<%=strSubmitTo%>">
-					<input type="hidden" name="AssignmentID" value="<%=objReportData(8)%>" />
-					<div>
-						<a href="device.asp?Tag=<%=objReportData(0)%>"><%=objReportData(0)%></a>
-						 - Case: <input type="checkbox" name="Case" value="True" />
-						<div class="Button"><input type="submit" value="Return" name="Submit" /></div>
-					</div>
-					</form>
-			<%	End If %>
-
-			</div>
-		<%	objReportData.MoveNext 
-		Loop %>
-	
-<%End Sub %>
-
 <%Sub DeviceYearJavaScript 
 
 	Dim strSQL, objOldestDevice, datOldestDevice, intYears, intIndex, objDeviceCount, intDeviceCount, strDeviceData
@@ -1333,9 +1312,9 @@ Dim strSQL, datStartDate, datEndDate, objEvents, strURL
 		
 	Next%>
 	
-	google.setOnLoadCallback(drawiPadYear);
+	google.setOnLoadCallback(drawLaptopYear);
 	
-	function drawiPadYear() {
+	function drawLaptopYear() {
 		
 		var data = google.visualization.arrayToDataTable([
 			<%=strLaptopData%>
