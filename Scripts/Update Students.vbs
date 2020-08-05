@@ -109,23 +109,23 @@ Function GetUserDataFromImportedData(strImportedData)
 	If InStr(arrRow(6),"/") <> 0 Then
 		strHomeRoomEmail = Replace(Trim(arrRow(6))," / ",";")
 		strHomeRoom = Replace(Trim(arrRow(7)),"""","")
-		strUserName = Trim(arrRow(10))
-		strSite = Trim(arrRow(11))
-		intClassOf = Right(Trim(arrRow(12)),4)
+		strUserName = Trim(arrRow(8))
+		strSite = Trim(arrRow(9))
+		intClassOf = Right(Trim(arrRow(10)),4)
 	Else
 
 		If Trim(arrRow(6)) = "" Then
 			strHomeRoomEmail = ""
 			strHomeRoom = ""
-			strUserName = Trim(arrRow(10))
-			strSite = Trim(arrRow(11))
-			intClassOf = Right(Trim(arrRow(12)),4)
+			strUserName = Trim(arrRow(8))
+			strSite = Trim(arrRow(9))
+			intClassOf = Right(Trim(arrRow(10)),4)
 		Else
 			strHomeRoomEmail = Trim(arrRow(6))
 			strHomeRoom = Replace(Trim(arrRow(7)) & ", " & Trim(arrRow(8)),"""","")
-			strUserName = Trim(arrRow(11))
-			strSite = Trim(arrRow(12))
-			intClassOf = Right(Trim(arrRow(13)),4)
+			strUserName = Trim(arrRow(9))
+			strSite = Trim(arrRow(10))
+			intClassOf = Right(Trim(arrRow(11)),4)
 		End If
 
 	End If
