@@ -384,7 +384,6 @@ End Sub%>
 			strURL = strURL & "&Role=" & strRole
 		End If
 		strSQL = Left(strSQL,Len(strSQL) - 5) & " AND Active=True"
-		Response.Write("*" & strSQL)
 		Set objUserLookup = Application("Connection").Execute(strSQL)
 	
 		If Not objUserLookup.EOF Then
