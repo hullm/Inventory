@@ -108,7 +108,7 @@ End If %>
 	intUserID = objUser(0)
 
 	'Get the list of devices assigned to the user
-	strSQL = "SELECT Assignments.LGTag,DateIssued,DateReturned,Assignments.Active,Assignments.Notes,Model,Devices.Active,IssuedBy,ReturnedBy,Devices.Deleted,Devices.HasInsurance,Devices.DatePurchased,SerialNumber,Manufacturer,InternalIP,LastUser,ComputerName,OSVersion,LastCheckInDate,LastCheckInTime,Assigned,DeviceType" & vbCRLF
+	strSQL = "SELECT Assignments.LGTag,DateIssued,DateReturned,Assignments.Active,Assignments.Notes,Model,Devices.Active,IssuedBy,ReturnedBy,Devices.Deleted,Devices.HasInsurance,Devices.DatePurchased,SerialNumber,Manufacturer,InternalIP,LastUser,ComputerName,OSVersion,LastCheckInDate,LastCheckInTime,Assigned,DeviceType,HasEvent" & vbCRLF
 	strSQL = strSQL & "FROM Devices INNER JOIN (People INNER JOIN Assignments ON People.ID = Assignments.AssignedTo) ON Devices.LGTag = Assignments.LGTag" & vbCRLF
 	strSQL = strSQL & "WHERE People.UserName='" & Replace(strUserName,"'","''") & "'" & vbCRLF
 	strSQL = strSQL & "ORDER BY DateIssued"
@@ -1430,10 +1430,12 @@ End Sub%>
 
 					If Not objDeviceList(3) Then
 
-						If objDeviceList(6) Then
-							strRowClass = ""
-						Else
+						If objDeviceList(22) Then
+							strRowClass = " Class=""Warning"""
+						ElseIf Not objDeviceList(6) Then
 							strRowClass = " Class=""Disabled"""
+						Else
+							strRowClass = ""
 						End If %>
 
 						<tr <%=strRowClass%>>

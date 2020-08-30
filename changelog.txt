@@ -737,3 +737,4 @@ Change Log - Inventory Site
 	- With iOS 13 and later the iPad advertises itself as a desktop client unless it's in a small window
 		on the side of the iPad.  Changed it so it sees that small version as a mobile version.
 	- Redesigned the stats pages so you can choose what cards you want to display and the order using global.asa.
+	- Devices listed as old assignment will show yellow if they're out for repair on the user's page.
