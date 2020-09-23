@@ -726,6 +726,7 @@ End Sub%>
 	Dim objStudentsWithoutDevices, objStudentsWithDevices, intStudentsWithDevices, intStudentsWithoutDevices
 	Dim intTotalWithDevices, intTotalWithoutDevices, intAssignedPercent, intSixToElevenCount
 	Dim strToolTip, intSchuylervilleES, intSchuylervilleMS, intSchuylervilleHS, intSchuylervilleCount
+    Dim strStudentsWithDevices, strStudentsWithoutDevices
 
 	strSQL = "SELECT ClassOf, Count(People.ID) AS CountOfID" & vbCRLF
 	strSQL = strSQL & "FROM People" & vbCRLF
@@ -776,8 +777,8 @@ End Sub%>
 					End If
 					objStudentsWithoutDevices.MoveNext
 				Loop
+				objStudentsWithoutDevices.MoveFirst
 			End If
-			objStudentsWithoutDevices.MoveFirst
 
 			If Not objStudentsWithDevices.EOF Then
 				Do Until objStudentsWithDevices.EOF
@@ -788,15 +789,19 @@ End Sub%>
 					objStudentsWithDevices.MoveNext
 				Loop
 				objStudentsWithDevices.MoveFirst
-			End If                   
+			End If
 
 			If intStudentsWithDevices = 0 Then
-				intStudentsWithDevices = ""
+				strStudentsWithDevices = ""
 				bolShowTotalCount = True
+			Else
+				strStudentsWithDevices = intStudentsWithDevices
 			End If
 			If intStudentsWithoutDevices = 0 Then
-				intStudentsWithoutDevices = ""
+				strStudentsWithoutDevices = ""
 				bolShowTotalCount = True
+			Else
+				strStudentsWithoutDevices = intStudentsWithoutDevices
 			End If
 
 			If bolShowTotalCount Then
@@ -807,10 +812,10 @@ End Sub%>
 
 			strStudentsPerGradeData = strStudentsPerGradeData & "['" & GetGrade(Replace(objStudentsPerGrade(0),"'","\'")) & _
 			"', " & intStudentsWithDevices & _
-			",'" & intStudentsWithDevices & _
+			",'" & strStudentsWithDevices & _
 			"','" & strToolTip & _
 			"'," & intStudentsWithoutDevices & _
-			",'" & intStudentsWithoutDevices & _
+			",'" & strStudentsWithoutDevices & _
 			"','" & strToolTip & "'],"
 			intTotalStudentCount = intTotalStudentCount + objStudentsPerGrade(1)
 
