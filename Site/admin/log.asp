@@ -140,7 +140,7 @@ End Sub%>
 
 	<div>
 		<br />
-		System Log
+		System Log | <a href="purchased.asp">Purchase Log</a>
 		<table align="center" Class="ListView" id="ListView">
 			<thead>
 				<th>Date</th>
@@ -325,6 +325,12 @@ End Sub%>
 			LogEntryType = "Password Expires"
 		Case "PasswordNeverExpiresSet"
 			LogEntryType = "Password Doesn't Expire"
+		Case "PurchasedByUser"
+			LogEntryType = "Device Purchased"
+		Case "PurchasedByUserDeleted"
+			LogEntryType = "Device No Longer Purchased"
+		Case "PurchasedDevicePickedUp"
+			LogEntryType = "Purchased Device Picked Up"
 		Case "ReturnedMissingAdapter"
 			LogEntryType = "Returned Missing Adapter"
 		Case "ReturnedMissingCase"

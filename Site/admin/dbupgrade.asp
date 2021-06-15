@@ -7,7 +7,7 @@
 
 'Option Explicit
 
-On Error Resume Next
+'On Error Resume Next
 
 Dim strSiteVersion, bolShowLogout, strUser, objReports, strReport, strSubmitTo, strColumns
 Dim strUpgradeMessage
@@ -25,7 +25,7 @@ End If %>
 	Select Case Request.Form("Submit")
 		Case "Upgrade Database"
 			UpgradeDatabase
-			UpdateLog "DatabaseUpgraded","","","","0.062",""
+			UpdateLog "DatabaseUpgraded","","","","0.063",""
 	End Select
 	
 	'Get the URL used to submit forms
@@ -95,7 +95,6 @@ End Sub%>
 	</html>
 
 <%End Sub%>
-
 
 <%Sub UpgradeDatabase 
 
@@ -512,6 +511,49 @@ End Sub%>
 		Application("Connection").Execute(strSQL)
 	End If
 	
+	'***********************************************************************************
+
+	'Check the Owed table for required fields.
+	bolPickUpDateFound = False
+	bolLGTagFound = False
+	bolModelFound = False
+	bolDeviceAgeFound = False
+	Set objDevicesTable = objCatalog.Tables("Owed")
+	For Each Column in objDevicesTable.Columns
+		Select Case LCase(Column.Name)
+			Case "pickupdate"
+				bolPickUpDateFound = True
+			Case "lgtag"
+				bolLGTagFound = True
+			Case "model"
+				bolModelFound = True
+			Case "deviceage"
+				bolDeviceAgeFound = True
+		End Select
+	Next
+	
+	'Add the needed columns to the database
+	If NOT bolPickUpDateFound Then
+		strSQL = "ALTER TABLE Owed" & vbCRLF
+		strSQL = strSQL & "Add PickupDate DATETIME"
+		Application("Connection").Execute(strSQL)
+	End If
+	If NOT bolLGTagFound Then
+		strSQL = "ALTER TABLE Owed" & vbCRLF
+		strSQL = strSQL & "Add LGTag TEXT(255) WITH COMPRESSION"
+		Application("Connection").Execute(strSQL)
+	End If
+	If NOT bolModelFound Then
+		strSQL = "ALTER TABLE Owed" & vbCRLF
+		strSQL = strSQL & "Add Model TEXT(255) WITH COMPRESSION"
+		Application("Connection").Execute(strSQL)
+	End If
+	If NOT bolDeviceAgeFound Then
+		strSQL = "ALTER TABLE Owed" & vbCRLF
+		strSQL = strSQL & "Add DeviceAge INTEGER"
+		Application("Connection").Execute(strSQL)
+	End If
+
 	'***********************************************************************************
 	
 	'Fix the Roles table

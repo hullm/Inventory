@@ -123,8 +123,6 @@ End If %>
 		intStudent = 0
 	End If
 
-
-
 	'Set the status of the insured checkbox
 	If objDevice(7) Then
 		strInsuredChecked = "checked=""checked"""
@@ -2035,6 +2033,12 @@ End Sub%>
 			LogEntryType = "Password Expires"
 		Case "PasswordNeverExpiresSet"
 			LogEntryType = "Password Doesn't Expire"
+		Case "PurchasedByUser"
+			LogEntryType = "Device Purchased"
+		Case "PurchasedByUserDeleted"
+			LogEntryType = "Device No Longer Purchased"
+		Case "PurchasedDevicePickedUp"
+			LogEntryType = "Purchased Device Picked Up"
 		Case "ReturnedMissingAdapter"
 			LogEntryType = "Returned Missing Adapter"
 		Case "ReturnedMissingCase"

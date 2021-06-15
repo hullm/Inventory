@@ -12,7 +12,7 @@ Sub Application_OnStart
 	Application("ForceSSL") = True
 	Application("PhotoLocation") = "C:\Shared Data\Photo Import\Site"
 	Application("Version") = "0.062"
-	Application("Copyright") = "Copyright &copy; 2014-2020 Matt Hull<br />All Rights Reserved"
+	Application("Copyright") = "Copyright &copy; 2014-2021 Matt Hull<br />All Rights Reserved"
 	Application("HelpDeskURL") = "https://helpdesk.school.org"
 	Application("ShowPasswords") = True
 	Application("MultiColumn") = False

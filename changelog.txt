@@ -738,3 +738,5 @@ Change Log - Inventory Site
 		on the side of the iPad.  Changed it so it sees that small version as a mobile version.
 	- Redesigned the stats pages so you can choose what cards you want to display and the order using global.asa.
 	- Devices listed as old assignment will show yellow if they're out for repair on the user's page.
+	- Fixed a bug in the StudentsPerGradeWithMissing card when all students have devices.
+	- Added a system to keep track of retired devices that are purchased.
