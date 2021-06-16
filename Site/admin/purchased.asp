@@ -51,7 +51,7 @@ End If %>
 	'Grab the list of completed entries
 	strSQL = "SELECT Owed.ID,RecordedDate,FirstName,LastName,Site,ClassOf,LGTag,PickupDate,Price,UserName,Model,DeviceAge" & vbCRLF
 	strSQL = strSQL & "FROM Owed INNER JOIN People ON Owed.OwedBy = People.ID" & vbCRLF
-	strSQL = strSQL & "WHERE Owed.Active=False AND Owed.Item='Retired MacBook Air' AND PickupDate IS NOT NULL"
+	strSQL = strSQL & "WHERE Owed.Active=False AND Owed.Item LIKE '%Retired%' AND PickupDate IS NOT NULL"
 	Set objCompleted = Application("Connection").Execute(strSQL)
 
 	SetupSite
