@@ -32,6 +32,8 @@ End If %>
 			AddAssetTag
 		Case "Delete"
 			DeleteAssetTag
+		Case "Remove"
+			RemoveEntry
 	End Select
 	
 	'Get the URL used to submit forms
@@ -42,16 +44,17 @@ End If %>
 	End If
 
 	'Grab the list of purchased 
-	strSQL = "SELECT Owed.ID,RecordedDate,FirstName,LastName,Site,ClassOf,LGTag,UserName,Model,DeviceAge" & vbCRLF
+	strSQL = "SELECT Owed.ID,RecordedDate,FirstName,LastName,Site,ClassOf,LGTag,UserName,Model,DeviceAge,Owed.Active" & vbCRLF
 	strSQL = strSQL & "FROM Owed INNER JOIN People ON Owed.OwedBy = People.ID" & vbCRLF
-	strSQL = strSQL & "WHERE Owed.Active=False AND Owed.Item LIKE '%Retired%' AND PickupDate IS NULL" & vbCRLF
+	strSQL = strSQL & "WHERE Owed.Item LIKE '%Retired%' AND PickupDate IS NULL" & vbCRLF
 	strSQL = strSQL & "ORDER BY LastName, FirstName;"
 	Set objPurchased = Application("Connection").Execute(strSQL)
 
 	'Grab the list of completed entries
 	strSQL = "SELECT Owed.ID,RecordedDate,FirstName,LastName,Site,ClassOf,LGTag,PickupDate,Price,UserName,Model,DeviceAge" & vbCRLF
 	strSQL = strSQL & "FROM Owed INNER JOIN People ON Owed.OwedBy = People.ID" & vbCRLF
-	strSQL = strSQL & "WHERE Owed.Active=False AND Owed.Item LIKE '%Retired%' AND PickupDate IS NOT NULL"
+	strSQL = strSQL & "WHERE Owed.Active=False AND Owed.Item LIKE '%Retired%' AND PickupDate IS NOT NULL" & vbCRLF
+	strSQL = strSQL & "ORDER BY LastName, FirstName;"
 	Set objCompleted = Application("Connection").Execute(strSQL)
 
 	SetupSite
@@ -169,7 +172,7 @@ End Sub %>
 
 <%Sub DisplayPurchasedTable
 
-	Dim objAssignmentInfo, strAssignmentInfo %>
+	Dim objAssignmentInfo, strAssignmentInfo, strRowClass, strShowPickupButton%>
 
 	<div>
 		<br />
@@ -213,8 +216,25 @@ End Sub %>
 						strAssignementInfo = strAssignementInfo & """"
 					End If
 				End If
+
+				'Highlight the row if the user hasn't paid for the device
+				If objPurchased(10) Then
+					strRowClass = " Class=""Warning"""
+				Else
+					strRowClass = ""
+				End If
+
+				'Disable the pickup button if a device isn't assigned to them, or of they haven't paid
+				If objPurchased(6) = "" Or IsNull(objPurchased(6)) Then
+					strShowPickupButton = "disabled"
+				ElseIf objPurchased(10) Then
+					strShowPickupButton = "disabled"
+				Else 
+					strShowPickupButton = ""
+				End If
 				%>
-				<tr>
+
+				<tr <%=strRowClass%>>
 					<td><%=objPurchased(1)%></td>
 					<td <%=strAssignementInfo%>><a href="user.asp?UserName=<%=objPurchased(7)%>&Back=Purchased&Page=purchased.asp"><%=objPurchased(3)%>,&nbsp;<%=objPurchased(2)%></a></td>
 					<td id="center"><%=objPurchased(4)%></td>
@@ -245,17 +265,13 @@ End Sub %>
 					<% End If %>
 					</td>
 					<td id="center">
-					<%	If objPurchased(6) = "" Or IsNull(objPurchased(6)) Then %>
-							<form method="POST" action="<%=strSubmitTo%>">
-								<input type="hidden" value="<%=objPurchased(0)%>" name="id" />
-								<input type="submit" value="Mark as Picked Up" name="Submit" disabled/>
-							</form>
-					<%	Else %>
-							<form method="POST" action="<%=strSubmitTo%>">
-								<input type="hidden" value="<%=objPurchased(0)%>" name="id" />
-								<input type="submit" value="Mark as Picked Up" name="Submit" />
-							</form>
-					<%	End If %>
+					
+						<form method="POST" action="<%=strSubmitTo%>">
+							<input type="hidden" value="<%=objPurchased(0)%>" name="id" />
+							<input type="hidden" value="<%=objPurchased(6)%>" name="AssetTag" />
+							<input type="submit" value="Mark as Picked Up" name="Submit" <%=strShowPickupButton%>>
+							<input type="submit" value="Remove" name="Submit" />
+						</form>
 					</td>
 				</tr>
 		<%		objPurchased.MoveNext 
@@ -294,7 +310,7 @@ End Sub %>
 				<tr>
 					<td><%=objCompleted(1)%></td>
 					<td><%=objCompleted(7)%></td>
-					<td><a href="user.asp?UserName=<%=objCompleted(9)%>&Back=Purchased&Page=purchased.asp"><%=objCompleted(2)%>&nbsp;<%=objCompleted(3)%></a></td>
+					<td><a href="user.asp?UserName=<%=objCompleted(9)%>&Back=Purchased&Page=purchased.asp"><%=objCompleted(3)%>,&nbsp;<%=objCompleted(2)%></a></td>
 					<td id="center"><%=objCompleted(10)%></td>
 			<%	If IsNull(objCompleted(11)) Then %>
 					<td id="center">&nbsp;</td>
@@ -420,6 +436,24 @@ End Sub%>
 
 	UpdateLog "DeviceUpdatedTagDeleted",intTag,objUser(0),"Purchased","",""
 	UpdateLog "PurchasedByUserDeleted",intTag,objUser(0),"","",""
+
+End Sub%>
+
+<%Sub RemoveEntry
+
+	Dim strSQL, intID, intTag, objUser
+
+	intID = Request.Form("id")
+	intTag = Request.Form("AssetTag")
+
+	'Delete the asset tag first, this will help make sure the data is logged
+	If intTag <> "" Then
+		DeleteAssetTag
+	End If
+
+	'Remove the entry from the database
+	strSQL = "DELETE FROM Owed WHERE ID=" & intID
+	Application("Connection").Execute(strSQL)
 
 End Sub%>
 

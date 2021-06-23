@@ -7,7 +7,7 @@
 
 Option Explicit
 
-On Error Resume Next
+'On Error Resume Next
 
 Dim strSiteVersion, bolShowLogout, strUser
 Dim objDevice, strActiveChecked, objAssignment, objOldAssignments, objSites, objEventTypes, objEvents
@@ -3090,7 +3090,7 @@ End Sub%>
 
 	If Not bolAdapterReturned Then
 		If InStr(objDevice(2),"MacBook") Then
-			BillUser objAssignmentInfo(0),objDevice(2) & " Charger",strUserName
+			BillUser objAssignmentInfo(0),"MacBook Air Charger",strUserName
 		End If
 		If InStr(objDevice(2),"iPad") Then
 			BillUser objAssignmentInfo(0),"iPad Charger",strUserName
