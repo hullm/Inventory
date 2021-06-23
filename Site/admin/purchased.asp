@@ -7,10 +7,10 @@
 
 'Option Explicit
 
-'On Error Resume Next
+On Error Resume Next
 
 Dim strSiteVersion, bolShowLogout, strUser, strColumns, strSQL, objPurchased, strSubmitTo, strAddMessage, intAddErrID
-Dim objCompleted
+Dim objCompleted, intPurchaseCount, intCompletedCount
 
 'See if the user has the rights to visit this page
 If AccessGranted Then
@@ -56,6 +56,26 @@ End If %>
 	strSQL = strSQL & "WHERE Owed.Active=False AND Owed.Item LIKE '%Retired%' AND PickupDate IS NOT NULL" & vbCRLF
 	strSQL = strSQL & "ORDER BY LastName, FirstName;"
 	Set objCompleted = Application("Connection").Execute(strSQL)
+
+	'Count the number of purchased devices
+	intPurchaseCount = 0
+	If Not objPurchased.EOF Then
+		Do Until objPurchased.EOF
+			intPurchaseCount = intPurchaseCount + 1
+			objPurchased.MoveNext
+		Loop
+		objPurchased.MoveFirst
+	End If
+
+	'Count the number of completed devices
+	intCompletedCount = 0
+	If Not objCompleted.EOF Then
+		Do Until objCompleted.EOF
+			intCompletedCount = intCompletedCount + 1
+			objCompleted.MoveNext
+		Loop
+		objCompleted.MoveFirst
+	End If
 
 	SetupSite
 	DisplaySite
@@ -176,7 +196,7 @@ End Sub %>
 
 	<div>
 		<br />
-		<a href="log.asp">System Log</a> | Purchase Log
+		<a href="log.asp">System Log</a> | Purchase Log (<%=intPurchaseCount%>)
 		<table align="center" Class="ListView" id="Purchased">
 			<thead>
 				<th>Date</th>
@@ -293,7 +313,7 @@ End Sub %>
 		<br />
 		<br />
 		<br />
-		History
+		History (<%=intCompletedCount%>)
 		<table align="center" Class="ListView" id="Completed">
 			<thead>
 				<th>Date Purchased</th>
