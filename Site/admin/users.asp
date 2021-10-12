@@ -840,10 +840,16 @@ End Sub%>
 						strLatestBilled =  ShortenDate(objOwedList(2))
 						objOwedList.MoveNext
 					Loop
-					strOwedList = Left(strOwedList,Len(strOwedList) - 7)%>
-					<td <%=strRowClass%>><%=strOwedDate%></td>
-					<td <%=strRowClass%>><%=strLatestBilled%></td>
-					<td <%=strRowClass%>><%=strOwedList%></td>
+					If strOwedList <> "" Then
+						strOwedList = Left(strOwedList,Len(strOwedList) - 7)%>
+						<td <%=strRowClass%>><%=strOwedDate%></td>
+						<td <%=strRowClass%>><%=strLatestBilled%></td>
+						<td <%=strRowClass%>><%=strOwedList%></td>
+				<%	Else %>
+						<td <%=strRowClass%>>&nbsp;</td>
+						<td <%=strRowClass%>>&nbsp;</td>
+						<td <%=strRowClass%>>&nbsp;</td>
+				<%	End If %>
 			<%	Else %>
 					<td <%=strRowClass%>>&nbsp;</td>
 					<td <%=strRowClass%>>&nbsp;</td>
